@@ -1,0 +1,153 @@
+;+
+;Purpose:
+;    Calculate Lstar
+;
+;Inputs:
+;    trange: time range
+;    var: position in sm coordinates
+;
+;History:
+;    Updated by XC Shen on 2018-10-19
+;    Created by Wen Li on April 5, 2010
+;
+;-----below is the time range for the themis run
+;year1='2010' & month1='06' & day1='01'
+;year2='2018' & month2='09' & day2='01'
+;-----
+
+
+
+;;;Loop code
+;
+;
+;;;bmodel='OP_quiet', 'T05', 'T89', or 'T96'
+PRO lstar_cal,var,trange=trange,bmodel=bmodel,dt=dt
+ 
+  lib_name='/projectnb/burbsp/home/common/IRBEM-4.4.0/source/onera_desp_lib_linux_x86_64.so'
+  
+  t=time_double(trange)
+  tr1=trange[0] & tr2=trange[1]
+  tsec1=t[0] & tsec2=t[1]
+  timespan,tsec1,tsec2-tsec1,/second
+
+  lwidth='1'
+  load_kpap,/clip
+
+  ;;;;;;;----------load position data--------------
+  variable_state=var
+  ;omni_load,median=1,/noplot,/init
+  
+  omni_hro_load,trange=[tsec1-60.*20,tsec2+60.*20]
+ 
+  tvars_tba=[variable_state,'kp_unsigned','OMNI_HRO_1min_Vx','OMNI_HRO_1min_Pressure',$
+    'OMNI_HRO_1min_BX_GSE','OMNI_HRO_1min_BY_GSM','OMNI_HRO_1min_BZ_GSM',$
+    'OMNI_HRO_1min_proton_density','OMNI_HRO_1min_flow_speed','OMNI_HRO_1min_SYM_H']
+    
+  tinterp_gap,tvars_tba[2:*],/overwrite
+
+  for tvar_ind=2,n_elements(tvars_tba)-1 do begin
+    tsmooth2,tvars_tba[tvar_ind],20,/overwrite
+  endfor
+  
+  if not keyword_set(dt) then dt=15 
+  tvar_interpol,tvars=tvars_tba,trange=[tr1,tr2],dt=dt,/nan_extrapolate,/overwrite
+  
+  get_data,variable_state,data=dpos
+  time_s=dpos.x
+  get_data,'kp_unsigned',data=dkp
+  get_data,'OMNI_HRO_1min_SYM_H',data=ddst
+  get_data,'OMNI_HRO_1min_Pressure',data=dp
+  get_data,'OMNI_HRO_1min_BX_GSE',data=dbx
+  get_data,'OMNI_HRO_1min_BY_GSM',data=dby
+  get_data,'OMNI_HRO_1min_BZ_GSM',data=dbz
+
+  ;MAKE ARRAR
+  tst=time_struct(dpos.x)
+  year=tst.year
+  month=tst.month
+  day=tst.date
+  doy=tst.doy
+  sod=tst.sod
+
+  ntime=long(n_elements(dpos.x))
+  nn=ntime
+
+  if bmodel eq 'T96' then kext = 7l
+  if bmodel eq 'T89' then kext = 4l
+  if bmodel eq 'OP_quiet' then kext = 5l
+  if bmodel eq 'T05' then kext = 11l
+
+  options=lonarr(5)
+  options[0]=1l
+  options[1]=0l
+  options[2]=0l
+  sysaxes=4l
+
+  iyear=lonarr(nn)
+  iyear=long(year)
+  idoy=lonarr(nn)
+  idoy=long(doy)
+  UT=dblarr(nn)
+  UT=sod
+
+  R0=6371.
+
+  x1=dblarr(nn)
+  x1=double(dpos.y[*,0]/R0)
+  x2=dblarr(nn)
+  x2=double(dpos.y[*,1]/R0)
+  x3=dblarr(nn)
+  x3=double(dpos.y[*,2]/R0)
+
+  maginput=dblarr(25,nn)
+  maginput[0,*]=double(dkp.y)
+  maginput[1,*]=double(ddst.y)
+  maginput[4,*]=double(dp.y)
+  maginput[5,*]=double(dby.y)
+  maginput[6,*]=double(dbz.y)
+
+  Lm=dblarr(nn)
+  Lstar=dblarr(nn)
+  Blocal=dblarr(nn)
+  Bmin=Lm
+  XJ=Lm
+  MLT=Lm
+  
+  
+  
+  if strmatch(bmodel,'T05') then begin
+    store_data,'omni_imf_yz',data={x:dbx.x,y:[[dbx.y],[dby.y],[dbz.y]]}
+    get_tsy_params,'OMNI_HRO_1min_SYM_H','omni_imf_yz','OMNI_HRO_1min_proton_density','OMNI_HRO_1min_flow_speed','t04s',/speed
+    tvar_interpol,tvars='t04s_par',target='OMNI_HRO_1min_SYM_H',/repeat_extrapolate,/overwrite
+    get_data,'t04s_par',data=dpar  ;par = {x:ntimes,y:[[pram],[dst],[imf_y],[imf_z],[out[*,0]],[out[*,1]],[out[*,2]],[out[*,3]],[out[*,4]],[out[*,5]]]}
+    ;store w1, w2, ..., w6 for t04s model
+    maginput[10,*]=double(reform(dpar.y[*,4]))
+    maginput[11,*]=double(reform(dpar.y[*,5]))
+    maginput[12,*]=double(reform(dpar.y[*,6]))
+    maginput[13,*]=double(reform(dpar.y[*,7]))
+    maginput[14,*]=double(reform(dpar.y[*,8]))
+    maginput[15,*]=double(reform(dpar.y[*,9]))
+
+  endif
+
+  ;COMPUTE L STAR
+  result = call_external(lib_name, 'make_lstar_',$
+    ntime,kext,options,sysaxes,iyear,idoy,ut, x1,x2,x3,$
+    maginput,Lm,Lstar,Blocal,Bmin,XJ,MLT, /f_value)
+
+  store_data,var+'_Lm',data={x:time_s,y:Lm},dlim={colors:'m',labels:'Lm'}
+  store_data,var+'_Lstar_W',data={x:time_s,y:Lstar},dlim={colors:'b',labels:'Lstar'}
+  store_data,var+'_Ls',data=[var+'_Lstar_W',var+'_Lstar','L',var+'_Lm']
+  store_data,var+'_MLT_W',data={x:time_s,y:MLT},dlim={colors:'b',labels:'MLT_W'}
+
+  ;PLOT RELATED
+  options,var+'_Lstar_W',psym=1
+  options,var+'_Ls',yrange=[0,12],ylog=0,ystyle=1
+  tplot_options,'charsize',1.3
+
+  tplot,[var+'_Ls'],trange=[tr1,tr2]
+
+  stop
+
+END
+

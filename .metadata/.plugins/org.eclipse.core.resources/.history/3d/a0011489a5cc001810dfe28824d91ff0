@@ -1,0 +1,33 @@
+PRO cont_data_to_list,tvar,output=output,no_csv=no_csv,start_time=start_time,end_time=end_time
+  if ~keyword_set(tvar) then return
+  if ~keyword_set(output) then output='tmp_output_'+time_string(systime(/seconds),format=2,precision=0)+'.csv'
+  get_data,tvar,data=data_tmp
+  ;Get resolution of data
+  t_dif=data_tmp.x[1:-1]-data_tmp.x[0:-2]
+  t_res=median(t_dif)
+
+  burst_time_start=[]
+  burst_time_end=[]
+  index=where(t_dif gt 2.5*t_res,count_gaps)
+  if count_gaps eq 0 then begin
+    burst_time_start=[data_tmp.x[0]]
+    burst_time_end=[data_tmp.x[-1]]
+  endif else begin
+    burst_time_start=data_tmp.x[[0,index+1]]
+    burst_time_end=[data_tmp.x[index],data_tmp.x[-1]]
+  endelse
+  if burst_time_start[0] eq burst_time_end[0]then begin
+    burst_time_start=burst_time_start[1:-1]
+    burst_time_end=burst_time_end[1:-1]
+  endif
+  if burst_time_start[-1] eq burst_time_end[-1]then begin
+    burst_time_start=burst_time_start[0:-2]
+    burst_time_end=burst_time_end[0:-2]
+  endif
+  if keyword_set(no_csv) then begin
+    start_time=burst_time_start
+    end_time=burst_time_end
+    return
+
+  endif else write_csv_rs,output,burst_time_start,burst_time_end
+END

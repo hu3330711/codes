@@ -1,0 +1,710 @@
+;Purpose:
+;         To analyze the conjunction
+;
+;Keyword:
+;         probes
+;         trange
+;         lrange: L shell range
+;         mltrange: MLT range
+;         ...
+;         level: 0, max(Bw_low) less than 5 pT during one conjunction time period; 1, 5pT<max(Bw_low)<10pT; 2, 10pT<max(Bw_low)<20pT
+;         showdata: print event time and distance btw two satellites in three dimensions.
+;         
+;Created by X.C. Shen on 2018-10-23
+;
+PRO conj_location_analysis_burst_a_point_each_conjunction,$
+  lrange=lrange,$
+  mltrange=mltrange,$
+  mlatrange=mlatrange,$
+  dr=dr,$
+  dphi=dphi,$
+  dz=dz,$
+  showdata=showdata,$
+  cctype=cctype,$
+  eps=eps,$
+  xlog=xlog,$
+  ylog=ylog,$
+  xrange=xrange,$
+  yrange=yrange
+ 
+  ;Initial settings
+  plot_init
+  dir_init
+  path=!files.doc_dir+'doc/final_data/csv/flag1/strong/'
+
+  files=file_search(path+'*cc_v2.4.csv',count=count)
+
+  ;header=['Index','L','MLT','MLAT','dr','dphi','dz','fce','bw1','bw2','wna1','wna2',
+  ;'cc_NW_50','cc_NW_75','cc_NW_85','cc_NW_95','cc_NW_pm_50','cc_NW_pm_75','cc_NW_pm_85','cc_NW_pm_95']
+
+  index=[]
+  la=[] & mlta=[] & mlata=[] 
+  mlat_dr=[] & mlat_dphi=[] & mlat_dz=[]
+  fce=[] & bw1=[] & bw2=[] & wna1=[] & wna2=[]  
+
+  cc_nw_50=[] & cc_nw_75=[]  & cc_nw_85=[] & cc_nw_95=[]
+  cc_nw_pm_50=[] & cc_nw_pm_75=[] & cc_nw_pm_85=[] & cc_nw_pm_95=[]  
+
+
+  for i=0, n_elements(files)-1 do begin
+    res=read_csv(files[i])
+    if n_elements(tag_names(res)) eq 1 then continue
+    index=[index,res.field01]
+    la=[la,res.field02] & mlta=[mlta,res.field03] & mlata=[mlata,res.field04] 
+    mlat_dr=[mlat_dr,abs(res.field05)] & mlat_dphi=[mlat_dphi,abs(res.field06)] & mlat_dz=[mlat_dz,abs(res.field07)]
+    fce=[fce,res.field08] & bw1=[bw1,res.field09] & bw2=[bw2,res.field10] & wna1=[wna1,res.field11] & wna2=[wna2,res.field12]  
+    cc_nw_50=[cc_nw_50,res.field13] & cc_nw_75=[cc_nw_75,res.field14]  & cc_nw_85=[cc_nw_85,res.field15] & cc_nw_95=[cc_nw_95,res.field16]
+    cc_nw_pm_50=[cc_nw_pm_50,res.field17] & cc_nw_pm_75=[cc_nw_pm_75,res.field18] & cc_nw_pm_85=[cc_nw_pm_85,res.field19] & cc_nw_pm_95=[cc_nw_pm_95,res.field20]
+ endfor
+  
+  if not defined(lrange)    then lrange    = [0,15]
+  if not defined(mltrange)  then mltrange  = [0,24]
+  if not defined(mlatrange) then mlatrange = [-50,50]
+  if not defined(dr)   then dr   = [0,10000]
+  if not defined(dphi) then dphi = [0,10000]
+  if not defined(dz)   then dz   = [0,10000]
+  
+  ;index
+  good_l=where(la ge lrange[0] and la le lrange[1],count_l)
+  if mltrange[1] gt mltrange[0] then good_mlt=where(mlta ge mltrange[0] and mlta le mltrange[1],count_mlt) else good_mlt=where(mlta ge mltrange[0] or mlta le mltrange[1],count_mlt)
+  good_mlat=where(mlata ge mlatrange[0] and mlata le mlatrange[1],count_mlat)
+  good_dr=where(mlat_dr ge dr[0] and mlat_dr le dr[1],count_dr)
+  good_dphi=where(mlat_dphi ge dphi[0] and mlat_dphi le dphi[1],count_dphi)
+  good_dz=where(mlat_dz ge dz[0] and mlat_dz le dz[1],count_dz)
+
+  if min([count_l,count_mlt,count_mlat,count_dr,count_dphi,count_dz]) eq 0 then goto,jump
+  tmp1=intersect(good_l,good_mlt,count=count)
+  if count eq 0 then goto,jump
+  tmp2=intersect(tmp1,good_mlat,count=count)
+  if count eq 0 then goto,jump
+  tmp3=intersect(tmp2,good_dr,count=count)
+  if count eq 0 then goto,jump
+  tmp4=intersect(tmp3,good_dphi,count=count)
+  if count eq 0 then goto,jump
+  good=intersect(tmp4,good_dz,count=count)
+  if count eq 0 then goto,jump
+
+  index=index[good]
+  la=la[good] & mlta=mlta[good] & mlata=mlata[good]
+  mlat_dr=mlat_dr[good] & mlat_dphi=mlat_dphi[good] & mlat_dz=mlat_dz[good]
+  fce=fce[good] & bw1=bw1[good] & bw2=bw2[good] & wna1=wna1[good] & wna2=wna2[good] 
+  cc_nw_50=cc_nw_50[good] & cc_nw_75=cc_nw_75[good]  & cc_nw_85=cc_nw_85[good] & cc_nw_95=cc_nw_95[good]
+  cc_nw_pm_50=cc_nw_pm_50[good] & cc_nw_pm_75=cc_nw_pm_75[good] & cc_nw_pm_85=cc_nw_pm_85[good] & cc_nw_pm_95=cc_nw_pm_95[good]
+
+  if not keyword_set(xrange) then xrange=[1,10000]
+  if not keyword_set(yrange) then yrange=[0.1,1]
+ 
+  if keyword_set(eps) then popen,$
+    !files.doc_dir+'figs/'+'L_'+strjoin(strtrim(lrange,1),'_')+'_MLT_'+strjoin(strtrim(mltrange,1),'_')+'_MLAT_'+strjoin(strtrim(mlatrange,1),'_')+$
+    '_dr_'+strjoin(strtrim(dr,1),'_')+'_dphi_'+strjoin(strtrim(dphi,1),'_')+'_dz_'+strjoin(strtrim(dz,1),'_')+'_cctype_'+strtrim(cctype,1),$
+    xsize=13,ysize=11,unit=cm,/encapsulated
+  ;-----
+  ;Fig_a
+  
+  
+  ;L=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+  ;MLT=[0,3,6,9,12,15,18,21,24]
+  
+  ;data=lonarr(n_elements(L),n_elements(MLT))
+  
+  ;for i=0,n_elements(L)-1 do begin
+  ;  for j=0, n_elements(MLT)-1 do begin
+  ;    good=where(la ge L[i] and la lt (L[i]+1) and mlta ge MLT[j] and mlta lt (MLT[j]+3),count)
+  ;    data[i,j]=count
+  ;  endfor
+  ;endfor
+  
+  ;cakeplot,data,L,MLT
+  ;stop
+  
+  
+  cgPlot, la, mlta/24*2*!pi, /Polar, XStyle=5, YStyle=5, $
+    /NoData, Aspect=1.0, XRange=[-15, 15], YRange=[-15, 15], $
+    Position=[0.05, 0.54,0.43, 0.94]
+
+  cgPlot,la, mlta/24*2*!pi, PSym=5, Color=0, /Overplot, /Polar,symsize=1
+
+  ; Draw axes through the center of the plot.
+  cgAxis, /XAxis, 0, 0, XRange=[-15, 15], XStyle=1,xtickformat='(A1)'
+  cgAxis, /YAxis, 0, 0, YRange=[-15, 15], YStyle=1,ytickformat='(A1)'
+  
+  ;add four circle
+  A = FINDGEN(100) * (!PI*2/99.)
+  B = FINDGEN(100) * (!PI/99.)
+  cgPlot,cos(A), sin(A), Color=0, /Overplot
+  cgPlot,5*cos(A), 5*sin(A), Color=0, /Overplot,linestyle=1
+  cgPlot,10*cos(A), 10*sin(A), Color=0, /Overplot,linestyle=1
+  cgPlot,15*cos(A), 15*sin(A), Color=0, /Overplot,linestyle=1
+  cgcolorfill,sin(B),cos(B), Color=0
+  
+  xyouts,0,-16.5,'18',charsize=1.2,ALIGNMENT=0.5
+  xyouts,0, 16  ,'06',charsize=1.2,ALIGNMENT=0.5
+  xyouts,-16 ,-0.5 ,'12',charsize=1.2,ALIGNMENT=1
+  xyouts, 16 ,-0.5 ,'00',charsize=1.2,ALIGNMENT=0
+  
+  xyouts,15.*sin(!pi/4.),15.*cos(!pi/4.),'L=15',color=2,charsize=1.2
+  xyouts,10.*sin(!pi/4.),10.*cos(!pi/4.),'L=10',color=2,charsize=1.2
+  xyouts, 5.*sin(!pi/4.), 5.*cos(!pi/4.),'L=5',color=2,charsize=1.2
+  
+  if not keyword_set(cctype) then cc_low=cc_75 else begin
+    case cctype of 
+        '50nw':cc_low=cc_nw_50
+        '75nw':cc_low=cc_nw_75
+        '85nw':cc_low=cc_nw_85
+        '95nw':cc_low=cc_nw_95
+      '50nwpm':cc_low=cc_nw_pm_50
+      '75nwpm':cc_low=cc_nw_pm_75
+      '85nwpm':cc_low=cc_nw_pm_85
+      '95nwpm':cc_low=cc_nw_pm_95
+    endcase
+  endelse  
+  
+  if keyword_set(showdata) then begin
+    print,'Event#:'
+    print,index
+    print,mlat_dr
+    print,mlat_dphi
+    print,mlat_dz
+    print,cc_low
+  endif
+  
+  
+
+
+  b_dvd=[5,8,12,18,25]   
+  ;b_dvd=[5,10,18,30,50]
+  dvd=[0,400,800,1200,1600]
+  
+  b_shreshold=b_dvd[2] ; great than b_shreshold
+  d_shreshold=dvd[2]   ; less than d_shreshold
+  nums=10
+  
+  ;-----
+  ;Fig_b
+  
+  od=mlat_dz
+  
+  ;replace_ind=where(bw2 gt bw1,count)
+  ;if count ge 1 then bw1[replace_ind]=bw2[replace_ind]
+  ;
+  good_1=where(od ge dvd[0] and od lt dvd[1])
+  good_2=where(od ge dvd[1] and od lt dvd[2])
+  good_3=where(od ge dvd[2] and od lt dvd[3])
+  good_4=where(od ge dvd[3] and od lt dvd[4])
+  good_5=where(od ge dvd[4])
+
+  good_b1=where(bw1 ge b_dvd[0] and bw1 lt b_dvd[1])
+  good_b2=where(bw1 ge b_dvd[1] and bw1 lt b_dvd[2])
+  good_b3=where(bw1 ge b_dvd[2] and bw1 lt b_dvd[3])
+  good_b4=where(bw1 ge b_dvd[3] and bw1 lt b_dvd[4])
+  good_b5=where(bw1 ge b_dvd[4])
+  
+  mlat_dperp=sqrt(mlat_dr^2+mlat_dphi^2)
+
+  ;median value
+  x_points=10.^[dlinear(1.25,3.75,25)];0.25,0.75,1.25,1.75,2.25,2.75,3.25,3.75
+  y_points_perp  =fltarr(n_elements(x_points),3)
+  sigma=fltarr(n_elements(x_points))
+  for y_ind=0,n_elements(x_points)-1 do begin
+    tmp_ind_1=where(mlat_dperp ge x_points[y_ind]/(10.^0.25) and mlat_dperp lt x_points[y_ind]*(10.^0.25) and bw1 ge b_shreshold and od lt d_shreshold,count1)
+    if count1 ge nums then begin
+      y_points_perp[y_ind,*]  =percentiles(cc_low[tmp_ind_1],value=[0.25,0.5,0.75])
+    endif else begin
+      y_points_perp[y_ind,*]  =!values.f_nan
+    endelse
+  endfor
+
+  good_xy=where(mlat_dperp ge xrange[0] and mlat_dperp le xrange[1] and cc_low ge yrange[0] and cc_low le yrange[1])
+
+  cgplot,[1],[1],psym=-16,color='PBG7',thick=2,symsize=1.5,ylog=ylog,xlog=xlog,$
+    xtitle='Perpendicular Separation [km]',ytitle='Correlation Coefficient',title='C.C. versus '+cgGreek('delta',/capital)+'perp',xrange=xrange,yrange=yrange,$
+    Position=[0.52, 0.54,0.90, 0.94],/noerase,xstyle=1,ystyle=1,/nodata
+    
+
+
+  ;small separation
+  c11=intersect(good_1,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c11,good_xy)],cc_low[intersect(c11,good_xy)],psym=9,symsize=0.1,color=1
+  c12=intersect(good_1,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c12,good_xy)],cc_low[intersect(c12,good_xy)],psym=9,symsize=0.6,color=1
+  c13=intersect(good_1,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c13,good_xy)],cc_low[intersect(c13,good_xy)],psym=9,symsize=1.2,color=1
+  c14=intersect(good_1,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c14,good_xy)],cc_low[intersect(c14,good_xy)],psym=9,symsize=1.8,color=1
+  c15=intersect(good_1,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c15,good_xy)],cc_low[intersect(c15,good_xy)],psym=9,symsize=2.4,color=1
+
+  ;second separation
+  c21=intersect(good_2,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c21,good_xy)],cc_low[intersect(c21,good_xy)],psym=9,symsize=0.1,color=2
+  c22=intersect(good_2,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c22,good_xy)],cc_low[intersect(c22,good_xy)],psym=9,symsize=0.6,color=2
+  c23=intersect(good_2,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c23,good_xy)],cc_low[intersect(c23,good_xy)],psym=9,symsize=1.2,color=2
+  c24=intersect(good_2,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c24,good_xy)],cc_low[intersect(c24,good_xy)],psym=9,symsize=1.8,color=2
+  c25=intersect(good_2,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c25,good_xy)],cc_low[intersect(c25,good_xy)],psym=9,symsize=2.4,color=2
+
+  ;third separation
+  c31=intersect(good_3,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c31,good_xy)],cc_low[intersect(c31,good_xy)],psym=9,symsize=0.1,color=3
+  c32=intersect(good_3,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c32,good_xy)],cc_low[intersect(c32,good_xy)],psym=9,symsize=0.6,color=3
+  c33=intersect(good_3,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c33,good_xy)],cc_low[intersect(c33,good_xy)],psym=9,symsize=1.2,color=3
+  c34=intersect(good_3,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c34,good_xy)],cc_low[intersect(c34,good_xy)],psym=9,symsize=1.8,color=3
+  c35=intersect(good_3,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c35,good_xy)],cc_low[intersect(c35,good_xy)],psym=9,symsize=2.4,color=3
+
+  ;fourth separation
+  c41=intersect(good_4,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c41,good_xy)],cc_low[intersect(c41,good_xy)],psym=9,symsize=0.1,color=0
+  c42=intersect(good_4,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c42,good_xy)],cc_low[intersect(c42,good_xy)],psym=9,symsize=0.6,color=0
+  c43=intersect(good_4,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c43,good_xy)],cc_low[intersect(c43,good_xy)],psym=9,symsize=1.2,color=0
+  c44=intersect(good_4,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c44,good_xy)],cc_low[intersect(c44,good_xy)],psym=9,symsize=1.8,color=0
+  c45=intersect(good_4,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c45,good_xy)],cc_low[intersect(c45,good_xy)],psym=9,symsize=2.4,color=0
+
+  ;fifth separation
+  c51=intersect(good_5,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c51,good_xy)],cc_low[intersect(c51,good_xy)],psym=9,symsize=0.1,color='gray'
+  c52=intersect(good_5,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c52,good_xy)],cc_low[intersect(c52,good_xy)],psym=9,symsize=0.6,color='gray'
+  c53=intersect(good_5,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c53,good_xy)],cc_low[intersect(c53,good_xy)],psym=9,symsize=1.2,color='gray'
+  c54=intersect(good_5,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c54,good_xy)],cc_low[intersect(c54,good_xy)],psym=9,symsize=1.8,color='gray'
+  c55=intersect(good_5,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dperp[intersect(c55,good_xy)],cc_low[intersect(c55,good_xy)],psym=9,symsize=2.4,color='gray'
+
+  xyouts,0.914,0.87,cgGreek('delta',/capital)+'z [km]',/normal
+  xyouts,0.914,0.85,'(or '+cgGreek('delta',/capital)+cgGreek('phi')+'z, '+cgGreek('delta',/capital)+'rz)',/normal
+  cgplots,0.914,0.83,psym=9,symsize=1.2,color=1,/normal
+  xyouts,0.928,0.826,strjoin(strtrim(dvd[0:1],1),'-'),/normal
+  cgplots,0.914,0.81,psym=9,symsize=1.2,color=2,/normal
+  xyouts,0.928,0.806,strjoin(strtrim(dvd[1:2],1),'-'),/normal
+  cgplots,0.914,0.79,psym=9,symsize=1.2,color=3,/normal
+  xyouts,0.928,0.786,strjoin(strtrim(dvd[2:3],1),'-'),/normal
+  cgplots,0.914,0.77,psym=9,symsize=1.2,color=0,/normal
+  xyouts,0.928,0.766,strjoin(strtrim(dvd[3:4],1),'-'),/normal
+  cgplots,0.914,0.75,psym=9,symsize=1.2,color='gray',/normal
+  xyouts,0.928,0.746,'> '+strtrim(dvd[4],1),/normal
+
+
+  xyouts,0.914,0.706,'Bw [pT]',/normal
+  cgplots,0.914,0.69,psym=9,symsize=0.1,color=0,/normal
+  xyouts,0.928,0.686,strjoin(strtrim(b_dvd[0:1],1),'-'),/normal
+  cgplots,0.914,0.67,psym=9,symsize=0.6,color=0,/normal
+  xyouts,0.928,0.666,strjoin(strtrim(b_dvd[1:2],1),'-'),/normal
+  cgplots,0.914,0.65,psym=9,symsize=1.2,color=0,/normal
+  xyouts,0.928,0.646,strjoin(strtrim(b_dvd[2:3],1),'-'),/normal
+  cgplots,0.914,0.63,psym=9,symsize=1.8,color=0,/normal
+  xyouts,0.928,0.626,strjoin(strtrim(b_dvd[3:4],1),'-'),/normal
+  cgplots,0.914,0.61,psym=9,symsize=2.4,color=0,/normal
+  xyouts,0.928,0.606,'> '+strtrim(b_dvd[4],1),/normal
+  
+  cgplots,x_points[where(finite(y_points_perp[*,1]))],y_points_perp[where(finite(y_points_perp[*,1])),1],psym=-16,color='PBG7',thick=5,symsize=1.3
+  cgplots,x_points[where(finite(y_points_perp[*,1]))],y_points_perp[where(finite(y_points_perp[*,1])),0],psym=-16,color='PBG5',thick=5,symsize=1.0
+  cgplots,x_points[where(finite(y_points_perp[*,1]))],y_points_perp[where(finite(y_points_perp[*,1])),2],psym=-16,color='PBG5',thick=5,symsize=1.0
+  result=GAUSSFIT(x_points[where(finite(y_points_perp[*,1]))],y_points_perp[where(finite(y_points_perp[*,1])),1], coeff, NTERMS=3)
+  x_add=10.^dlinear(1,4,50)
+  y_add=coeff[0] * exp(-0.5*((x_add-coeff[1])/coeff[2])^2);y_add=result[0]+x_add*result[1]
+  y_mark=0.4 & y_mark_2=0.5
+  x_mark=sqrt(alog(y_mark/coeff[0])/(-0.5))*coeff[2]+coeff[1]
+  x_mark_2=sqrt(alog(y_mark_2/coeff[0])/(-0.5))*coeff[2]+coeff[1]
+  good=where(y_add ge 0 and y_add le 1)
+  x_add=x_add[good]
+  y_add=y_add[good]
+  cgplots,x_add,y_add,color=6,psym=0,thick=5
+  cgplots,[x_mark,x_mark],[0,1],linestyle=2,thick=1.5
+  cgplots,[x_mark_2,x_mark_2],[0,1],linestyle=2,thick=2
+  xyouts,x_mark*0.95,0.95,strtrim(round(x_mark),1),ALIGNMENT=1,ORIENTATION=90,charsize=1.2
+  xyouts,x_mark_2*0.95,0.95,strtrim(round(x_mark_2),1),ALIGNMENT=1,ORIENTATION=90,charsize=1.2
+  xyouts,x_mark*1.25,1.05,'cc=0.4',ALIGNMENT=0.5,ORIENTATION=45,charsize=1.2
+  xyouts,x_mark_2*1.25,1.05,'cc=0.5',ALIGNMENT=0.5,ORIENTATION=45,charsize=1.2
+
+  
+  ;-----
+  ;Fig_c
+  
+  od=sqrt(mlat_dphi^2+mlat_dz^2); other dimensions
+  ;d_od=max(od)-min(od)
+  ;dvd=[min(od),min(od)+0.2*d_od,min(od)+0.4*d_od,min(od)+0.6*d_od,min(od)+0.8*d_od,min(od)+1.0*d_od]
+  ;dvd=percentiles(od,value=[0,0.2,0.4,0.6,0.8,1])
+
+  good_1=where(od ge dvd[0] and od lt dvd[1])
+  good_2=where(od ge dvd[1] and od lt dvd[2])
+  good_3=where(od ge dvd[2] and od lt dvd[3])
+  good_4=where(od ge dvd[3] and od lt dvd[4])
+  good_5=where(od ge dvd[4])
+  
+  good_b1=where(bw1 ge b_dvd[0] and bw1 lt b_dvd[1])
+  good_b2=where(bw1 ge b_dvd[1] and bw1 lt b_dvd[2])
+  good_b3=where(bw1 ge b_dvd[2] and bw1 lt b_dvd[3])
+  good_b4=where(bw1 ge b_dvd[3] and bw1 lt b_dvd[4])
+  good_b5=where(bw1 ge b_dvd[4])
+  
+
+  
+  ;median value
+  x_points=10.^[dlinear(1.25,3.75,25)];0.25,0.75,1.25,1.75,2.25,2.75,3.25,3.75
+  y_points_r  =fltarr(n_elements(x_points),3)
+  sigma=fltarr(n_elements(x_points))
+  for y_ind=0,n_elements(x_points)-1 do begin
+    tmp_ind_1=where(mlat_dr ge x_points[y_ind]/(10.^0.25) and mlat_dr lt x_points[y_ind]*(10.^0.25) and bw1 ge b_shreshold and od lt d_shreshold,count1)
+    if count1 ge nums then begin
+      y_points_r[y_ind,*]  =percentiles(cc_low[tmp_ind_1],value=[0.25,0.5,0.75]) 
+    endif else begin
+      y_points_r[y_ind,*]  =!values.f_nan
+    endelse  
+  endfor
+  
+  good_xy=where(mlat_dr ge xrange[0] and mlat_dr le xrange[1] and cc_low ge yrange[0] and cc_low le yrange[1])
+  
+  cgplot,[0],[0],psym=-16,color='PBG7',thick=2,symsize=1.5,ylog=ylog,xlog=xlog,$
+    xtitle='Radial Separation [km]',ytitle='Correlation Coefficient',title='C.C. versus '+cgGreek('delta',/capital)+'r',xrange=xrange,yrange=yrange,$
+    Position=[0.05, 0.05,0.43, 0.45],/noerase,xstyle=1,ystyle=1,/nodata
+  
+  
+  ;small separation
+  c11=intersect(good_1,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c11,good_xy)],cc_low[intersect(c11,good_xy)],psym=9,symsize=0.1,color=1
+  c12=intersect(good_1,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c12,good_xy)],cc_low[intersect(c12,good_xy)],psym=9,symsize=0.6,color=1
+  c13=intersect(good_1,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c13,good_xy)],cc_low[intersect(c13,good_xy)],psym=9,symsize=1.2,color=1
+  c14=intersect(good_1,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c14,good_xy)],cc_low[intersect(c14,good_xy)],psym=9,symsize=1.8,color=1
+  c15=intersect(good_1,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c15,good_xy)],cc_low[intersect(c15,good_xy)],psym=9,symsize=2.4,color=1
+  
+  ;second separation
+  c21=intersect(good_2,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c21,good_xy)],cc_low[intersect(c21,good_xy)],psym=9,symsize=0.1,color=2
+  c22=intersect(good_2,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c22,good_xy)],cc_low[intersect(c22,good_xy)],psym=9,symsize=0.6,color=2
+  c23=intersect(good_2,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c23,good_xy)],cc_low[intersect(c23,good_xy)],psym=9,symsize=1.2,color=2
+  c24=intersect(good_2,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c24,good_xy)],cc_low[intersect(c24,good_xy)],psym=9,symsize=1.8,color=2
+  c25=intersect(good_2,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c25,good_xy)],cc_low[intersect(c25,good_xy)],psym=9,symsize=2.4,color=2
+
+  ;third separation
+  c31=intersect(good_3,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c31,good_xy)],cc_low[intersect(c31,good_xy)],psym=9,symsize=0.1,color=3
+  c32=intersect(good_3,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c32,good_xy)],cc_low[intersect(c32,good_xy)],psym=9,symsize=0.6,color=3
+  c33=intersect(good_3,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c33,good_xy)],cc_low[intersect(c33,good_xy)],psym=9,symsize=1.2,color=3
+  c34=intersect(good_3,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c34,good_xy)],cc_low[intersect(c34,good_xy)],psym=9,symsize=1.8,color=3
+  c35=intersect(good_3,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c35,good_xy)],cc_low[intersect(c35,good_xy)],psym=9,symsize=2.4,color=3
+
+  ;fourth separation
+  c41=intersect(good_4,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c41,good_xy)],cc_low[intersect(c41,good_xy)],psym=9,symsize=0.1,color=0
+  c42=intersect(good_4,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c42,good_xy)],cc_low[intersect(c42,good_xy)],psym=9,symsize=0.6,color=0
+  c43=intersect(good_4,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c43,good_xy)],cc_low[intersect(c43,good_xy)],psym=9,symsize=1.2,color=0
+  c44=intersect(good_4,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c44,good_xy)],cc_low[intersect(c44,good_xy)],psym=9,symsize=1.8,color=0
+  c45=intersect(good_4,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c45,good_xy)],cc_low[intersect(c45,good_xy)],psym=9,symsize=2.4,color=0
+  
+  ;fifth separation
+  c51=intersect(good_5,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c51,good_xy)],cc_low[intersect(c51,good_xy)],psym=9,symsize=0.1,color='gray'
+  c52=intersect(good_5,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c52,good_xy)],cc_low[intersect(c52,good_xy)],psym=9,symsize=0.6,color='gray'
+  c53=intersect(good_5,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c53,good_xy)],cc_low[intersect(c53,good_xy)],psym=9,symsize=1.2,color='gray'
+  c54=intersect(good_5,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c54,good_xy)],cc_low[intersect(c54,good_xy)],psym=9,symsize=1.8,color='gray'
+  c55=intersect(good_5,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dr[intersect(c55,good_xy)],cc_low[intersect(c55,good_xy)],psym=9,symsize=2.4,color='gray'
+  
+;  xyouts,0.914,0.87,cgGreek('delta',/capital)+cgGreek('phi')+'z [km]',/normal
+;  xyouts,0.914,0.85,'(or '+cgGreek('delta',/capital)+'rz, '+cgGreek('delta',/capital)+'r'+cgGreek('phi')+')',/normal
+;  cgplots,0.914,0.83,psym=9,symsize=1.2,color=6,/normal
+;  xyouts,0.928,0.826,strjoin(strtrim(dvd[0:1],1),'-'),/normal
+;  cgplots,0.914,0.81,psym=9,symsize=1.2,color=1,/normal
+;  xyouts,0.928,0.806,strjoin(strtrim(dvd[1:2],1),'-'),/normal
+;  cgplots,0.914,0.79,psym=9,symsize=1.2,color=2,/normal
+;  xyouts,0.928,0.786,strjoin(strtrim(dvd[2:3],1),'-'),/normal
+;  cgplots,0.914,0.77,psym=9,symsize=1.2,color=0,/normal
+;  xyouts,0.928,0.766,strjoin(strtrim(dvd[3:4],1),'-'),/normal
+;  cgplots,0.914,0.75,psym=9,symsize=1.2,color='gray',/normal
+;  xyouts,0.928,0.746,'> '+strtrim(dvd[4],1),/normal
+;  
+;
+;  xyouts,0.914,0.706,'Bw [pT]',/normal
+;  cgplots,0.914,0.69,psym=9,symsize=0.1,color=0,/normal
+;  xyouts,0.928,0.686,strjoin(strtrim(b_dvd[0:1],1),'-'),/normal
+;  cgplots,0.914,0.67,psym=9,symsize=0.6,color=0,/normal
+;  xyouts,0.928,0.666,strjoin(strtrim(b_dvd[1:2],1),'-'),/normal
+;  cgplots,0.914,0.65,psym=9,symsize=1.2,color=0,/normal
+;  xyouts,0.928,0.646,strjoin(strtrim(b_dvd[2:3],1),'-'),/normal
+;  cgplots,0.914,0.63,psym=9,symsize=1.8,color=0,/normal
+;  xyouts,0.928,0.626,strjoin(strtrim(b_dvd[3:4],1),'-'),/normal
+;  cgplots,0.914,0.61,psym=9,symsize=2.4,color=0,/normal
+;  xyouts,0.928,0.606,'> '+strtrim(b_dvd[4],1),/normal
+  
+  cgplots,x_points[where(finite(y_points_r[*,1]))],y_points_r[where(finite(y_points_r[*,1])),1],psym=-16,color='PBG7',thick=5,symsize=1.3
+  cgplots,x_points[where(finite(y_points_r[*,1]))],y_points_r[where(finite(y_points_r[*,1])),0],psym=-16,color='PBG5',thick=5,symsize=1.0
+  cgplots,x_points[where(finite(y_points_r[*,1]))],y_points_r[where(finite(y_points_r[*,1])),2],psym=-16,color='PBG5',thick=5,symsize=1.0
+  result=GAUSSFIT(x_points[where(finite(y_points_r[*,1]))],y_points_r[where(finite(y_points_r[*,1])),1], coeff, NTERMS=3)
+  x_add=10.^dlinear(1,4,50)
+  y_add=coeff[0] * exp(-0.5*((x_add-coeff[1])/coeff[2])^2);y_add=result[0]+x_add*result[1]
+  y_mark=0.4 & y_mark_2=0.5
+  x_mark=sqrt(alog(y_mark/coeff[0])/(-0.5))*coeff[2]+coeff[1]
+  x_mark_2=sqrt(alog(y_mark_2/coeff[0])/(-0.5))*coeff[2]+coeff[1]
+  good=where(y_add ge 0 and y_add le 1)
+  x_add=x_add[good]
+  y_add=y_add[good]
+  cgplots,x_add,y_add,color=6,psym=0,thick=5
+  cgplots,[x_mark,x_mark],[0,1],linestyle=2,thick=1.5
+  cgplots,[x_mark_2,x_mark_2],[0,1],linestyle=2,thick=2
+  xyouts,x_mark*0.95,0.95,strtrim(round(x_mark),1),ALIGNMENT=1,ORIENTATION=90,charsize=1.2
+  xyouts,x_mark_2*0.95,0.95,strtrim(round(x_mark_2),1),ALIGNMENT=1,ORIENTATION=90,charsize=1.2
+  xyouts,x_mark*1.25,1.05,'cc=0.4',ALIGNMENT=0.5,ORIENTATION=45,charsize=1.2
+  xyouts,x_mark_2*1.25,1.05,'cc=0.5',ALIGNMENT=0.5,ORIENTATION=45,charsize=1.2
+
+  ;-----
+  ;Fig_d
+  
+  od=sqrt(mlat_dr^2+mlat_dz^2); other dimensions
+  ;d_od=max(od)-min(od)
+  ;dvd=[min(od),min(od)+0.2*d_od,min(od)+0.4*d_od,min(od)+0.6*d_od,min(od)+0.8*d_od,min(od)+1.0*d_od]
+  ;dvd=percentiles(od,value=[0,0.2,0.4,0.6,0.8,1])
+  
+  good_1=where(od ge dvd[0] and od lt dvd[1])
+  good_2=where(od ge dvd[1] and od lt dvd[2])
+  good_3=where(od ge dvd[2] and od lt dvd[3])
+  good_4=where(od ge dvd[3] and od lt dvd[4])
+  good_5=where(od ge dvd[4])
+  
+  good_xy=where(mlat_dphi ge xrange[0] and mlat_dphi le xrange[1] and cc_low ge yrange[0] and cc_low le yrange[1])
+  
+  ;median value
+
+  y_points_phi=fltarr(n_elements(x_points),3)
+  for y_ind=0,n_elements(x_points)-1 do begin
+    tmp_ind_2=where(mlat_dphi ge x_points[y_ind]/(10.^0.25) and mlat_dphi lt x_points[y_ind]*(10.^0.25) and bw1 ge b_shreshold and od lt d_shreshold,count2)
+    if count2 ge nums then y_points_phi[y_ind,*]=percentiles(cc_low[tmp_ind_2],value=[0.25,0.5,0.75]) else y_points_phi[y_ind,*]=!values.f_nan
+  endfor
+  
+  
+  cgplot,[0],[0],psym=-16,color='PBG7',thick=2,symsize=1.5,ylog=ylog,xlog=xlog,$
+    xtitle='Azimuthal Separation [km]',ytitle='Correlation Coefficient',title='C.C. versus '+cgGreek('delta',/capital)+cgGreek('phi'),xrange=xrange,yrange=yrange,$
+    Position=[0.52, 0.05,0.90, 0.45],/noerase,xstyle=1,ystyle=1,/nodata
+  
+  ;small separation
+  c11=intersect(good_1,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c11,good_xy)],cc_low[intersect(c11,good_xy)],psym=9,symsize=0.1,color=1
+  c12=intersect(good_1,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c12,good_xy)],cc_low[intersect(c12,good_xy)],psym=9,symsize=0.6,color=1
+  c13=intersect(good_1,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c13,good_xy)],cc_low[intersect(c13,good_xy)],psym=9,symsize=1.2,color=1
+  c14=intersect(good_1,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c14,good_xy)],cc_low[intersect(c14,good_xy)],psym=9,symsize=1.8,color=1
+  c15=intersect(good_1,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c15,good_xy)],cc_low[intersect(c15,good_xy)],psym=9,symsize=2.4,color=1
+  
+  ;second separation
+  c21=intersect(good_2,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c21,good_xy)],cc_low[intersect(c21,good_xy)],psym=9,symsize=0.1,color=1
+  c22=intersect(good_2,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c22,good_xy)],cc_low[intersect(c22,good_xy)],psym=9,symsize=0.6,color=2
+  c23=intersect(good_2,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c23,good_xy)],cc_low[intersect(c23,good_xy)],psym=9,symsize=1.2,color=2
+  c24=intersect(good_2,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c24,good_xy)],cc_low[intersect(c24,good_xy)],psym=9,symsize=1.8,color=2
+  c25=intersect(good_2,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c25,good_xy)],cc_low[intersect(c25,good_xy)],psym=9,symsize=2.4,color=2
+
+  ;third separation
+  c31=intersect(good_3,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c31,good_xy)],cc_low[intersect(c31,good_xy)],psym=9,symsize=0.1,color=3
+  c32=intersect(good_3,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c32,good_xy)],cc_low[intersect(c32,good_xy)],psym=9,symsize=0.6,color=3
+  c33=intersect(good_3,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c33,good_xy)],cc_low[intersect(c33,good_xy)],psym=9,symsize=1.2,color=3
+  c34=intersect(good_3,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c34,good_xy)],cc_low[intersect(c34,good_xy)],psym=9,symsize=1.8,color=3
+  c35=intersect(good_3,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c35,good_xy)],cc_low[intersect(c35,good_xy)],psym=9,symsize=2.4,color=3
+
+  ;fourth separation
+  c41=intersect(good_4,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c41,good_xy)],cc_low[intersect(c41,good_xy)],psym=9,symsize=0.1,color=0
+  c42=intersect(good_4,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c42,good_xy)],cc_low[intersect(c42,good_xy)],psym=9,symsize=0.6,color=0
+  c43=intersect(good_4,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c43,good_xy)],cc_low[intersect(c43,good_xy)],psym=9,symsize=1.2,color=0
+  c44=intersect(good_4,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c44,good_xy)],cc_low[intersect(c44,good_xy)],psym=9,symsize=1.8,color=0
+  c45=intersect(good_4,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c45,good_xy)],cc_low[intersect(c45,good_xy)],psym=9,symsize=2.4,color=0
+  
+  ;fifth separation
+  c51=intersect(good_5,good_b1,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c51,good_xy)],cc_low[intersect(c51,good_xy)],psym=9,symsize=0.1,color='gray'
+  c52=intersect(good_5,good_b2,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c52,good_xy)],cc_low[intersect(c52,good_xy)],psym=9,symsize=0.6,color='gray'
+  c53=intersect(good_5,good_b3,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c53,good_xy)],cc_low[intersect(c53,good_xy)],psym=9,symsize=1.2,color='gray'
+  c54=intersect(good_5,good_b4,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c54,good_xy)],cc_low[intersect(c54,good_xy)],psym=9,symsize=1.8,color='gray'
+  c55=intersect(good_5,good_b5,count=count)
+  if count ge 1 then cgplots,mlat_dphi[intersect(c55,good_xy)],cc_low[intersect(c55,good_xy)],psym=9,symsize=2.4,color='gray'
+
+  
+;  result=GAUSSFIT(x_points[where(finite(y_points_phi))],y_points_phi[where(finite(y_points_phi))], coeff, NTERMS=3)
+;  x_add=[10,20,40,80,160,320,640,1280,2560,5120,10000]
+;  y_add=coeff[0] * exp(-0.5*((x_add-coeff[1])/coeff[2])^2);y_add=result[0]+x_add*result[1]
+;
+;  good=where(y_add ge 0 and y_add le 1)
+;  x_add=x_add[good]
+;  y_add=y_add[good]
+  ;cgplots,x_add,y_add,color=6,psym=-2,thick=3
+  
+  
+  cgplots,x_points[where(finite(y_points_phi[*,1]))],y_points_phi[where(finite(y_points_phi[*,1])),1],psym=-16,color='PBG7',thick=5,symsize=1.3
+  cgplots,x_points[where(finite(y_points_phi[*,1]))],y_points_phi[where(finite(y_points_phi[*,1])),0],psym=-16,color='PBG5',thick=5,symsize=1.0
+  cgplots,x_points[where(finite(y_points_phi[*,1]))],y_points_phi[where(finite(y_points_phi[*,1])),2],psym=-16,color='PBG5',thick=5,symsize=1.0
+  result=GAUSSFIT(x_points[where(finite(y_points_phi[*,1]))],y_points_phi[where(finite(y_points_phi[*,1])),1], coeff, NTERMS=3)
+  x_add=10.^dlinear(1,4,50)
+  y_add=coeff[0] * exp(-0.5*((x_add-coeff[1])/coeff[2])^2);y_add=result[0]+x_add*result[1]
+  y_mark=0.4 & y_mark_2=0.5
+  x_mark=sqrt(alog(y_mark/coeff[0])/(-0.5))*coeff[2]+coeff[1]
+  x_mark_2=sqrt(alog(y_mark_2/coeff[0])/(-0.5))*coeff[2]+coeff[1]
+  good=where(y_add ge 0 and y_add le 1)
+  x_add=x_add[good]
+  y_add=y_add[good]
+  cgplots,x_add,y_add,color=6,psym=0,thick=5
+  cgplots,[x_mark,x_mark],[0,1],linestyle=2,thick=1.5
+  cgplots,[x_mark_2,x_mark_2],[0,1],linestyle=2,thick=2
+  xyouts,x_mark*0.95,0.95,strtrim(round(x_mark),1),ALIGNMENT=1,ORIENTATION=90,charsize=1.2
+  xyouts,x_mark_2*0.95,0.95,strtrim(round(x_mark_2),1),ALIGNMENT=1,ORIENTATION=90,charsize=1.2
+  xyouts,x_mark*1.25,1.05,'cc=0.4',ALIGNMENT=0.5,ORIENTATION=45,charsize=1.2
+  xyouts,x_mark_2*1.25,1.05,'cc=0.5',ALIGNMENT=0.5,ORIENTATION=45,charsize=1.2
+ 
+;  ;-----
+;  ;Fig_d
+;  
+;  od=sqrt(mlat_dr^2+mlat_dphi^2); other dimensions
+;  ;dvd=percentiles(od,value=[0,0.2,0.4,0.6,0.8,1])
+;  ;d_od=max(od)-min(od)
+;  ;dvd=[min(od),min(od)+0.2*d_od,min(od)+0.4*d_od,min(od)+0.6*d_od,min(od)+0.8*d_od,min(od)+1.0*d_od]
+;  
+;  good_1=where(od ge dvd[0] and od lt dvd[1])
+;  good_2=where(od ge dvd[1] and od lt dvd[2])
+;  good_3=where(od ge dvd[2] and od lt dvd[3])
+;  good_4=where(od ge dvd[3] and od lt dvd[4])
+;  good_5=where(od ge dvd[4])
+;  
+;  good_xy=where(mlat_dz ge xrange[0] and mlat_dz le xrange[1] and cc_low ge yrange[0] and cc_low le yrange[1])
+;  
+;  ;median value
+;
+;  y_points_z  =fltarr(n_elements(x_points))
+;  for y_ind=0,n_elements(y_points_z)-1 do begin
+;    tmp_ind_3=where(mlat_dz   ge x_points[y_ind]/(10.^0.25) and mlat_dz   lt x_points[y_ind]*(10.^0.25) and bw1 ge b_shreshold and od lt d_shreshold,count3)
+;    if count3 ge nums then y_points_z[y_ind]  =mean(cc_low[tmp_ind_3],/nan) else y_points_z[y_ind]  =!values.f_nan
+;  endfor
+;  
+;  cgplot,x_points[where(finite(y_points_z))],y_points_z[where(finite(y_points_z))],psym=-16,color='PBG7',thick=2,symsize=1.5,xlog=xlog,ylog=ylog,$
+;    xtitle='Parallel Separation [km]',ytitle='Correlation Coefficient',title='C.C. versus '+cgGreek('delta',/capital)+'z',xrange=xrange,yrange=yrange,$
+;    Position=[0.52, 0.05,0.90, 0.45],/noerase,xstyle=1,ystyle=1
+;  
+;  ;small separation
+;  c11=intersect(good_1,good_b1,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c11,good_xy)],cc_low[intersect(c11,good_xy)],psym=9,symsize=0.1,color=6
+;  c12=intersect(good_1,good_b2,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c12,good_xy)],cc_low[intersect(c12,good_xy)],psym=9,symsize=0.6,color=6
+;  c13=intersect(good_1,good_b3,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c13,good_xy)],cc_low[intersect(c13,good_xy)],psym=9,symsize=1.2,color=6
+;  c14=intersect(good_1,good_b4,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c14,good_xy)],cc_low[intersect(c14,good_xy)],psym=9,symsize=1.8,color=6
+;  c15=intersect(good_1,good_b5,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c15,good_xy)],cc_low[intersect(c15,good_xy)],psym=9,symsize=2.4,color=6
+;  
+;  ;second separation
+;  c21=intersect(good_2,good_b1,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c21,good_xy)],cc_low[intersect(c21,good_xy)],psym=9,symsize=0.1,color=1
+;  c22=intersect(good_2,good_b2,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c22,good_xy)],cc_low[intersect(c22,good_xy)],psym=9,symsize=0.6,color=1
+;  c23=intersect(good_2,good_b3,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c23,good_xy)],cc_low[intersect(c23,good_xy)],psym=9,symsize=1.2,color=1
+;  c24=intersect(good_2,good_b4,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c24,good_xy)],cc_low[intersect(c24,good_xy)],psym=9,symsize=1.8,color=1
+;  c25=intersect(good_2,good_b5,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c25,good_xy)],cc_low[intersect(c25,good_xy)],psym=9,symsize=2.4,color=1
+;
+;  ;third separation
+;  c31=intersect(good_3,good_b1,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c31,good_xy)],cc_low[intersect(c31,good_xy)],psym=9,symsize=0.1,color=2
+;  c32=intersect(good_3,good_b2,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c32,good_xy)],cc_low[intersect(c32,good_xy)],psym=9,symsize=0.6,color=2
+;  c33=intersect(good_3,good_b3,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c33,good_xy)],cc_low[intersect(c33,good_xy)],psym=9,symsize=1.2,color=2
+;  c34=intersect(good_3,good_b4,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c34,good_xy)],cc_low[intersect(c34,good_xy)],psym=9,symsize=1.8,color=2
+;  c35=intersect(good_3,good_b5,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c35,good_xy)],cc_low[intersect(c35,good_xy)],psym=9,symsize=2.4,color=2
+;
+;  ;fourth separation
+;  c41=intersect(good_4,good_b1,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c41,good_xy)],cc_low[intersect(c41,good_xy)],psym=9,symsize=0.1,color=0
+;  c42=intersect(good_4,good_b2,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c42,good_xy)],cc_low[intersect(c42,good_xy)],psym=9,symsize=0.6,color=0
+;  c43=intersect(good_4,good_b3,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c43,good_xy)],cc_low[intersect(c43,good_xy)],psym=9,symsize=1.2,color=0
+;  c44=intersect(good_4,good_b4,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c44,good_xy)],cc_low[intersect(c44,good_xy)],psym=9,symsize=1.8,color=0
+;  c45=intersect(good_4,good_b5,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c45,good_xy)],cc_low[intersect(c45,good_xy)],psym=9,symsize=2.4,color=0
+;  
+;  ;fifth separation
+;  c51=intersect(good_5,good_b1,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c51,good_xy)],cc_low[intersect(c51,good_xy)],psym=9,symsize=0.1,color='gray'
+;  c52=intersect(good_5,good_b2,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c52,good_xy)],cc_low[intersect(c52,good_xy)],psym=9,symsize=0.6,color='gray'
+;  c53=intersect(good_5,good_b3,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c53,good_xy)],cc_low[intersect(c53,good_xy)],psym=9,symsize=1.2,color='gray'
+;  c54=intersect(good_5,good_b4,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c54,good_xy)],cc_low[intersect(c54,good_xy)],psym=9,symsize=1.8,color='gray'
+;  c55=intersect(good_5,good_b5,count=count)
+;  if count ge 1 then cgplots,mlat_dz[intersect(c55,good_xy)],cc_low[intersect(c55,good_xy)],psym=9,symsize=2.4,color='gray'
+;  
+  
+  
+  ;cgLegend, SymColors=[6,2,2,2,2], PSyms=[9,9,9,9,9], Symsize=[1,1,1,1,1], Location=[0.725, 0.43], $      
+  ;  Titles=['1','2','3','4','5'], Length=0.075, /Box, VSpace=2.75, /Background, BG_Color='rose'
+    
+  xyouts,0.24,0.98,'Percentage: '+strtrim(cctype,1),/normal,ALIGNMENT=0.5,charsize=1.5
+  ;measure_errors = SQRT(ABS(cc))
+  ;result=linfit(mlat_dz,cc,measure_errors=measure_errors)
+ ; result=GAUSSFIT(mlat_dz, cc_low, coeff, NTERMS=3)
+ ; x_add=[10,20,40,80,160,320,640,1280,2560,5120,10000]
+ ; y_add=coeff[0] * exp(-0.5*((x_add-coeff[1])/coeff[2])^2);y_add=result[0]+x_add*result[1]
+ ; good=where(y_add ge 0.1 and y_add le 1)
+ ; x_add=x_add[good]
+ ; y_add=y_add[good]
+  ;cgplots,x_add,y_add,color=6,psym=-2,thick=3
+ if keyword_set(eps) then pclose
+  
+ return
+  
+ jump:
+ dprint,'NO Data in this range'
+  
+END

@@ -1,0 +1,27 @@
+/var/spool/sge/scc-tr1/job_scripts/6036506: line 8: module: command not found
+IDL 8.6.0 (linux x86_64 m64).
+(c) 2016, Exelis Visual Information Solutions, Inc., a subsidiary of Harris Corporation.
+
+Licensed for use by: Boston University (Main)
+License: 244534:AF01-EEAB-82AB-312D via csg-licsrv.bu.edu:7070
+A new version is available: IDL 8.7
+https://harrisgeospatial.flexnetoperations.com
+ 
+
+PRO HelloWorld
+              ^
+% Programs can't be compiled from single statement mode.
+  At: /usr2/postdoc/shenxc/idlCode/HelloWorld.pro, Line 1
+% Attempt to call undefined procedure: 'POPEN'.
+% Execution halted at: $MAIN$          
+% PLOT: Unable to connect to X Windows display: :0.0
+% PLOT: Unable to open X Windows display.
+        Is your DISPLAY environment variable set correctly?
+% Execution halted at: $MAIN$          
+% Attempt to call undefined procedure: 'PCLOSE'.
+% Execution halted at: $MAIN$          
+
+END
+ ^
+% Syntax error.
+  At: /usr2/postdoc/shenxc/idlCode/HelloWorld.pro, Line 7

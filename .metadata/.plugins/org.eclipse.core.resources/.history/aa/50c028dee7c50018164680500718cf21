@@ -1,0 +1,85 @@
+;Purpose: record event time, location, and wave properties
+;Input: conj event list btw two satellites, burst time list for both satellites
+;Output: excel file consists of time, location-A, location-B, seperation in azimuthal, radial and parallel directions, bw_a, wna_a, bw_b, wna_b
+;Created By:Xiao-Chen Shen
+;Date: 2018-09-20
+
+PRO record_wave_parameters_main,probes=probes
+
+dir_init
+cd,!files.doc_dir+'doc/conj_w_burst_list/'
+
+;Load conj with burst mode event list
+files=file_search(probes[0]+'_'+probes[1]+'_conj_with_burst*.csv',count=count)
+st=[] & et=[] 
+for i=0, n_elements(files)-1 do begin
+  res=read_csv(files[i],N_TABLE_HEADER=1)
+  if  n_elements(tag_names(res)) eq 1 then continue
+  st=[st,string(res.field1)] & et=[et,string(res.field2)]
+endfor
+
+;Load burst mode data
+for time_ind=0,n_elements(st) do begin
+  for probe_ind=0,1 do begin
+    case strmid(probes[probe_ind],0,2) of
+      'th': begin
+              get_themis_bfield_burst,probe=strmid(probes[probe_ind],2,1),trange=[st[time_ind],et[time_ind]]
+              if ~tvar_exist('th'+strmid(probes[probe_ind],2,1)+'_scw_fac') then goto,jump1
+              tplot_rename,'th'+strmid(probes[probe_ind],2,1)+'_scw_fac','waveform'+strtrim(probe_ind,1)
+              options,'th'+strmid(probes[probe_ind],2,1)+'_scw*',ytitle='th'+strmid(probes[probe_ind],2,1)+'!C',ysubtitle='[Hz]'
+              split_vec,'waveform'+strtrim(probe_ind,1)
+            end
+      'rb': begin
+              get_rbsp_emfisis_L2_burst,probe=strmid(probes[probe_ind],2,1),trange=[st[time_ind],et[time_ind]],/local
+              if ~tvar_exist('rbsp'+strmid(probes[probe_ind],2,1)+'_burst_Bfac') then goto,jump1
+              tplot_rename,'rbsp'+strmid(probes[probe_ind],2,1)+'_burst_Bfac','waveform'+strtrim(probe_ind,1)
+              get_data,'rbsp'+strmid(probes[probe_ind],2,1)+'_burst_Bfac_waveangle',data=tmp,dlim=dlim
+              store_data,'rbsp'+strmid(probes[probe_ind],2,1)+'_burst_Bfac_waveangle_deg',data={x:tmp.x,y:tmp.y*180./!pi,v:tmp.v},dlim=dlim
+              options,'rbsp'+strmid(probes[probe_ind],2,1)+'*',ytitle='rbsp'+strmid(probes[probe_ind],2,1)+'!C',ysubtitle='[Hz]'
+              split_vec,'waveform'+strtrim(probe_ind,1)
+            end
+    endcase
+   
+  endfor
+  
+  jump1:
+  if ~tvar_exist('waveform0') or ~tvar_exist('waveform1') then continue
+  
+  get_data,'waveform0',data=d1
+  get_data,'waveform1',data=d2
+  s_t=max([d1.x[0],d2.x[0]],time_double(st[time_ind])) & e_t=min([d1.x[-1],d2.x[-1]],time_double(et[time_ind]))
+  
+  tinterpol_mxn,'waveform1_x','waveform0_x',/overwrite
+  time_clip,'waveform0_x',s_t,e_t
+  time_clip,'waveform1_x',s_t,e_t
+  
+  running_cross_correlation,'waveform0_x','waveform1_x',boxpoints=4000.,shiftpoints=512
+  options,'*fac*',/ylog,yrange=[1e2,4e3]
+  options,'*powspec',ylog=1,yrange=[1e2,4e3],zlog=1,zrange=[1e-10,1e-4]
+  options,'*waveangle_deg',zrange=[0,90],ztickinterval=30
+  options,'*elliptict',zrange=[-1,1],ztickinterval=0.5
+  tplot_options,'title',probes[0]+' '+probes[1]
+  ylim,'cross_correlation',0,1
+  
+  yy=strmid(time_string(s_t),0,4)
+  mm=strmid(time_string(s_t),5,2)
+  dd=strmid(time_string(s_t),8,2)
+  hh=strmid(time_string(s_t),11,2)
+  mi=strmid(time_string(s_t),14,2)
+  ss=strmid(time_string(s_t),17,2)
+  
+  popen,!files.fig_dir+'burst_conj_overview_'+strtrim(probes[0],1)+'_'+strtrim(probes[1],1)+'_'+yy+mm+dd+'T'+hh+mi+ss,xsize=10,ysize=9,units=cm,/encapsulated
+    tplot,['*powspec','*waveangle_deg','*elliptict','cross_correlation'],trange=[s_t,e_t]
+  pclose
+  del_data,'*'
+endfor
+
+
+;check chorus wave
+
+;check inside magnetosphere (for themis)
+
+;Output data
+
+
+END

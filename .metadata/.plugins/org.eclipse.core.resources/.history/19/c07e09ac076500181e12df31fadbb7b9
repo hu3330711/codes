@@ -1,0 +1,19 @@
+PRO get_emphisis_L4,probe=probe,trange=trange
+
+  get_data,'bsum',data=tmp,dlim=dlim
+  store_data,'bsum',data={x:tmp.x,y:tmp.y,v:reform(tmp.v)},dlim=dlim
+  
+  get_data,'bsumperp',data=tmp,dlim=dlim
+  store_data,'bsumperp',data={x:tmp.x,y:tmp.y,v:reform(tmp.v)},dlim=dlim
+  
+  get_data,'esum',data=tmp,dlim=dlim
+  store_data,'esum',data={x:tmp.x,y:tmp.y,v:reform(tmp.v)},dlim=dlim
+  
+  get_data,'esumperp',data=tmp,dlim=dlim
+  store_data,'esumperp',data={x:tmp.x,y:tmp.y,v:reform(tmp.v)},dlim=dlim
+  
+  options,'bsum*',yrange=[30,1e4],ystyle=1,ylog=1,zlog=1,zrange=[1e-8,1e-5],ytitle='B!Isum!N',ysubtitle='Frequency (Hz)',ztitle='[(nT)!E2!N/Hz]',ztickunits='Scientific',ytickunits='Scientific'
+  options,'esum*',yrange=[30,1e4],ystyle=1,ylog=1,zlog=1,zrange=[1e-5,1e-2],ytitle='E!isum!n',ysubtitle='Frequency (hz)',ztitle='[(mv/m)!e2!n/hz]',ztickunits='Scientific',ytickunits='Scientific'
+  
+  return  
+END  

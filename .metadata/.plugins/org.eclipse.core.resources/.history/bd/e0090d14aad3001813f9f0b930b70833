@@ -1,0 +1,17 @@
+PRO epssave, filename,outputdir
+
+  if not keyword_set(filename) then begin
+    dprint, 'filename must be set'
+    return
+  endif
+  
+  if not keyword_set(outputdir) then begin
+    outputdir='/Users/shenxc/Documents/plottmp/'
+  endif
+  
+  popen,outputdir+filename,xsize=8,ysize=9,/encapsulated
+    tplot
+  pclose
+  
+  return
+END

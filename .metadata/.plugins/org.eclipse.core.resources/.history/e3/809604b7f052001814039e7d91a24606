@@ -1,0 +1,209 @@
+pro ulf_wave_find_rbsp
+  
+  del_data, '*'
+  CLOSE,/all
+  
+  ;init set
+  rbsp_efw_init,local_data_dir='/projectnb/burbsp/big/SATELLITE/'
+
+  year='2015'
+  trange=[year+' 12 1',year+' 12 5']
+  ;trangefft=['2007-07-04/13:20','2007-07-04/24:10']
+  
+  step_hours=1.0
+  
+  st=trange[0]
+  et=time_string(time_double(trange[0])+60.*60*step_hours)
+
+  sc='a'
+  smthP_togetFAC=900.
+
+  ;LOAD DATA
+  ;set date and probe
+
+  WHILE time_double(et) lt time_double(trange[1]) do begin
+    
+    date=strmid(st,0,10)
+  
+    trange_data=[time_double(st)-60.*60*0.5,time_double(et)+60.*60*0.5]
+    trange_plot=[st,et]
+    timespan, time_double(st)-60.*60*0.5,60.*60*(step_hours+1.0),/seconds
+  
+    rbspx = 'rbsp'+sc
+   
+    ;>>>>>>>>>>>>>>>>>> mGSE2GSE associated >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    rbsp_load_spice_kernels
+    ;Get spin-axis pointing vector. Used for rotation from GSE -> MGSE
+    time2=time_double(date) ; first get unix time double for beginning of day
+  
+    ;Grab first and last time of day
+    time2 = [time2,time2+86399.]
+    time3=time_string(time2, prec=6) ; turn it back into a string for ISO conversion
+    strput,time3,'T',10 ; convert TPLOT time string 'yyyy-mm-dd/hh:mm:ss.msec' to ISO 'yyyy-mm-ddThh:mm:ss.msec'
+    cspice_str2et,time3,et2 ; convert ISO time string to SPICE ET
+  
+    cspice_pxform,'RBSP'+strupcase(sc)+'_SCIENCE','GSE',et2[0],pxform1
+    cspice_pxform,'RBSP'+strupcase(sc)+'_SCIENCE','GSE',et2[1],pxform2
+  
+    wsc1=dblarr(3)
+    wsc1[2]=1d
+    wsc_GSE1=dblarr(3)
+  
+    wsc2=dblarr(3)
+    wsc2[2]=1d
+    wsc_GSE2=dblarr(3)
+  
+    wsc_GSE1 = pxform1 ## wsc1  ;start of day
+    wsc_GSE2 = pxform2 ## wsc2  ;end of day
+    ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  
+    ;load position and velocity data
+  
+    rbsp_load_emfisis,probe=sc,coord='gsm'
+    rbsp_load_emfisis,probe=sc,coord='gsm',cadence='hires'
+  
+    rbsp_load_ect_l3,sc,'mageis',/get_support_data
+  
+    get_data,'rbsp'+sc+'_emfisis_l3_hires_gsm_Mag',data=tmp
+  
+    t1=tmp.x[0]
+    t2=tmp.x[n_elements(tmp.x)-1]
+  
+    num=(t2-t1)*20.
+    timesrs=dblarr(num)
+  
+    for ti=0,num-1 do timesrs[ti]=tmp.x[0]+1/20.*ti
+  
+    store_data,'time_reference',data={x:timesrs,y:timesrs}
+    tinterpol_mxn,'rbsp'+sc+'_emfisis_l3_hires_gsm_Mag','time_reference',/overwrite
+  
+    ;rotate all data into field aligned coordinates
+    ;thm_load_state,probe=probe2, coord='gei',/get_support_data
+  
+    tsmooth2, 'rbsp'+sc+'_emfisis_l3_hires_gsm_Mag', 20.*60*20, newname='rbsp'+sc+'_emfisis_l3_hires_gsm_Mag_DC' ;20 min
+    rbsp_load_spice_state,probe=sc,coord='gei',/no_spice_load
+    fac_matrix_make, 'rbsp'+sc+'_emfisis_l3_hires_gsm_Mag_DC', other_dim='Xgse', pos_var_name='rbsp'+sc+'_state_pos_gei',newname = 'rotmat'
+    tvector_rotate, 'rotmat', 'rbsp'+sc+'_emfisis_l3_hires_gsm_Mag', newname = 'rbsp'+sc+'_emfisis_l3_hires_fac_Mag'
+    ;tvector_rotate, 'rotmat', 'rbsp'+sc+'_efw_esvy_gsm_vxb_removed_spinfit', newname = 'rbsp'+sc+'_efw_esvy_fac_vxb_removed_spinfit'
+  
+  
+    
+    get_data,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag',data=tmp,dlim=dlim
+    store_data,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp',data={x:tmp.x,y:sqrt(tmp.y[*,0]^2+tmp.y[*,1]^2)},dlim=dlim
+  
+    nboxpoints=1024
+  
+    tdpwrspc, 'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp', nboxpoints=nboxpoints, nshiftpoints=512,bin=1,trange=[st,et]
+    ; time_shift, 'th'+sc+'_fgl_gsm_x_dpwrspc', nboxpoints/2.*3.
+    get_data,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc',data=tmp
+    print,1./(tmp.x[2]-tmp.x[2])
+    stop
+    tmedian,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc',180
+  
+  
+  
+    get_data,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc',data=d
+  
+  
+    ;time_clip,'background_sm',d.x[0],d.x[n_elements(d.x)-1]
+    get_data,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc_sm',data=bg
+  
+  
+  
+    store_data,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc_ratio',data={x:d.x,y:alog10(d.y/bg.y)-1,v:d.v}
+  
+    ratio=alog10(d.y/bg.y)-1
+  
+    fmax=fltarr(n_elements(d.x))
+    ftop=fltarr(n_elements(d.x))
+    fbtm=fltarr(n_elements(d.x))
+  
+    for i=0,n_elements(d.x)-1 do begin
+      rr=reform(ratio[i,*])
+      bad=where(rr lt 0)
+      good=where(rr ge 0, count)
+      if count eq 0 then continue
+      rr[bad]=!values.F_nan
+      pmax=where(rr eq max(rr,/nan),count)
+      if count eq 0 then continue
+      fmax[i]=d.v[i,pmax[0]]
+      fbtm[i]=d.v[i,good[0]]
+      endn=n_elements(good)-1
+      ftop[i]=d.v[i,good[endn]]
+  
+    endfor
+  
+    bad=where(fmax eq 0.)
+    fmax[bad]=!values.F_nan
+    bad=where(ftop eq 0.)
+    ftop[bad]=!values.F_nan
+    bad=where(fbtm eq 0.)
+    fbtm[bad]=!values.F_nan
+  
+  
+  
+    ;连续四个点都有数据才保留，否则就去除单个的散点，整个数据最后三个点懒得考虑了，以后可以加上。
+    for i=158,n_elements(d.x)-4 do begin
+      judge=fmax[i]*fmax[i+1]*fmax[i+2]*fmax[i+3]
+      badt=where(bt.x ge d.x[i])
+      if ((judge gt 0) eq 0) or (bt.y[badt[0]] ge 500.) then begin ;or (fbtm[i] le 0.05)
+        fmax[i]=!values.F_nan
+        ftop[i]=!values.F_nan
+        fbtm[i]=!values.F_nan
+      endif else begin
+        i=i+3
+      endelse
+  
+    endfor
+  
+  
+    goodt=where(fmax gt 0,count)
+    time_list=time_string(d.x[goodt],TFORMAT='YYYY MM DD hh mm ss')
+  
+  
+    output_txt, time_list, filename = '~/list'+year+'THEMIS'+sc+'.txt'
+  
+    ylim,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc_ratio',0,1
+    ylim,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc_sm',0,1,0
+    ylim,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc',0,1,0
+    options,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc_ratio',spec=1
+    zlim,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc_ratio',0.001,10,1
+    zlim,'rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrsp*',1e-4,1e2,1
+  
+    store_data,'dot1',data={x:d.x,y:ftop}
+    store_data,'dot2',data={x:d.x,y:fmax}
+    store_data,'dot3',data={x:d.x,y:fbtm}
+    options,'dot*',Psym=1,sym_size=1
+    options,'dot2',color=6
+  
+    store_data,'dot',data=['dot1','dot2','dot3','fcp_a','fche_a','fco_a']
+  
+    get_data,'rbsp'+sc+'_emfisis_l3_hires_gsm_Magnitude',data=mag
+    fce = 28.*mag.y
+    store_data,'fce_a',data={x:mag.x,y:fce}
+    store_data,'fcp_a',data={x:mag.x,y:fce/1836.}
+    store_data,'fche_a',data={x:mag.x,y:fce/7344.}
+    store_data,'fco_a',data={x:mag.x,y:fce/29376.}
+  
+    options,'f*a','color',1
+    options,'f*a',thick=3
+    options,'fche_a',linestyle=2
+    options,'fco_a',linestyle=1
+  
+    store_data,'SpectralDensity',data=['rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc','fcp_a','fche_a','fco_a']
+    store_data,'SpectralDensity_median',data=['rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc_sm','fcp_a','fche_a','fco_a']
+    store_data,'Ratio',data=['rbsp'+sc+'_emfisis_l3_hires_fac_Mag_perp_dpwrspc_ratio','fcp_a','fche_a','fco_a']
+  
+    ylim,'SpectralDensity',0.1,10,1
+    ylim,'SpectralDensity_median',0.1,10,1
+    ylim,'Ratio',0.1,10,1
+    ylim,'dot',0.1,10,1
+  
+  
+    tplot,['rbsp'+sc+'_emfisis_l3_hires_gsm_Magnitude','SpectralDensity','SpectralDensity_median','Ratio','dot'],trange=trange;['2007-07-04/13:30','2007-07-04/16:00']
+    
+    st=time_string(time_double(st)+step_hours*60.*60)
+    et=time_string(time_double(et)+step_hours*60.*60)
+    stop
+  ENDWHILE
+end

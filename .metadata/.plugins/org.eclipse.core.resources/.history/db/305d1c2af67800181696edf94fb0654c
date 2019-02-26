@@ -1,0 +1,108 @@
+pro thm_asi_v2
+
+trange=['2017-03-30/12:00:00','2017-03-30/13:30:00']
+timestep=30 ;sec
+tm=trange[0]
+dir_init
+
+while time_double(tm) lt time_double(trange[1]) do begin
+
+  
+  thm_asi_merge_mosaic,tm,/verbose;,/gif_out;,exclude=['pgeo','atha','kian','fsim']
+  loadct2,34
+  ; get position of one spacecraft
+
+  thm_load_state,probe='a',coord='gsm',suffix='_gsm',trange=trange
+  thm_load_state,probe='d',coord='gsm',suffix='_gsm',trange=trange
+  thm_load_state,probe='e',coord='gsm',suffix='_gsm',trange=trange
+
+  get_rbsp_position,probe='a',trange=trange
+  get_rbsp_position,probe='b',trange=trange
+  
+  ; trace to the ionosphere
+  ttrace2iono,'tha_state_pos_gsm',newname='tha_ifoot_geo',external_model='t89',par=2.0D,/km,$
+    in_coord='gsm',out_coord='geo'
+  get_data,'tha_ifoot_geo',data=a
+  ttrace2iono,'thd_state_pos_gsm',newname='thd_ifoot_geo',external_model='t89',par=2.0D,/km,$
+    in_coord='gsm',out_coord='geo'
+  get_data,'thd_ifoot_geo',data=d
+  ttrace2iono,'the_state_pos_gsm',newname='the_ifoot_geo',external_model='t89',par=2.0D,/km,$
+    in_coord='gsm',out_coord='geo'
+  get_data,'the_ifoot_geo',data=e
+  
+  ; transform to Lat/Lon
+  lon = !radeg * atan(d.y[*,1],d.y[*,0])
+  lat = !radeg * atan(d.y[*,2],sqrt(d.y[*,0]^2+d.y[*,1]^2))
+;  plots,lon,lat,color=6
+  lon2 = !radeg * atan(e.y[*,1],e.y[*,0])
+  lat2 = !radeg * atan(e.y[*,2],sqrt(e.y[*,0]^2+e.y[*,1]^2))
+;  plots,lon2,lat2,color=4
+  lon3 = !radeg * atan(a.y[*,1],a.y[*,0])
+  lat3 = !radeg * atan(a.y[*,2],sqrt(a.y[*,0]^2+a.y[*,1]^2))
+ ; plots,lon3,lat3,color=2
+ 
+ ttrace2iono,'rbspa_xyz_gsm',newname='rbspa_ifoot_geo',external_model='t89',par=2.0D,/km,$
+   in_coord='gsm',out_coord='geo'
+ xyz_to_polar,'rbspa_ifoot_geo'
+ get_data,'rbspa_ifoot_geo_phi',data=ra1
+ if is_struct(ra1) then lonrbspa=ra1.y
+ get_data,'rbspa_ifoot_geo_th',data=ra2
+ if is_struct(ra2) then latrbspa=ra2.y
+ 
+ min_diff=min(abs(ra1.x-time_double(tm)),index)
+ ; show footprint
+ xyouts,lonrbspa[index]+0.5,latrbspa[index]+0.1,'RBSP-A',/data,charsize=2,color=1
+ plots,lonrbspa[index],latrbspa[index],psym=2,symsize=2,color=1
+ plots,lonrbspa[index],latrbspa[index],psym=4,symsize=2,color=1
+
+ ttrace2iono,'rbspb_xyz_gsm',newname='rbspb_ifoot_geo',external_model='t89',par=2.0D,/km,$
+   in_coord='gsm',out_coord='geo'
+ xyz_to_polar,'rbspb_ifoot_geo'
+ get_data,'rbspb_ifoot_geo_phi',data=rb1
+ if is_struct(rb1) then lonrbspb=rb1.y
+ get_data,'rbspb_ifoot_geo_th',data=rb2
+ if is_struct(rb2) then latrbspb=rb2.y
+
+ min_diff=min(abs(ra1.x-time_double(tm)),index)
+ ; show footprint
+ xyouts,lonrbspb[index]+0.5,latrbspb[index]+0.1,'RBSP-B',/data,charsize=2,color=5
+ plots,lonrbspb[index],latrbspb[index],psym=2,symsize=2,color=5
+ plots,lonrbspb[index],latrbspb[index],psym=4,symsize=2,color=5
+ 
+  ; label a specific time
+  min_diff=min(abs(a.x-time_double(tm)),index)
+  ; show footprint
+  xyouts,lon3[index]+0.5,lat3[index]+0.1,'THEMIS-A',/data,charsize=2,color=2
+  plots,lon3[index],lat3[index],psym=2,symsize=2,color=2
+  plots,lon3[index],lat3[index],psym=4,symsize=2,color=2
+
+  ; label a specific time
+  min_diff=min(abs(d.x-time_double(tm)),index)
+  ; show footprint
+  xyouts,lon[index]+0.5,lat[index]+0.1,'THEMIS-D',/data,charsize=2,color=6
+  plots,lon[index],lat[index],psym=2,symsize=2,color=6
+  plots,lon[index],lat[index],psym=4,symsize=2,color=6
+
+  min_diff=min(abs(e.x-time_double(tm)),index)
+  ; show footprint of TH-E
+  xyouts,lon2[index]+0.5,lat2[index]+0.1,'THEMIS-E',/data,charsize=2,color=4
+  plots,lon2[index],lat2[index],psym=2,symsize=2,color=4
+  plots,lon2[index],lat2[index],psym=4,symsize=2,color=4
+  
+  makepng,!files.fig_dir+'EIC_'+strmid(trange[0],0,4)+strmid(trange[0],5,2)+strmid(trange[0],8,2)+'T'+strmid(tm,11,2)+strmid(tm,14,2)+strmid(tm,17,2)
+    
+  img=READ_IMAGE(!files.fig_dir+'EIC_'+strmid(trange[0],0,4)+strmid(trange[0],5,2)+strmid(trange[0],8,2)+'T'+strmid(tm,11,2)+strmid(tm,14,2)+strmid(tm,17,2)+'.png', red, green, blue)
+  img_idx = COLOR_QUAN(img[0, *, *], img[1, *, *], img[2, *, *], tbl_r, tbl_g, tbl_b)
+  img_idx = REFORM(img_idx)
+  
+  WRITE_GIF,!files.fig_dir+'EIC_'+strmid(trange[0],0,4)+strmid(trange[0],5,2)+strmid(trange[0],8,2)+'T'+strmid(tm,11,2)+'.gif', img_idx, tbl_r, tbl_g, tbl_b, DELAY_TIME = 1, /MULTIPLE, REPEAT_COUNT = 0
+  spawn,'rm '+!files.fig_dir+'EIC_'+strmid(trange[0],0,4)+strmid(trange[0],5,2)+strmid(trange[0],8,2)+'T'+strmid(tm,11,2)+strmid(tm,14,2)+strmid(tm,17,2)+'.png'
+  tm=time_string(time_double(tm)+timestep)
+  
+endwhile
+
+WRITE_GIF, !files.fig_dir+'EIC_'+strmid(trange[0],0,4)+strmid(trange[0],5,2)+strmid(trange[0],8,2)+'T'+strmid(tm,11,2)+'.gif', /CLOSE
+  
+
+  
+End  

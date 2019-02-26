@@ -1,0 +1,217 @@
+;+
+;Name:
+;    bin_plot
+;
+;Keywords:
+;    x
+;    y
+;    z:dimension,[n_elements(x),n_elements(y)]
+;    .
+;    .
+;    .
+;    noerase
+;    polar: only for L-MLT map so far
+;    
+;Created by X.C. Shen on Nov 28, 2018   
+
+PRO bin_plot,x,y,z,$
+  position=position,$
+  ASPECT=aspect, $
+  AXISCOLOR=saxiscolor, $
+  AXESCOLOR=saxescolor, $
+  BACKGROUND=sbackground, $
+  CHARSIZE=charsize, $
+  COLOR=scolor, $
+  FONT=font, $
+  ISOTROPIC=isotropic, $
+  LABEL=label, $
+  LAYOUT=layout, $
+  LEGENDS=legends, $
+  NOERASE=noerase, $
+  OPLOTS=oplots, $
+  OUTFILENAME=outfilename, $
+  OUTPUT=output, $
+  OVERPLOT=overplot, $
+  PSYM=psymIn, $
+  SYMCOLOR=ssymcolor, $
+  SYMSIZE=symsize, $
+  TITLE=title, $
+  TRADITIONAL=traditional, $
+  WINDOW=window, $
+  XMARGIN=xmargin, $
+  XSTYLE=xstyle, $
+  XTICKLEN=xticklen, $
+  XTITLE=xtitle, $
+  XMINOR=xminor,$
+  YMARGIN=ymargin, $
+  XTICKINTERVAL=xtickinterval,$
+  YSTYLE=ystyle, $
+  YTICKLEN=yticklen, $
+  YTITLE=ytitle, $
+  YMINOR=yminor, $
+  ZTITLE=ztitle, $
+  ZTICKINTERVAL=ztickinterval,$
+  ZTICKLEN=zticklen, $
+  YTICKINTERVAL=ytickinterval,$  
+  ZRANGE=zrange, $
+  DISCRETE=discrete,$
+  POLAR=polar,$
+  ct=ct,$
+  GRID=grid,$
+  REVERSE=reverse,$
+  _REF_EXTRA=extra
+  
+  dx=median(x[1:-1]-x[0:-2])
+  dy=median(y[1:-1]-y[0:-2])
+  
+  xrange=[x[0]-0.5*dx,x[-1]+0.5*dx]
+  yrange=[y[0]-0.5*dy,y[-1]+0.5*dy]
+  
+  if not defined(position) then position=[0.1,0.1,0.94,0.94]
+  position_main=[position[0],position[1],position[2]-0.04,position[3]]
+  position_cb  =[position[2]-0.02,position[1]+0.1*(position[3]-position[1]),position[2],position[3]-0.1*(position[3]-position[1])]
+  
+  if keyword_set(polar) then begin
+    XSTYLE=5
+    YSTYLE=5
+    xrange=[-1*xrange[1],xrange[1]]
+    yrange=xrange
+    aspect=1
+  endif
+  
+  if keyword_set(output) then begin
+    dir_init
+    popen,$
+      !files.doc_dir+'figs/cakeplot_'+output,$
+      xsize=8,ysize=8,unit=cm,/encapsulated
+  endif
+  
+  if keyword_set(ct) then cgloadct,ct,reverse=reverse
+  
+  cgplot,xrange,yrange, $   
+    position=position_main,$
+    ASPECT=aspect, $
+    AXISCOLOR=saxiscolor, $
+    AXESCOLOR=saxescolor, $
+    BACKGROUND=sbackground, $
+    CHARSIZE=charsize, $
+    COLOR=scolor, $
+    FONT=font, $
+    ISOTROPIC=isotropic, $
+    LABEL=label, $
+    LAYOUT=layout, $
+    LEGENDS=legends, $
+    NODATA=1, $
+    NOERASE=noerase, $
+    OPLOTS=oplots, $
+    OVERPLOT=overplot, $
+    PSYM=psymIn, $
+    SYMCOLOR=ssymcolor, $
+    SYMSIZE=symsize, $
+    TITLE=title, $
+    TRADITIONAL=traditional, $
+    WINDOW=window, $
+    XMARGIN=xmargin, $
+    XSTYLE=xstyle, $
+    XTITLE=xtitle, $
+    XRANGE=xrange, $
+    XTICKLEN=xticklen, $
+    XTICKINTERVAL=xtickinterval,$    
+    YMARGIN=ymargin, $
+    XMINOR=xminor,$
+    YSTYLE=ystyle, $
+    YTITLE=ytitle, $
+    YRANGE=yrange, $
+    YTICKLEN=yticklen, $
+    YTICKINTERVAL=ytickinterval,$
+    YMINOR=yminor
+ 
+  ;generate color scale
+  if not keyword_set(zrange) then zrange=[ Min(z,/nan), Max(z,/nan)]
+  colors     =  cgScaleVector(Findgen(n_elements(z)),zrange[0],zrange[1])
+  loc =  Value_Locate(colors, z)
+  elevColors =  StrTrim(Round(cgScaleVector(colors, 0, 255)),2)
+  finecolor = elevColors[loc]
+  
+  finecolor[where(loc eq -1)]=!values.f_nan
+  
+  for xaxis_ind=0,n_elements(x)-1 do begin
+    for yaxis_ind=0,n_elements(y)-1 do begin
+      
+      if keyword_set(polar) then begin
+;        Ltmp=x[xaxis_ind] & MLTtmp=y[xaxis_ind]
+;        Lplus1=REPLICATE(Ltmp,9)
+;        MLTplus1=FINDGEN(9, INCREMENT=0.1*dy)+MLTtmp+0.1*dy
+;        Lplus2=REPLICATE(Ltmp+dx,9)
+;        MLTplus2=FINDGEN(9, INCREMENT=-0.1*dy)+MLTtmp+dy-0.1*dy
+;        L_fill=[Ltmp,Lplus1,Ltmp,Ltmp+dx,Lplus2,Ltmp+dx,Ltmp]
+;        MLT_fill=[MLTtmp,MLTplus1,MLTtmp+dy,MLTtmp+dy,MLTplus2,MLTtmp,MLTtmp]
+;        theta=MLT_fill*!pi/12.-!pi/2.
+;        xx=L_fill*cos(theta)
+;        yy=L_fill*sin(theta)
+        
+        L_fill  =[x[xaxis_ind]-0.5*dx,REPLICATE(x[xaxis_ind]-0.5*dx,99),x[xaxis_ind]-0.5*dx,x[xaxis_ind]+0.5*dx,REPLICATE(x[xaxis_ind]+0.5*dx,99),x[xaxis_ind]+0.5*dx]
+        MLT_fill=[y[yaxis_ind]-0.5*dy,FINDGEN(99, INCREMENT=0.01*dy)+y[yaxis_ind]-0.5*dy,y[yaxis_ind]+0.5*dy,y[yaxis_ind]+0.5*dy,FINDGEN(99, INCREMENT=-0.01*dy)+y[yaxis_ind]+0.5*dy,y[yaxis_ind]-0.5*dy]*!pi/12.
+        
+        if finite(finecolor[xaxis_ind,yaxis_ind]) then begin
+          cgColorFill,L_fill*cos(MLT_fill),$
+            L_fill*sin(MLT_fill),color=finecolor[xaxis_ind,yaxis_ind]
+        endif
+      endif else begin
+        if finite(finecolor[xaxis_ind,yaxis_ind]) then begin
+          cgcolorfill,[x[xaxis_ind]-0.5*dx,x[xaxis_ind]+0.5*dx,x[xaxis_ind]+0.5*dx,x[xaxis_ind]-0.5*dx],$
+            [y[yaxis_ind]-0.5*dy,y[yaxis_ind]-0.5*dy,y[yaxis_ind]+0.5*dy,y[yaxis_ind]+0.5*dy],color=finecolor[xaxis_ind,yaxis_ind]
+        endif    
+      endelse
+      
+   
+    endfor
+  endfor
+  
+
+  
+  if keyword_set(polar) then begin
+    ;cgAxis, /XAxis, 0, 0,xtickformat='(A1)',xrange=xrange,ticklen=0
+    ;cgAxis, /YAxis, 0, 0,ytickformat='(A1)',yrange=xrange,ticklen=0
+    ;add four circle
+    A = FINDGEN(100) * (!PI*2/99.)
+    B = FINDGEN(100) * (!PI/99.)
+    
+    cgplot,[-1*xrange[1],xrange[1]],[0,0],color=0,/overplot
+    cgplot,[0,0],[-1*xrange[1],xrange[1]],color=0,/overplot
+
+    for l_ind=1,round(xrange[1])-1 do begin
+      if ((l_ind+1) mod 5) eq 0 then begin
+        cgPlot,(l_ind+1)*cos(A), (l_ind+1)*sin(A), Color='black', /Overplot,linestyle=0 
+        xyouts,(l_ind+1)*cos(!pi/4.),(l_ind+1)*sin(!pi/4.),strtrim((l_ind+1),1)
+      endif else cgPlot,(l_ind+1)*cos(A), (l_ind+1)*sin(A), Color='black', /Overplot,linestyle=1
+    endfor
+    
+
+    
+    cgcolorfill,sin(B),cos(B), Color='black'
+    cgcolorfill,-1*sin(B),cos(B), Color='white'
+    cgPlot,cos(A), sin(A), Color='black', /Overplot
+    
+    
+    
+  endif else begin
+    
+    if keyword_set(grid) then begin
+      for x_num=0,n_elements(x)-2 do begin
+        cgplot,[x[x_num]+0.5*dx,x[x_num]+0.5*dx],yrange,linestyle=1,/overplot
+      endfor
+      for y_num=0,n_elements(y)-2 do begin
+        cgplot,xrange,[y[y_num]+0.5*dy,y[y_num]+0.5*dy],linestyle=1,/overplot
+      endfor
+    endif
+    
+  endelse
+  
+  cgcolorbar,position=position_cb,/vertical,range=zrange,$
+    title=ztitle,/right,DISCRETE=discrete,TICKINTERVAL=ztickinterval,TICKLEN=zticklen
+  
+  if keyword_set(output) then pclose
+    
+    
+End    

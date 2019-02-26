@@ -1,0 +1,94 @@
+;+
+;Purpose:
+;    survey plot of whistler mode waves with flag
+;
+
+PRO rbsp_whistler_survey_w_flag,probe=probe,trange=trange
+  
+  plot_init
+  
+  get_b0state,probe=probe,trange=trange
+  get_waveeb,probe=probe,trange=trange
+  get_rbsp_hfr_density,probe=probe,trange=trange
+  get_emfisis_l4,probe=probe,trange=trange
+  
+  get_data,'rbsp'+probe+'_BwaveIntensity',data=bpow
+  get_data,'rbsp'+probe+'_EwaveIntensity',data=epow
+  ratio_eb=epow.y/bpow.y
+  store_data,'ratio',data={x:bpow.x,y:ratio_eb,v:bpow.v}
+  
+  tvar_interpol,tvars=['rbsp'+probe+'_density','rbsp'+probe+'_fLHR'],target='rbsp'+probe+'_EwaveIntensity',/overwrite,/nan_extrapolate
+  get_data,'rbsp'+probe+'_density',data=density
+  density.y[where(density.x le time_double('2013-09-02/16:04'))]=!values.f_nan
+  store_data,'rbsp'+probe+'_density',data=density
+  get_data,'rbsp'+probe+'_fLHR',data=flhr
+  
+  location_flag=bpow.y*0+1  ;outside=1
+  
+  ;location index
+  if strmatch(probe,'a') then begin
+    index_plume=where(bpow.x ge time_double('2013-09-02/16:03:17') and bpow.x le time_double('2013-09-02/18:27:40') and density.y ge 70,count_plume)
+    index_plasmasphere=where(bpow.x ge time_double('2013-09-02/18:59:00'))
+  endif
+  if strmatch(probe,'b') then begin
+    index_plume=where(bpow.x le time_double('2013-09-02/01:00:00'))
+    index_plasmasphere=where(bpow.x le time_double('2013-09-02/16:28:00'))
+  endif
+ 
+  
+  density_mark=density.y*!values.f_nan
+  density_mark[index_plume]=density.y[index_plume]
+  
+  store_data,'rbsp'+probe+'_density_mark',data={x:density.x,y:density_mark}
+  store_data,'rbsp'+probe+'_density_combo',data=['rbsp'+probe+'_density','rbsp'+probe+'_density_mark'],dlim={colors:[0,1]}
+  location_flag[index_plasmasphere,*]=0
+  location_flag[index_plume,*]=2
+  
+  store_data,'location_flag',data={x:bpow.x,y:location_flag}
+  
+  get_data,'RBSP'+strupcase(probe)+'_plansvde',data=planarity
+  get_data,'RBSP'+strupcase(probe)+'_ellsvd',data=ellip
+  get_data,'RBSPB_thpoy1_2_3',data=pf
+
+  ;wave index
+  wave_flag=bpow.y*0
+  flhr_flag=bpow.y*0
+  ;hiss
+  
+  for x_ind=0,n_elements(bpow.x)-1 do begin
+    good=where(bpow.v le flhr.y[x_ind],count)
+    if count ge 1 then flhr_flag[x_ind,good]=1
+  endfor
+
+  index_hiss=where(bpow.y gt 1e-8 and location_flag eq 0 and ratio_eb lt 2e-4 and planarity.y ge 0.3 and abs(ellip.y) gt 0.5)
+  index_ms=where(bpow.y gt 1e-8 and ratio_eb ge 2e-4 and abs(ellip.y) le 0.2 and flhr_flag eq 1)
+  index_chorus=where(bpow.y gt 1e-8 and location_flag eq 1 and ratio_eb lt 2e-4 and planarity.y ge 0.3 ge 0.3 and abs(ellip.y) gt 0.8 and pf.y lt 90)
+  index_exohiss=where(bpow.y gt 1e-8 and location_flag eq 1 and ratio_eb lt 2e-4 and planarity.y ge 0.3 ge 0.3 and abs(ellip.y) gt 0.8 and pf.y gt 90)
+  index_plumehiss=where(bpow.y gt 1e-8 and location_flag eq 2 and ratio_eb lt 2e-4 and planarity.y ge 0.3 ge 0.3 and abs(ellip.y) gt 0.5)
+
+  wave_flag[index_hiss]=170
+  wave_flag[index_chorus]=100
+  wave_flag[index_exohiss]=140
+  wave_flag[index_ms]=230
+  wave_flag[index_plumehiss]=190
+  
+  store_data,'wave_flag',data={x:bpow.x,y:wave_flag,v:bpow.v},dlim={spec:1}
+  store_data,'wave_flag_combo',data=['wave_flag','rbsp'+probe+'_fce_eq_half','rbsp'+probe+'_fLHR']
+  ylim,'rbsp'+probe+'_density_combo',10,3000,1
+  ylim,'wave_flag_combo',30,4000,1
+  zlim,'wave_flag_combo',0,255
+  zlim,'rbsp'+probe+'_EwaveIntensity_combo',1e-14,1e-9
+  zlim,'rbsp'+probe+'_BwaveIntensity_combo',1e-9,1e-4
+  
+  options,'*',zticklen=-1
+  tplot_options,'title','Van Allen Probe '+strupcase(probe)
+  options,'*',ytickunits='scientific'
+  
+  ylim,'rbsp'+probe+'_?waveIntensity_combo',30,4000,1
+  cdf2tplot,files='/projectnb/burbsp/home/xcshen/doc/20130902T1806_lstar_t01.cdf'
+  
+  tplot,['rbsp'+probe+'_density_combo','rbsp'+probe+'_EwaveIntensity_combo','rbsp'+probe+'_BwaveIntensity_combo','wave_flag_combo'],$
+    trange=['2013-09-02/15:30','2013-09-02/20:30'],var_label=['rbsp'+probe+'_MLAT','rbsp'+probe+'_Position_sm_Lm_T01','rbsp'+probe+'_MLT']
+  stop
+
+END

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Default/MultiSateEMIC/rbsp_emic_plot_from_list.pro&apos; to &apos;rbsp_emic_plot_from_list_v2.pro&apos;" description="Rename resource &apos;rbsp_emic_plot_from_list.pro&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="MultiSateEMIC/rbsp_emic_plot_from_list.pro" name="rbsp_emic_plot_from_list_v2.pro" stamp="1539095216985" updateReferences="true"/>
+</session>

@@ -1,0 +1,87 @@
+PRO get_rbsp_emfisis_L2_burst,probe=probe,trange=trange,despin=despin,local=local,tclip=tclip
+
+  if not keyword_set(probe) then begin
+    dprint,'probe should be set: a or b'
+    return
+  endif
+
+  if not keyword_set(trange) then begin
+    dprint,'trange should be set'
+    return
+  endif
+  
+  if not keyword_set(no_update) then no_update=1
+  
+  year=strmid(trange[0],0,4)
+  yy=strmid(trange[0],2,2)
+  mm=strmid(trange[0],5,2)
+  dd=strmid(trange[0],8,2)
+  ts=strmid(trange[0],0,13)
+  if time_double(strmid(trange[1],0,19)) eq time_double(strmid(trange[1],0,13)) then te=strmid(trange[1],0,13) else te=time_string(time_double(strmid(trange[1],0,13))+60.*60)
+  
+  timespan,ts,time_double(te)-time_double(ts),/seconds
+
+  dir_init
+  remote_data_dir=!rbsp_emfisis.REMOTE_DATA_DIR
+  local_data_dir=!rbsp_emfisis.local_data_dir
+  
+  if keyword_set(local) then begin
+    pathformat1 = 'burst_spec/rbsp-'+probe+'_WFR-spectrum-continuous-burst_emfisis-L2_YYYYMMDDThh_v*.cdf'
+    relpathnames1 = file_dailynames(file_format=pathformat1,trange=trange,/unique,/hour_res)
+    files1 = spd_download(remote_file=relpathnames1,no_download=1,remote_path=remote_data_dir, no_update=no_update,local_path = local_data_dir, ssl_verify_peer=0, ssl_verify_host=0, /last_version )
+    cdf2tplot,files=files1
+    return
+  endif
+  
+  pathformat = 'RBSP-'+strupcase(probe)+'/L2/YYYY/MM/DD/rbsp-'+probe+'_WFR-waveform-continuous-burst_emfisis-L2_YYYYMMDDThh_v*.cdf'
+  relpathnames = file_dailynames(file_format=pathformat,trange=trange,/unique,/hour_res)
+  files = spd_download(remote_file=relpathnames, remote_path=remote_data_dir, no_update=no_update,local_path = local_data_dir, ssl_verify_peer=0, ssl_verify_host=0, /last_version )
+  prefix = 'rbsp'+strlowcase(probe)+'_'
+  cdf2tplot,file=files,varformat=varformat,verbose=verbose,prefix=prefix ,tplotnames=tn    ; load data into tplot variables
+  
+  if tvar_exist('rbsp'+strlowcase(probe)+'_BuSamples') then begin
+    get_data,'rbsp'+probe+'_BuSamples',data=bu,dlim=dlim
+    get_data,'rbsp'+probe+'_BvSamples',data=bv,dlim=dlim
+    get_data,'rbsp'+probe+'_BwSamples',data=bw,dlim=dlim
+    get_data,'rbsp'+probe+'_EuSamples',data=eu,dlim=dlim
+    get_data,'rbsp'+probe+'_EvSamples',data=ev,dlim=dlim
+    get_data,'rbsp'+probe+'_EwSamples',data=ew,dlim=dlim
+    
+    time_tmp=bu.v*1e-9+bu.x[0] 
+    b_data_tmp_x=bu.y[0,*] & b_data_tmp_y=bv.y[0,*] & b_data_tmp_z=bw.y[0,*] & b_data_tmp=transpose([b_data_tmp_x,b_data_tmp_y,b_data_tmp_z])
+    e_data_tmp_x=eu.y[0,*] & e_data_tmp_y=ev.y[0,*] & e_data_tmp_z=ew.y[0,*] & e_data_tmp=transpose([e_data_tmp_x,e_data_tmp_y,e_data_tmp_z])
+    for time_ind=1,n_elements(bu.x)-1 do begin
+      time_tmp_tmp=bu.v*1e-9+bu.x[time_ind] 
+      b_data_tmp_tmp=[bu.y[time_ind,*],bv.y[time_ind,*],bw.y[time_ind,*]]
+      e_data_tmp_tmp=[eu.y[time_ind,*],ev.y[time_ind,*],ew.y[time_ind,*]]
+      time_tmp=[time_tmp,time_tmp_tmp]
+      b_data_tmp=[b_data_tmp,transpose(b_data_tmp_tmp)]
+      e_data_tmp=[e_data_tmp,transpose(e_data_tmp_tmp)]
+    endfor
+    
+    store_data,'rbsp'+probe+'_burst_Buvw',data={x:time_tmp,y:b_data_tmp}
+    store_data,'rbsp'+probe+'_burst_Euvw',data={x:time_tmp,y:e_data_tmp}
+    data_flag=time_tmp*0.+1
+    store_data,'rbsp'+probe+'_data_flag',data={x:time_tmp,y:data_flag},dlim={psym:3,yrange:[0,2],ystyle:1}
+    options,'rbsp'+probe+'_burst_Buvw',data_att={units:'nT',coord_sys:'uvw'},/def
+    options,'rbsp'+probe+'_burst_Euvw',data_att={units:'V/m',coord_sys:'uvw'},/def
+    
+    if keyword_set(tclip) then begin
+      time_clip,'rbsp'+probe+'_burst_Buvw',trange[0],trange[1],/replace
+      time_clip,'rbsp'+probe+'_burst_Euvw',trange[0],trange[1],/replace
+    endif
+    if keyword_set(despin) then begin
+      rbsp_load_spice_kernels
+      rbsp_load_state,probe=probe,datatype=['mat_dsc','spinper','spinphase'],/no_spice_load,trange=[time_double(trange[0])-5.*60,time_double(trange[1])+5.*60],dt=0.5
+      if ~tvar_exist('rbsp'+probe+'_mat_dsc') then return
+      rbsp_despin,probe,'rbsp'+probe+'_burst_Buvw',/uvw,newname='rbsp'+probe+'_burst_Bdsc'
+      rbsp_despin,probe,'rbsp'+probe+'_burst_Euvw',/uvw,newname='rbsp'+probe+'_burst_Edsc'
+      rbsp_cotrans,'rbsp'+probe+'_burst_Bdsc','rbsp'+probe+'_burst_Bgse',/dsc2gse,mat_dsc='rbsp'+probe+'_mat_dsc'
+      rbsp_cotrans,'rbsp'+probe+'_burst_Edsc','rbsp'+probe+'_burst_Egse',/dsc2gse,mat_dsc='rbsp'+probe+'_mat_dsc'
+      stop
+    endif 
+  endif
+  
+  del_data,'rbsp?_??Samples'
+  return
+END

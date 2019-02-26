@@ -1,0 +1,92 @@
+PRO get_mageis_hr,probe=probe,trange=trange,mode=mode
+
+  if not keyword_set(probe) then begin
+    dprint,'probe should be set: a or b'
+    return
+  endif
+
+  if not keyword_set(trange) then begin
+    dprint,'trange should be set'
+    return
+  endif
+
+  if not keyword_set(no_update) then no_update=1
+
+  ttmp=time_string(trange)
+  year=strmid(ttmp[0],0,4)
+
+  dir_init
+  remote_data_dir=!rbsp_mageishr.REMOTE_DATA_DIR
+  local_data_dir=!rbsp_mageishr.local_data_dir
+
+  pathformat = 'rbsp'+probe+'/mageis/level3/int/'+year+'/rbsp'+probe+'_int_ect-mageis'+mode+'-hr-L3_YYYYMMDD_v*.cdf'
+
+  relpathnames = file_dailynames(file_format=pathformat,trange=trange,/unique)
+
+  files = spd_download(remote_file=relpathnames, remote_path=remote_data_dir, no_update=no_update,local_path = local_data_dir, ssl_verify_peer=0, ssl_verify_host=0, /last_version )
+
+
+
+  cdf2tplot,file=files,varformat=varformat,verbose=verbose,tplotnames=tn    ; load data into tplot variables
+  
+  get_data,'HighRate',data=d
+  n_ek=n_elements(d.v2)
+  n_t=n_elements(d.x)
+  n_pa=n_elements(d.v1[0,*])
+  pa180=d.v1
+  index=where(d.v1 gt 180 and d.v1 le 360,count)
+  if count ge 1 then pa180[index]=360-pa180[index]
+  ymax=180
+  pa90=pa180
+  index=where(pa180 gt 90 and pa180 le 180,count)
+  if count ge 1 then pa90[index]=180-pa180[index]
+  ymax=90
+
+  pa=pa90
+  index_sort=lonarr(n_t,n_pa)
+  for ttt=0,n_t-1 do begin
+    index_tmp=sort(pa[ttt,*])
+    pa_tmp=pa[ttt,index_tmp]
+    pa[ttt,*]=pa_tmp
+    index_sort[ttt,*]=index_tmp
+  endfor
+
+  get_mageis_electronflux_stevens_energy,trange[0],probe,mode,ek,g0de
+
+  index_ek_name=0
+  ;for eee=0,n_ek-1 do begin
+  for eee=0,n_elements(g0de)-1 do begin
+
+
+    cr=dblarr(n_t,n_pa)
+    for ppp=0,n_pa-1 do cr[*,ppp]=d.y[*,eee,ppp]
+    index1=where(d.x ge time_double(trange[0]) and d.x le time_double(trange[1]),count1)
+   
+    if count1 le 0 then continue
+    tmp_cr=reform(cr[index1,*])
+    index=where(tmp_cr gt 0,count)
+    if count le 0 then continue
+    max_cr=max(tmp_cr[index])
+    min_cr=max_cr/10.
+
+    for ttt=0,n_t-1 do begin
+      cr_tmp=cr[ttt,index_sort[ttt,*]]
+      cr[ttt,*]=cr_tmp
+    endfor
+
+    insert_nan_for_get_mageis_electronflux_stevens,pa,cr,90.,pa_out,cr_out
+    pa=pa_out
+    cr=cr_out
+
+    flux=cr/g0de[index_ek_name]
+    max_cr=max_cr/g0de[index_ek_name]
+    min_cr=max_cr*0.1
+    store_data,mode+'HighRate_E'+string(eee,format='(I1)'),data={x:d.x,v:pa,y:flux}
+    options,mode+'HighRate_E'+string(eee,format='(I1)'),yrange=[0,ymax],ystyle=1,zrange=[min_cr,max_cr],/zlog,ztitle='Flux!C!C[s!U-1!Nsr!U-1!Ncm!U-2!NkeV!U-1!N]',$
+      ytitle=string(round(ek[index_ek_name]),format='(I4)')+' keV!C!CPitch Angle',spec=1,ztickunits='scientific',zminor=9,zticklen=-0.3,yticks=6,yminor=3,zstyle=1
+
+    index_ek_name=index_ek_name+1
+    
+  endfor
+  
+END

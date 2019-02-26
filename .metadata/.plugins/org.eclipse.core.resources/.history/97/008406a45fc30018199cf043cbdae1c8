@@ -1,0 +1,81 @@
+PRO save_rbsp_wave_burst_to_spec_cdf,probe=probe,trange=trange
+
+  ;SETTINGS
+  plot_init,'ps'
+  dir_init
+  cdf_leap_second_init
+
+  ;ROOT START
+  duration=1.*3600. ;1 hour
+  tstart=time_double(strmid(trange[0],0,13)) & root_num=round((time_double(trange[1])-time_double(trange[0]))/3600.)
+
+  FOR r_ind=0,root_num-1 do begin
+    ;TIME & OUTPUT NAME
+    st=tstart+r_ind*duration & et=tstart+(r_ind+1.)*duration
+    f_dir=!rbsp_emfisis.local_data_dir+'burst_spec/'
+    f_name='rbsp-'+probe+'_WFR-spectrum-continuous-burst_emfisis-L2_'+strmid(time_string(st),0,4)+strmid(time_string(st),5,2)+strmid(time_string(st),8,2)+'T'+strmid(time_string(st),11,2)+'_v2.0.0.cdf'
+    
+    ;CHECK FILE EXISTENCE
+    file_num=file_search(f_dir+f_name)
+    if size(file_num,/n_dim) eq 1 then begin
+      print,'exist!'
+      continue
+    endif
+    
+    ;LOAD DATA
+    get_rbsp_emfisis_L2_burst,probe=probe,trange=[st,et],/despin
+    if ~tvar_exist('rbsp'+probe+'_burst_Bfac') then continue
+    get_emfisis_l3,probe=probe,trange=[st,et],coord='gse',timeres='1sec'
+    get_mageis_l2,probe=probe,trange=[st,et]
+    cotrans,'rbsp'+probe+'_ect_mageis_L2_Position','rbsp'+probe+'_Position_gei',/GEO2GEI
+    get_b0state,probe=probe,trange=[st,et]
+    
+    ;ROTATE TO FAC
+    fac_matrix_make, 'rbsp'+probe+'_emfisis_l3_1sec_gse_Mag', other_dim='Rgeo', pos_var_name='rbsp'+probe+'_Position_gei',newname = 'rotmat'
+    tvector_rotate, 'rotmat', 'rbsp'+probe+'_burst_Bgse', newname = 'rbsp'+probe+'_burst_Bfac'
+    tvector_rotate, 'rotmat', 'rbsp'+probe+'_burst_Egse', newname = 'rbsp'+probe+'_burst_Efac'
+
+    ;CALCULATE POLARIZATION
+    twavpol,'rbsp'+probe+'_burst_Bfac',nopfft=round(208896/60./4),steplength=round(208896/60./4)/4.,bin_freq=1
+    tdpwrspc,'rbsp'+probe+'_burst_Efac',nboxpoints=round(208896/60./4),nshiftpoints=round(208896/60./4)/4.,bin=1
+    get_data,'rbsp'+probe+'_burst_Efac_x_dpwrspc',data=tmpex,dlim=dlim
+    get_data,'rbsp'+probe+'_burst_Efac_y_dpwrspc',data=tmpey,dlim=dlim
+    get_data,'rbsp'+probe+'_burst_Efac_z_dpwrspc',data=tmpez,dlim=dlim
+    store_data,'rbsp'+probe+'_burst_Efac_powspec',data={x:tmpex.x,y:tmpex.y+tmpey.y+tmpez.y,v:tmpex.v},dlim=dlim
+    
+    ;INTERPOLATION
+    tvar_interpol,tvars=['rbsp'+probe+'_burst_Efac_powspec','rbsp'+probe+'_fce_eq'],target='rbsp'+probe+'_burst_Bfac_powspec',/overwrite
+
+    ;CALCULATE BW FOR UPPER AND LOWER BANDS
+    get_data,'rbsp'+probe+'_burst_Bfac_powspec',data=bpow
+    get_data,'rbsp'+probe+'_fce_eq',data=fce
+    get_data,'rbsp'+probe+'_burst_Bfac_waveangle',data=wna,dlim=dlim
+    get_data,'rbsp'+probe+'_burst_Bfac_degpol',data=degp
+    wna.y[where(bpow.y le 1e-8 or degp.y le 0.7)]=!values.f_nan
+    bw_up=bpow.x*!values.f_nan & bw_low=bpow.x*!values.f_nan & wna_median=wna.x*!values.f_nan
+    for ind_tmp=0,n_elements(bpow.x)-1 do begin
+      up_band=[0.5*fce.y[ind_tmp],fce.y[ind_tmp]]
+      low_band=[0.1*fce.y[ind_tmp],0.5*fce.y[ind_tmp]]
+      freq=reform(bpow.y[ind_tmp,*])
+      good_v_up=where(freq ge up_band[0] and freq le up_band[1])
+      good_v_low=where(freq ge low_band[0] and freq le low_band[1])
+      bw_up[ind_tmp]=sqrt(total(reform(bpow.y[ind_tmp,good_v_up]))*mean(bpow.v[1:-1]-bpow.v[0:-2]))
+      bw_low[ind_tmp]=sqrt(total(reform(bpow.y[ind_tmp,good_v_low]))*mean(bpow.v[1:-1]-bpow.v[0:-2]))
+      wna_up[ind_tmp]=median(wna.y[ind_tmp,good_v_up])
+      wna_low[ind_tmp]=median(wna.y[ind_tmp,good_v_low])
+    endfor
+    store_data,'rbsp'+probe+'_bw_up',data={x:bpow.x,y:bw_up}
+    store_data,'rbsp'+probe+'_bw_low',data={x:bpow.x,y:bw_low}
+    store_data,'rbsp'+probe+'_burst_Bfac_waveangle_up',data={x:wna.x,y:wna_up}
+    store_data,'rbsp'+probe+'_burst_Bfac_waveangle_low',data={x:wna.x,y:wna_low}
+    store_data,'rbsp'+probe+'_burst_Bfac_waveangle_deg_tclip_r',data=wna,dlim=dlim
+    
+    ;SAVE TPLOT TO CDF
+    tvars_to_save=['rbsp'+probe+'_burst_Bfac_powspec','rbsp'+probe+'_burst_Efac_powspec','rbsp'+probe+'_burst_Bfac','rbsp'+probe+'_burst_Efac','rbsp'+probe+'_burst_Bfac_degpol','rbsp'+probe+'_burst_Bfac_waveangle','rbsp'+probe+'_burst_Bfac_elliptict','rbsp'+probe+'_burst_Bfac_helict',$
+      'rbsp'+probe+'_bw_up','rbsp'+probe+'_bw_low','rbsp'+probe+'_burst_Bfac_waveangle_up','rbsp'+probe+'_burst_Bfac_waveangle_low']
+    tplot2cdf,filename=f_dir+f_name,tvars=tvars_to_save,/default
+    
+  ENDFOR
+  ;ROOT END
+  
+END

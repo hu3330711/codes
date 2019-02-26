@@ -1,0 +1,243 @@
+;+
+;NAME:
+;    rbsp_fbk_chorus_size_main.pro
+;
+;DESCRIPTION:
+;    main code for chorus size using FBK dataset
+
+
+PRO rbsp_fbk_chorus_size_loop,trange=trange,st_out,et_out,cc_bw,cc_ew,ratio_b,ratio_e,max_b,max_e
+
+  ;------------
+  ;Setting paremeters
+  ;------------
+  del_data,'*'
+  st_out=[]
+  et_out=[]
+  cc_bw=[]
+  cc_ew=[]
+  ratio_b=[]
+  ratio_e=[]
+  max_b=[]
+  max_e=[]
+  ;------------
+  ;Loading data
+  ;------------
+
+  get_efw_fbk,probe='a',trange=trange
+  get_efw_fbk,probe='b',trange=trange
+
+  get_b0state,probe='a',trange=trange
+  get_b0state,probe='b',trange=trange
+
+  ;------------
+  ;Processing
+  ;------------
+
+  tvars_a_e=tnames('rbspa_fbk*_e*dc_pk',index=ind1)
+  tvars_a_b=tnames('rbspa_fbk*_scmw_pk',index=ind2)
+  tvars_b_e=tnames('rbspb_fbk*_e*dc_pk',index=ind3)
+  tvars_b_b=tnames('rbspb_fbk*_scmw_pk',index=ind4)
+
+  if ind1[0] ge 1 then store_data,'Ea_combo',data=[tvars_a_e[0],'rbspa_fce_eq','rbspa_fce_eq_half','rbspa_fce_eq_tenth']
+  if ind2[0] ge 1 then store_data,'Ba_combo',data=[tvars_a_b[0],'rbspa_fce_eq','rbspa_fce_eq_half','rbspa_fce_eq_tenth']
+  if ind3[0] ge 1 then store_data,'Eb_combo',data=[tvars_b_e[0],'rbspb_fce_eq','rbspb_fce_eq_half','rbspb_fce_eq_tenth']
+  if ind4[0] ge 1 then store_data,'Bb_combo',data=[tvars_b_b[0],'rbspb_fce_eq','rbspb_fce_eq_half','rbspb_fce_eq_tenth']
+
+  tvar_interpol,tvars=['rbspa_fce_eq',tvars_a_b[0],'rbspb_fce_eq',tvars_b_b[0],tvars_b_e[0]],target=tvars_a_e[0],/overwrite,/nan_extrapolate
+  get_data,tvars_a_e[0],data=da
+  get_data,tvars_a_b[0],data=dba
+  get_data,tvars_b_e[0],data=db
+  get_data,tvars_b_b[0],data=dbb
+
+  
+  if ind1[0] ge 1 then cons1=round(mean(da.v[1:-1]/da.v[0:-2],/nan))
+  if ind2[0] ge 1 then cons2=round(mean(dba.v[1:-1]/dba.v[0:-2],/nan))
+  if ind3[0] ge 1 then cons3=round(mean(db.v[1:-1]/db.v[0:-2],/nan))
+  if ind4[0] ge 1 then cons4=round(mean(dbb.v[1:-1]/dbb.v[0:-2],/nan))
+   
+  if ind1[0] ge 1 and ind3[0] ge 1 then begin    
+    for f_ind=0,n_elements(da.v)-1 do begin
+      da.y[*,f_ind]=da.y[*,f_ind]^2./(da.v[f_ind]*(sqrt(cons1)-1./sqrt(cons1)))
+      db.y[*,f_ind]=db.y[*,f_ind]^2./(db.v[f_ind]*(sqrt(cons3)-1./sqrt(cons3)))
+    endfor
+  endif
+  
+  if ind2[0] ge 1 and ind4[0] ge 1 then begin
+    for f_ind=0,n_elements(dba.v)-1 do begin
+      dba.y[*,f_ind]=dba.y[*,f_ind]^2./(da.v[f_ind]*(sqrt(cons2)-1./sqrt(cons2)))
+      dbb.y[*,f_ind]=dbb.y[*,f_ind]^2./(db.v[f_ind]*(sqrt(cons4)-1./sqrt(cons4)))
+    endfor
+  endif
+  get_data,'rbspa_fce_eq',data=fce_a
+  get_data,'rbspb_fce_eq',data=fce_b
+
+  ;;;;-----------increase the resolution in frequency---------
+  freq_int = 10.^(dlinear(alog10(min(da.v)),alog10(max(da.v)),128))
+  if ind1[0] ge 1 then pow_a_E_int=fltarr(n_elements(da.x),n_elements(freq_int))
+  if ind2[0] ge 1 then pow_a_B_int=fltarr(n_elements(da.x),n_elements(freq_int))
+  if ind3[0] ge 1 then pow_b_E_int=fltarr(n_elements(db.x),n_elements(freq_int))
+  if ind4[0] ge 1 then pow_b_B_int=fltarr(n_elements(db.x),n_elements(freq_int))
+
+  for ind_t=0,n_elements(da.x)-1 do begin
+    if ind1[0] ge 1 then pow_a_E_int[ind_t,*]=interpol(da.y[ind_t,*],da.v,freq_int)
+    if ind2[0] ge 1 then pow_a_B_int[ind_t,*]=interpol(dba.y[ind_t,*],dba.v,freq_int)
+    if ind3[0] ge 1 then pow_b_E_int[ind_t,*]=interpol(db.y[ind_t,*],db.v,freq_int)
+    if ind4[0] ge 1 then pow_b_B_int[ind_t,*]=interpol(dbb.y[ind_t,*],dbb.v,freq_int)
+  endfor
+
+  if ind1[0] ge 1 then store_data,'rbspa_E_powspec_int',data={x:da.x,y:pow_a_E_int,v:freq_int}
+  if ind2[0] ge 1 then store_data,'rbspa_B_powspec_int',data={x:da.x,y:pow_a_B_int,v:freq_int}
+  if ind3[0] ge 1 then store_data,'rbspb_E_powspec_int',data={x:db.x,y:pow_b_E_int,v:freq_int}
+  if ind4[0] ge 1 then store_data,'rbspb_B_powspec_int',data={x:db.x,y:pow_b_B_int,v:freq_int}
+
+  ;CALCULATE BW FOR UPPER AND LOWER BANDS
+  ;
+  ;probes 1 and 2
+  if ind1[0] ge 1 then bw_low_e_1=make_array(n_elements(da.x),/float)
+  if ind2[0] ge 1 then bw_low_b_1=make_array(n_elements(da.x),/float)
+  if ind3[0] ge 1 then bw_low_e_2=make_array(n_elements(db.x),/float) 
+  if ind4[0] ge 1 then bw_low_b_2=make_array(n_elements(db.x),/float)
+
+  for ind_tmp=0,n_elements(da.x)-1 do begin
+    low_band=[0.1*fce_a.y[ind_tmp],0.5*fce_a.y[ind_tmp]]
+    good_v_low=where(freq_int ge low_band[0] and freq_int le low_band[1])
+    if ind1[0] ge 1 then bw_low_e_1[ind_tmp]=sqrt(total(reform(pow_a_E_int[ind_tmp,good_v_low]))*mean(freq_int[1:-1]-freq_int[0:-2]))
+    if ind2[0] ge 1 then bw_low_b_1[ind_tmp]=1000.*sqrt(total(reform(pow_a_B_int[ind_tmp,good_v_low]))*mean(freq_int[1:-1]-freq_int[0:-2]))
+  endfor
+  for ind_tmp=0,n_elements(db.x)-1 do begin
+    low_band=[0.1*fce_b.y[ind_tmp],0.5*fce_b.y[ind_tmp]]
+    good_v_low=where(freq_int ge low_band[0] and freq_int le low_band[1])
+    if ind3[0] ge 1 then bw_low_e_2[ind_tmp]=sqrt(total(reform(pow_b_E_int[ind_tmp,good_v_low]))*mean(freq_int[1:-1]-freq_int[0:-2]))
+    if ind4[0] ge 1 then bw_low_b_2[ind_tmp]=1000.*sqrt(total(reform(pow_b_B_int[ind_tmp,good_v_low]))*mean(freq_int[1:-1]-freq_int[0:-2]))
+  endfor
+
+  if ind1[0] ge 1 then store_data,'rbspa_bw_E',data={x:da.x,y:bw_low_e_1}
+  if ind2[0] ge 1 then store_data,'rbspa_bw_B',data={x:da.x,y:bw_low_b_1}
+  if ind3[0] ge 1 then store_data,'rbspb_bw_E',data={x:db.x,y:bw_low_e_2}
+  if ind4[0] ge 1 then store_data,'rbspb_bw_B',data={x:db.x,y:bw_low_b_2}
+
+  nplots=round((trange[1]-trange[0])/6.)
+  
+  for ind_loop=0,nplots-1 do begin
+    trange_sge_sge=[trange[0]+ind_loop*6.0,trange[0]+(ind_loop+1)*6.0]
+
+    if ind1[0] ge 1 then time_clip,'rbspa_bw_E',trange_sge_sge[0],trange_sge_sge[1]
+    if ind2[0] ge 1 then time_clip,'rbspa_bw_B',trange_sge_sge[0],trange_sge_sge[1]
+    if ind3[0] ge 1 then time_clip,'rbspb_bw_E',trange_sge_sge[0],trange_sge_sge[1]
+    if ind4[0] ge 1 then time_clip,'rbspb_bw_B',trange_sge_sge[0],trange_sge_sge[1]
+    if ind1[0] ge 1 then get_data,'rbspa_bw_E_tclip',data=bwae
+    if ind2[0] ge 1 then get_data,'rbspa_bw_B_tclip',data=bwab
+    if ind3[0] ge 1 then get_data,'rbspb_bw_E_tclip',data=bwbe
+    if ind4[0] ge 1 then get_data,'rbspb_bw_B_tclip',data=bwbb
+  
+  
+    lag=dlinear(-8,8,17)
+    if ind1[0] ge 1 and ind3[0] ge 1 then begin
+      cc_e=c_correlate(bwae.y[where(finite(bwae.y) and finite(bwbe.y))],bwbe.y[where(finite(bwae.y) and finite(bwbe.y))],lag)
+      ew_a_tmp=bwae.y[where(finite(bwae.y) and finite(bwbe.y))]
+      ew_b_tmp=bwbe.y[where(finite(bwae.y) and finite(bwbe.y))]
+      ratio_a_tmp=max(ew_a_tmp)/median(ew_a_tmp)
+      ratio_b_tmp=max(ew_b_tmp)/median(ew_b_tmp)
+      max2med_e=max([ratio_a_tmp,ratio_b_tmp])
+      maxe=max([max(ew_a_tmp),max(ew_b_tmp)])
+    endif else begin
+      cc_e=!values.f_nan
+      max2med_e=!values.f_nan
+      maxe=!values.f_nan
+    endelse
+    if ind2[0] ge 1 and ind4[0] ge 1 then begin
+      cc_b=c_correlate(bwab.y[where(finite(bwab.y) and finite(bwbb.y))],bwbb.y[where(finite(bwab.y) and finite(bwbb.y))],lag)
+      bw_a_tmp=bwab.y[where(finite(bwab.y) and finite(bwbb.y))]
+      bw_b_tmp=bwbb.y[where(finite(bwab.y) and finite(bwbb.y))]
+      ratio_a_tmp=max(bw_a_tmp)/median(bw_a_tmp)
+      ratio_b_tmp=max(bw_b_tmp)/median(bw_b_tmp)
+      max2med_b=max([ratio_a_tmp,ratio_b_tmp])
+      maxb=max([max(bw_a_tmp),max(bw_b_tmp)])
+    endif else begin
+      cc_b=!values.f_nan
+      max2med_b=!values.f_nan
+      maxb=!values.f_nan
+    endelse
+    
+    tplot_options,'title','CC_E:'+strmid(strtrim(max(cc_e),1),0,4)+' CC_B:'+strmid(strtrim(max(cc_b),1),0,4)
+  
+    options,'Ea_combo',ytitle='Ea!C',ysubtitle='[Hz]',ztitle='[mV/m]',zrange=[0.01,30],/zlog,yrange=[100,5000],ystyle=1,zstyle=1,/ylog,ytickunits='scientific',ztickunits='scientific'
+    options,'Eb_combo',ytitle='Eb!C',ysubtitle='[Hz]',ztitle='',zrange=[0.01,30],/zlog,yrange=[100,5000],ystyle=1,zstyle=1,/ylog,ytickunits='scientific',ztickunits='scientific'
+    options,'Ba_combo',ytitle='Ba!C',ysubtitle='[Hz]',ztitle='[nT]',zrange=[1e-4,3e-1],/zlog,yrange=[100,5000],ystyle=1,zstyle=1,/ylog,ytickunits='scientific',ztickunits='scientific'
+    options,'Bb_combo',ytitle='Bb!C',ysubtitle='[Hz]',ztitle='',zrange=[1e-4,3e-1],/zlog,yrange=[100,5000],ystyle=1,zstyle=1,/ylog,ytickunits='scientific',ztickunits='scientific'
+  
+    options,'rbspa_E_powspec_int',ytitle='E!C',ysubtitle='[Hz]',ztitle='[(mV/m)!E2!N/Hz]',spec=1,zrange=[1e-6,1e-2],/zlog,yrange=[100,5000],ystyle=1,zstyle=1,/ylog,ytickunits='scientific',ztickunits='scientific'
+    options,'rbspb_E_powspec_int',ytitle='E!C',ysubtitle='[Hz]',ztitle='',spec=1,zrange=[1e-6,1e-2],/zlog,yrange=[100,5000],ystyle=1,zstyle=1,/ylog,ytickunits='scientific',ztickunits='scientific'
+    options,'rbspa_B_powspec_int',ytitle='B!C',ysubtitle='[Hz]',ztitle='[(nT)!E2!N/Hz]',spec=1,zrange=[1e-9,1e-5],/zlog,yrange=[100,5000],ystyle=1,zstyle=1,/ylog,ytickunits='scientific',ztickunits='scientific'
+    options,'rbspb_B_powspec_int',ytitle='B!C',ysubtitle='[Hz]',ztitle='',spec=1,zrange=[1e-9,1e-5],/zlog,yrange=[100,5000],ystyle=1,zstyle=1,/ylog,ytickunits='scientific',ztickunits='scientific'
+  
+    store_data,'E_combo',data=['rbspa_bw_E','rbspb_bw_E'],dlim={colors:[2,6]}
+    store_data,'B_combo',data=['rbspa_bw_B','rbspb_bw_B'],dlim={colors:[2,6]}
+    
+    options,'E_combo',yrange=[0.01,30],/ylog,ystyle=1,ytickunits='scientific',ytitle='E!C',ysubtitle='[mV/m]',labels=['RBSPA','RBSPB'],labflag=-1
+    options,'B_combo',yrange=[0.1,300],/ylog,ystyle=1,ytickunits='scientific',ytitle='B!C',ysubtitle='[pT]',labels=['RBSPA','RBSPB'],labflag=-1
+  
+    popen,'/projectnb/burbsp/home/xcshen/chorus_size_fbk/figs/RBSP_FBK_'+strtrim(time_string(trange_sge_sge[0],format=6),1),xsize=8,ysize=10,units=cm,/encapsulated
+    tplot,['Ea_combo','Eb_combo','rbspa_E_powspec_int','rbspb_E_powspec_int','E_combo','Ba_combo','Bb_combo','rbspa_B_powspec_int','rbspb_B_powspec_int','B_combo'],trange=trange_sge_sge
+    ; makepng,!files.fig_dir+'EFW_'+strtrim(time_string(trange[0],format=6),1)
+    pclose
+    
+    spawn,'convert -density 90 -background "#FFFFFF" -flatten '+'/projectnb/burbsp/home/xcshen/chorus_size_fbk/figs/RBSP_FBK_'+strtrim(time_string(trange_sge_sge[0],format=6),1)+'.eps '+'/projectnb/burbsp/home/xcshen/chorus_size_fbk/figs/RBSP_FBK_'+strtrim(time_string(trange_sge_sge[0],format=6),1)+'.png'
+    spawn,'rm -f '+'/projectnb/burbsp/home/xcshen/chorus_size_fbk/figs/RBSP_FBK_'+strtrim(time_string(trange_sge_sge[0],format=6),1)+'.eps'
+    
+    st_out=[st_out,time_string(trange_sge_sge[0])]
+    et_out=[et_out,time_string(trange_sge_sge[1])]
+    cc_bw=[cc_bw,max(cc_b,/nan)]
+    cc_ew=[cc_ew,max(cc_e,/nan)]
+    ratio_b=[ratio_b,max2med_b]
+    ratio_e=[ratio_e,max2med_e]
+    max_b=[max_b,maxb]
+    max_e=[max_e,maxe]
+  endfor
+    
+  return
+END
+
+PRO rbsp_fbk_chorus_size_main,ind=ind
+
+  dir_init
+  plot_init,'ps'
+  
+  ;-----
+  ;Input
+  ;-----
+  file_name='/projectnb/burbsp/home/xcshen/doc/conj_list/sorted/conj_btw_rbspa_rbspb.csv'
+  
+  ;-----
+  ;Output
+  ;-----
+  path_name='/projectnb/burbsp/home/xcshen/chorus_size_fbk/data/data1/'
+
+  
+  res=read_csv(file_name,N_TABLE_HEADER=1)
+  st=res.field1
+  et=res.field2
+ 
+  if defined(ind) then ind_range=[ind,ind] else ind_range=[0,n_elements(st)-1]
+  
+  for ind_conj_list=ind_range[0],ind_range[1] do begin
+    
+     trange_sge=time_double([st[ind_conj_list],et[ind_conj_list]])
+     data_name='RBSP_fbk_cc_'+time_string(trange_sge[1],format=6)+'.csv'
+     ;nplots=round((trange_sge[1]-trange_sge[0])/6.)
+     ;for ind_loop=0,nplots-1 do begin
+     ;  trange_sge_sge=[trange_sge[0]+ind_loop*6.0,trange_sge[0]+(ind_loop+1)*6.0]
+       ;test
+       ;trange_sge_sge=['2016-01-22/07:47','2016-01-22/07:47:06']
+     rbsp_fbk_chorus_size_loop,trange=trange_sge,st_out,et_out,cc_bw,cc_ew,ratio_b,ratio_e,max_b,max_e
+       
+  
+     ;endfor
+     if ~file_test(path_name) then file_mkdir,path_name
+     write_csv,path_name+data_name,st_out,et_out,max_b,ratio_b,cc_bw,max_e,ratio_e,cc_ew,header=['StartTime','EndTime','Max(B)','RatioB','CC|Bw','Max(E)','RatioE','CC|Ew']
+  endfor
+  
+END  
+
+

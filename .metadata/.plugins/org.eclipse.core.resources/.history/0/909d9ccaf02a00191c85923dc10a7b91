@@ -1,0 +1,76 @@
+;+
+;Purpose:
+;    bin data
+;
+;Keywords:
+;      xrange
+;      yrange
+;      xbins
+;      ybins
+;      log
+;      num_shreshold
+;      mode: 'mean','median' ;default is 'mean'
+;      
+;Outputs:
+;      xout
+;      yout
+;      zout        
+;
+;Created by X.C. Shen on Nov 29, 2018
+;
+PRO bin_data,x,y,z,$
+  xrange=xrange,$
+  yrange=yrange,$
+  xbins=xbins,$
+  ybins=ybins,$
+  log=log,$
+  num_shreshold=num_shreshold,$
+  mode=mode,$
+  xout=xout,$
+  yout=yout,$
+  zout=zout,$
+  countout=countout
+
+  if not defined(mode) then mode='mean'
+  
+  if not defined(xbins) then xbins=20
+  if not defined(ybins) then ybins=20
+  if not defined(xrange) then xrange=minmax(x)
+  if not defined(yrange) then yrange=minmax(y)
+  if not defined(num_shreshold) then num_shreshold=10
+
+  if not keyword_set(log) then begin
+    x_dvd=dlinear(xrange[0],xrange[1],xbins+1)
+    y_dvd=dlinear(yrange[0],yrange[1],ybins+1)
+    xout=0.5*(x_dvd[0:-2]+x_dvd[1:-1])
+    yout=0.5*(y_dvd[0:-2]+y_dvd[1:-1])
+  endif else begin
+    x_dvd=10.^dlinear(alog10(xrange[0]),alog10(xrange[1]),xbins+1)
+    y_dvd=10.^dlinear(alog10(xrange[0]),alog10(xrange[1]),xbins+1)
+    xout=sqrt(x_dvd[0:-2]*x_dvd[1:-1])
+    yout=sqrt(y_dvd[0:-2]*y_dvd[1:-1])
+  endelse
+
+  zout=fltarr(n_elements(xout),n_elements(yout))
+  countout=fltarr(n_elements(xout),n_elements(yout))
+  
+  for x_ind=0,xbins-1 do begin
+    
+      for y_ind=0,ybins-1 do begin
+        
+        good_bin=where(x gt x_dvd[x_ind] and x le x_dvd[x_ind+1] and y gt y_dvd[y_ind] and y le y_dvd[y_ind+1],count_num)
+        if x_ind eq 3 and y_ind eq 1 then stop
+        countout[x_ind,y_ind]=count_num
+        
+        if count_num ge num_shreshold then begin
+         case mode of
+            'mean'  : zout[x_ind,y_ind]=mean(z[good_bin],/nan)
+            'median': zout[x_ind,y_ind]=median(z[good_bin])
+          endcase
+        endif else begin
+          zout[x_ind,y_ind]=!values.f_nan
+        endelse  
+      endfor
+  endfor
+  return
+END

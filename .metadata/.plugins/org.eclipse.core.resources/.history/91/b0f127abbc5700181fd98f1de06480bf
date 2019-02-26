@@ -1,0 +1,12 @@
+pro plot_init
+
+device,decompose=0
+
+loadct,49,file='~/colortable/colortable75.tbl'
+!p.font=-1
+!p.background='ffffff'xl
+!p.color=0
+
+tplot_options,'ygap',.5           ; Set gap distance between tplot panels.
+
+end

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Delete resource &apos;IDL_code/auto_find/find_conj_vbasic.pro&apos;" deleteContents="false" description="Delete resource &apos;IDL_code/auto_find/find_conj_vbasic.pro&apos;" element1="/IDL_code/auto_find/find_conj_vbasic.pro" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1541716400953"/>
+</session>

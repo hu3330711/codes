@@ -1,0 +1,333 @@
+;+
+;Purpose:
+;    to record wave parameters
+;    
+;Inputs:
+;    redo: if set files will be overwritten
+;    (removed) revise: if set then calculate back Power density and Bw to an origin value which was devided by band width by mistake
+;    probes: 'rbspa', 'tha', 'mms1'
+;    intensity: 'strong', 'weak'
+
+PRO chorus_parameters_generation_from_cdf,redo=redo,year=year,probes=probes,intensity=intensity
+  
+  probe1=probes[0] & probe2=probes[1]
+  
+  if not keyword_set(redo) then redo=1
+  
+  dir_init
+  plot_init,'ps'
+  
+  if not keyword_set(year) then year='*'
+  
+  cdf_path=!files.fig_dir+'doc/final_data/cdf/flag1/'+intensity+'/'+'*'+'_conj_burst_'+probe1+'_'+probe2+'_'+year+'??????????TO*.cdf'
+  csv_path=!files.fig_dir+'doc/final_data/csv/flag1/'+intensity+'/'
+  files=file_search(cdf_path)  
+  
+;  ;check index
+;  for i=0,n_elements(files)-1 do begin
+;    index=strmid(files[i],55,5)
+;    res=read_csv(!files.doc_dir+'doc/final_data/processed/conj_burst_list_mp_pp_flag_v1.0.csv')
+;    ;flag=res.field5[index]
+;    probe1=res.field1[index]
+;    probe2=res.field2[index]
+;
+;    cdf2tplot,file=files[i]
+;    get_data,probe1+'_burst_Bfac_waveangle_low',data=wna_1
+;    get_data,probe2+'_burst_Bfac_waveangle_low',data=wna_2
+;    get_data,probe1+'_bw_low',data=bw1
+;    get_data,probe2+'_bw_low',data=bw2
+;    good1=finite(wna_1.y)
+;    good2=finite(wna_2.y)
+;    ;print,total(good1)
+;    ;print,total(good2)
+;    
+;    bw_low_1_max=max(bw1.y,/nan)
+;    bw_low_1_uq=median(bw1.y)
+;    bw_low_2_max=max(bw2.y,/nan)    
+;    bw_low_2_uq=median(bw2.y)
+;
+;    if (total(good1) eq 0 and total(good2) eq 0) or $
+;      (bw_low_1_max/bw_low_1_uq lt 5 and bw_low_2_max/bw_low_2_uq lt 5) or $
+;      (bw_low_1_max lt 5 and bw_low_2_max lt 5) then begin
+;      
+;      spawn,'mv '+files[i]+' '+strmid(files[i],0,55)+'weak/'
+;      spawn,'mv '+strmid(files[i],0,45)+'figs/flag1/'+index+'* '+strmid(files[i],0,45)+'figs/flag1/weak/'
+;    endif else begin
+;      
+;      spawn,'mv '+files[i]+' '+strmid(files[i],0,55)+'strong/'
+;      spawn,'mv '+strmid(files[i],0,45)+'figs/flag1/'+index+'* '+strmid(files[i],0,45)+'figs/flag1/strong/'
+;      
+;    endelse
+;    
+;  endfor
+;  stop
+  
+  l_rec_5=[]
+  mlt_rec_5=[]
+  mlat_rec_5=[]
+  dr_rec_5=[]
+  dphi_rec_5=[]
+  dz_rec_5=[]
+  cc_median=[]
+  cc_u_q=[]
+  cc_max=[]
+  cc_80=[]
+  cc_85=[]
+  cc_90=[]
+  cc_95=[]
+  index_rec=[]
+  
+  for ind_files=0,n_elements(files)-1 do begin
+    
+    cdf2tplot,file=files[ind_files]
+    
+    if strmatch(intensity,'strong') then index=strmid(files[ind_files],62,5)
+    if strmatch(intensity,'weak') then index=strmid(files[ind_files],60,5)
+
+    
+    inputs_check=tnames('*bw_up')
+    case strmid(inputs_check[0],0,2) of
+      'rb':probe1=strmid(inputs_check[0],0,5)
+      'mm':probe1=strmid(inputs_check[0],0,4)
+      'th':probe1=strmid(inputs_check[0],0,3)
+    endcase
+    case strmid(inputs_check[1],0,2) of
+      'rb':probe2=strmid(inputs_check[1],0,5)
+      'mm':probe2=strmid(inputs_check[1],0,4)
+      'th':probe2=strmid(inputs_check[1],0,3)
+    endcase
+   
+    get_data,probe1+'_burst_tmp_tvar',data=b1
+    get_data,probe2+'_burst_tmp_tvar',data=b2
+   
+    ;define start time and end time for interpolation
+    start_time=max([b1.x[0],b2.x[0]])
+    end_time=min([b1.x[-1],b2.x[-1]])
+    
+    csv_name='wave_parameters_conj_btw_'+probe1+'_'+probe2+'_'+strtrim(time_string(start_time,format=6))+'TO'+strtrim(time_string(end_time,format=6))+'_v4.0.csv'
+    
+    if not keyword_set(redo) then if file_test(csv_path+csv_name) then continue
+    
+    if start_time ge end_time then begin
+     write_log,files[ind_files]+' burst data error!'
+     continue
+    endif
+   
+    ;to calculate back Power density and Bw to an origin value which was devided by band width by mistake
+    if keyword_set(revise) then begin
+      get_data,probe1+'_burst_tmp_tvar_powspec',data=tmp,dlim=dlim
+      df=tmp.v[1:-1]-tmp.v[0:-2]
+      fre_width=median(df)
+      store_data,probe1+'_burst_tmp_tvar_powspec',data={x:tmp.x,y:tmp.y*fre_width,v:tmp.v},dlim=dlim
+      get_data,probe1+'_bw_up',data=tmp,dlim=dlim
+      store_data,probe1+'_bw_up',data={x:tmp.x,y:tmp.y*sqrt(fre_width)},dlim=dlim
+      get_data,probe1+'_bw_low',data=tmp,dlim=dlim
+      store_data,probe1+'_bw_low',data={x:tmp.x,y:tmp.y*sqrt(fre_width)},dlim=dlim
+      get_data,probe2+'_burst_tmp_tvar_powspec',data=tmp,dlim=dlim
+      df=tmp.v[1:-1]-tmp.v[0:-2]
+      fre_width=median(df)
+      store_data,probe2+'_burst_tmp_tvar_powspec',data={x:tmp.x,y:tmp.y*fre_width,v:tmp.v},dlim=dlim
+      get_data,probe2+'_bw_up',data=tmp,dlim=dlim
+      store_data,probe2+'_bw_up',data={x:tmp.x,y:tmp.y*sqrt(fre_width)},dlim=dlim
+      get_data,probe2+'_bw_low',data=tmp,dlim=dlim
+      store_data,probe2+'_bw_low',data={x:tmp.x,y:tmp.y*sqrt(fre_width)},dlim=dlim
+    endif
+    
+    get_data,probe1+'_fce_eq',data=fce1
+    get_data,probe2+'_fce_eq',data=fce2
+    store_data,probe1+'_fce_eq_half',data={x:fce1.x,y:fce1.y*0.5},dlim={colors:'m',thick:'3',linestyle:'2'}
+    store_data,probe1+'_fce_eq_tenth',data={x:fce1.x,y:fce1.y*0.1},dlim={colors:'m',thick:'3',linestyle:'4'}
+    store_data,probe2+'_fce_eq_half',data={x:fce1.x,y:fce1.y*0.5},dlim={colors:'m',thick:'3',linestyle:'2'}
+    store_data,probe2+'_fce_eq_tenth',data={x:fce1.x,y:fce1.y*0.1},dlim={colors:'m',thick:'3',linestyle:'4'}
+    
+    ;tvar_interpol,tvars=[probe1+'_burst_tmp_tvar',probe2+'_burst_tmp_tvar'],trange=[start_time,end_time],dt=1/8192.,/nan_extrapolate,/overwrite
+    split_vec,probe1+'_burst_tmp_tvar'
+    split_vec,probe2+'_burst_tmp_tvar'
+    
+    get_data,probe1+'_burst_tmp_tvar_x',data=bx_1
+    get_data,probe2+'_burst_tmp_tvar_x',data=bx_2
+ 
+    filter_tvar,probe1+'_burst_tmp_tvar_x',0.5*mean(fce1.y,/NAN),mean(fce1.y,/NAN),newname=probe1+'_burst_tmp_tvar_x_up'
+    filter_tvar,probe2+'_burst_tmp_tvar_x',0.5*mean(fce1.y,/NAN),mean(fce1.y,/NAN),newname=probe2+'_burst_tmp_tvar_x_up'
+    
+    filter_tvar,probe1+'_burst_tmp_tvar_x',0.1*mean(fce1.y,/NAN),0.5*mean(fce1.y,/NAN),newname=probe1+'_burst_tmp_tvar_x_low'
+    filter_tvar,probe2+'_burst_tmp_tvar_x',0.1*mean(fce1.y,/NAN),0.5*mean(fce1.y,/NAN),newname=probe2+'_burst_tmp_tvar_x_low'
+
+    running_cross_correlation, probe1+'_burst_tmp_tvar_x_up',probe2+'_burst_tmp_tvar_x_up',boxpoints=820,shiftpoints=164,prefix='up_'
+    running_cross_correlation, probe1+'_burst_tmp_tvar_x_low',probe2+'_burst_tmp_tvar_x_low',boxpoints=820,shiftpoints=164,prefix='low_'
+   
+    correlation_coefficient,probe1+'_burst_tmp_tvar_x_low',probe2+'_burst_tmp_tvar_x_low',nboxpoints=820.,nshiftpoints=164
+    if not tvar_exist('correlation_coefficient_kullback') then continue
+    tplot_rename,'correlation_coefficient_kullback','correlation_coefficient_kullback_low_waveform'
+    
+    correlation_coefficient,probe1+'_bw_low',probe2+'_bw_low',nboxpoints=10,nshiftpoints=2
+    if not tvar_exist('correlation_coefficient_kullback') then continue
+    tplot_rename,'correlation_coefficient_kullback','correlation_coefficient_kullback_low_bw'
+
+    correlation_coefficient,probe1+'_bw_low',probe2+'_bw_low',nboxpoints=10,nshiftpoints=2
+    if not tvar_exist('correlation_coefficient_pearson') then continue
+    tplot_rename,'correlation_coefficient_pearson','correlation_coefficient_pearson_low_bw'
+    
+    options,'*_burst_tmp_tvar_powspec',/ylog,/zlog,yrange=[100,4000],zrange=[1e-12,1e-5],ystyle=1
+    ;options,'*3d',spec=1,yrange=[-0.002,0.002]
+ 
+    tvars_save=[$
+      probe1+'_bw_up',probe1+'_bw_low',probe1+'_burst_Bfac_waveangle_up',probe1+'_burst_Bfac_waveangle_low',$
+      probe2+'_bw_up',probe2+'_bw_low',probe2+'_burst_Bfac_waveangle_up',probe2+'_burst_Bfac_waveangle_low',$
+      probe1+'_L',probe1+'_MLT',probe1+'_MLAT',probe2+'_L',probe2+'_MLT',probe2+'_MLAT',probe1+'_rotmat',probe2+'_rotmat',$
+      probe1+'_pos_gsm',probe2+'_pos_gsm','up_cross_correlation','low_cross_correlation',$
+      'correlation_coefficient_kullback_low_waveform','correlation_coefficient_kullback_low_bw','correlation_coefficient_pearson_low_bw']  
+    
+    get_data,'correlation_coefficient_kullback_low_bw',data=d_for_time
+    trange_final=minmax(d_for_time.x)
+      
+    tvar_interpol,tvars=tvars_save,trange=trange_final,dt=1./50,/nan_extrapolate,/overwrite
+    
+    if not tvar_exist('time_reference') then begin
+      write_log,index+': time not enough for interpolation'
+      continue
+    endif
+    
+    dif_data,probe1+'_pos_gsm',probe2+'_pos_gsm',newname='dif_pos'
+    get_data,probe1+'_MLAT',data=mlat1
+    get_data,probe2+'_MLAT',data=mlat2
+    get_data,probe1+'_rotmat',data=rmat1
+    get_data,probe2+'_rotmat',data=rmat2
+    get_data,probe1+'_L',data=l1
+    get_data,probe2+'_L',data=l2
+    get_data,probe1+'_MLT',data=mlt1
+    get_data,probe2+'_MLT',data=mlt2
+    get_data,'up_cross_correlation',data=cc_up
+    get_data,'low_cross_correlation',data=cc_low
+;    get_data,'correlation_coefficient_kullback_low_waveform',data=cc_kb_wf
+;    get_data,'correlation_coefficient_kullback_low_bw',data=cc_kb_bw
+;    get_data,'correlation_coefficient_pearson_low_bw',data=cc_ps_bw
+    get_data,probe1+'_bw_up',data=bw_up1
+    get_data,probe2+'_bw_up',data=bw_up2
+    get_data,probe1+'_bw_low',data=bw_low1
+    get_data,probe2+'_bw_low',data=bw_low2
+    get_data,probe1+'_burst_Bfac_waveangle_up',data=wna_up1_2pi
+    get_data,probe2+'_burst_Bfac_waveangle_up',data=wna_up2_2pi
+    get_data,probe1+'_burst_Bfac_waveangle_low',data=wna_low1_2pi
+    get_data,probe2+'_burst_Bfac_waveangle_low',data=wna_low2_2pi
+    wna_up1_deg=wna_up1_2pi.y*180./!pi
+    wna_up2_deg=wna_up2_2pi.y*180./!pi
+    wna_low1_deg=wna_low1_2pi.y*180./!pi
+    wna_low2_deg=wna_low2_2pi.y*180./!pi
+
+    store_data,probe1+'_burst_Bfac_waveangle_deg_up',data={x:wna_up1_2pi.x,y:wna_up1_deg}
+    store_data,probe2+'_burst_Bfac_waveangle_up',data={x:wna_up2_2pi.x,y:wna_up2_deg}
+    store_data,probe1+'_burst_Bfac_waveangle_low',data={x:wna_low1_2pi.x,y:wna_low1_deg}
+    store_data,probe2+'_burst_Bfac_waveangle_low',data={x:wna_low2_2pi.x,y:wna_low2_deg}
+    
+    rmat1.y[where(abs(rmat1.y) gt abs(rmat2.y))]=rmat2.y[where(abs(rmat1.y) gt abs(rmat2.y))]
+    store_data,'rotmat',data=rmat1
+    tvector_rotate,'rotmat', 'dif_pos', newname = 'dif_pos_fac'
+    split_vec,'dif_pos_fac'
+    
+    get_data,'dif_pos_fac_x',data=dr
+    get_data,'dif_pos_fac_y',data=dphi
+    get_data,'dif_pos_fac_z',data=dz
+    get_data,'time_reference',data=flag
+    intensity_flag='level0'
+    ;record data per conjunction
+    
+
+    if max(bw_low1.y,/nan) lt 5 and max(bw_low2.y,/nan) lt 5 then begin
+      write_log,index+': less than 5 pT'
+      continue
+    endif  
+    
+    weak_point=where((bw_low1.y lt 2.*median(bw_low1.y)) and (bw_low2.y le 2.*median(bw_low2.y)))
+    cc_low_mark=cc_low
+    cc_low_mark.y[weak_point]=!values.f_nan
+    
+    good_cc=finite(cc_low_mark.y)
+    if total(good_cc) eq 0 then begin
+      write_log,index+': no clear lower band wave'
+      continue
+    endif
+    
+    cc_rec=percentiles(cc_low_mark.y,value=[0.5,0.75,0.8,0.85,0.9,0.95,1],/nan)
+    if abs(mean(mlat1.y)) le abs(mean(mlat2.y)) then begin
+      l_rec_5=[l_rec_5,mean(l1.y,/nan)]
+      mlt_rec_5=[mlt_rec_5,mean(mlt1.y)]
+      mlat_rec_5=[mlat_rec_5,mean(mlat1.y)]
+    endif else begin
+      l_rec_5=[l_rec_5,mean(l2.y,/nan)]
+      mlt_rec_5=[mlt_rec_5,mean(mlt2.y)]
+      mlat_rec_5=[mlat_rec_5,mean(mlat2.y)]
+    endelse
+
+    dr_rec_5=[dr_rec_5,mean(dr.y,/nan)]
+    dphi_rec_5=[dphi_rec_5,mean(dphi.y)]
+    dz_rec_5=[dz_rec_5,mean(dz.y)]
+    cc_median=[cc_median,cc_rec[0]]
+    cc_u_q=[cc_u_q,cc_rec[1]]
+    cc_80=[cc_80,cc_rec[2]]
+    cc_85=[cc_85,cc_rec[3]]
+    cc_90=[cc_90,cc_rec[4]]
+    cc_95=[cc_95,cc_rec[5]]
+    cc_max=[cc_max,cc_rec[6]]
+    
+    
+    index_rec=[index_rec,index]
+    
+    store_data,'low_cross_correlation_mark',data=cc_low_mark
+    options,'low_cross_correlation_mark',thick=1,psym=2
+    
+    store_data,'intensity_flag',data=flag
+    store_data,probe1+'_powspec_combo',data=[probe1+'_burst_tmp_tvar_powspec',probe1+'_fce_eq',probe1+'_fce_eq_half',probe1+'_fce_eq_tenth']
+    store_data,probe2+'_powspec_combo',data=[probe2+'_burst_tmp_tvar_powspec',probe2+'_fce_eq',probe2+'_fce_eq_half',probe2+'_fce_eq_tenth']
+    store_data,'bw_up_combo',data=[probe1+'_bw_up',probe2+'_bw_up']
+    store_data,'bw_low_combo',data=[probe1+'_bw_low',probe2+'_bw_low']
+    store_data,'wna_up_combo',data=[probe1+'_burst_Bfac_waveangle_up',probe2+'_burst_Bfac_waveangle_up']
+    store_data,'wna_low_combo',data=[probe1+'_burst_Bfac_waveangle_low',probe2+'_burst_Bfac_waveangle_low']
+    store_data,'cc_combo',data=['low_cross_correlation','low_cross_correlation_mark']
+    options,'intensity_flag',psym=2,symsize=1,thick=1,color=6,panel_size=0.5,yrange=[0,4],ystyle=1,ytitle='Flag!IIntensity!N!C'
+    options,'*fce*',color=200,thick=3
+    options,'*_powspec_combo',yrange=[1e2,4e3],ystyle=1,ylog=1,zlog=1,zrange=[1e-11,1e-4],ytickunits='scientific',ztickunits='scientific',ytitle='Frequency!C',ysubtitle='[Hz]',ztitle='[(nT)!E2!N/Hz]'
+    options,'bw_up_combo',labels=[probe1,probe2],colors=[2,6],labflag=-1,ytitle='Bw_up!C',ysubtitle='[pT]',panel_size=0.7,/ynozero
+    options,'bw_low_combo',labels=[probe1,probe2],colors=[2,6],labflag=-1,ytitle='Bw_low!C',ysubtitle='[pT]',panel_size=0.7,/ynozero
+    options,'wna_up_combo',labels=[probe1,probe2],colors=[2,6],labflag=-1,ytitle='WNA_up!C',ysubtitle='[deg]',panel_size=0.7,yrange=[0,90],ystyle=1,ytickinterval=30
+    options,'wna_low_combo',labels=[probe1,probe2],colors=[2,6],labflag=-1,ytitle='WNA_low!C',ysubtitle='[deg]',panel_size=0.7,yrange=[0,90],ystyle=1,ytickinterval=30
+    options,'cc_combo',panel_size=0.7,yrange=[0,1],ystyle=1,ytitle='Pearson C.C.!C',ytickinterval=0.25,colors=[1,2],labels=['Lower WF','Intense Bw'],labflag=-1,xticklen=1,yticklen=1,xgridstyle=1,ygridstyle=1
+    options,'correlation_coefficient_kullback_low_waveform',ytitle='Kullback WF!C',panel_size=0.75
+    options,'correlation_coefficient_kullback_low_bw',ytitle='Kullback Bw!C',panel_size=0.75
+    options,probe1+'_L',ytitle='L!E'+probe1
+    options,probe2+'_L',ytitle='L!E'+probe2
+    options,probe1+'_MLT',ytitle='MLT'
+    options,probe2+'_MLT',ytitle='MLT'
+    options,probe1+'_MLAT',ytitle='MLAT'
+    options,probe2+'_MLAT',ytitle='MLAT'
+
+    tplot_options,'title',strupcase(probe1)+'&'+strupcase(probe2)+': dr='+strtrim(round(mean(abs(dr.y),/nan)),1)+' dphi='+strtrim(round(mean(abs(dphi.y),/nan)),1)+' dz='+strtrim(round(mean(abs(dz.y),/nan)),1)+' km cc: '+strmid(strtrim(cc_rec[0],1),0,4)+' '+strmid(strtrim(cc_rec[1],1),0,4)+' '+strmid(strtrim(cc_rec[6],1),0,4)
+    
+    fig_name_eps=!files.fig_dir+'doc/final_data/figs/flag1/'+intensity+'/cc/eps/'+index+'_conj_burst_'+probe1+'_'+probe2+'_'+strtrim(time_string(start_time,format=6),1)+'TO'+strtrim(time_string(end_time,format=6),1)+'_v3.0'
+    fig_name_png=!files.fig_dir+'doc/final_data/figs/flag1/'+intensity+'/cc/png/'+index+'_conj_burst_'+probe1+'_'+probe2+'_'+strtrim(time_string(start_time,format=6),1)+'TO'+strtrim(time_string(end_time,format=6),1)+'_v3.0'
+
+    popen,fig_name_eps,xsize=8,ysize=10,units=cm,/encapsulated
+   ; tplot,[probe1+'_powspec_combo',probe2+'_powspec_combo','bw_up_combo','bw_low_combo','wna_up_combo','wna_low_combo','cc_combo'],$
+   ;   var_label=[probe2+'_MLAT',probe1+'_MLAT',probe2+'_MLT',probe1+'_MLT',probe2+'_L',probe1+'_L'],$
+   ;   trange=[start_time,end_time]
+   ; pclose 
+    tplot,[probe1+'_powspec_combo',probe2+'_powspec_combo','bw_low_combo','wna_low_combo','cc_combo','correlation_coefficient_kullback_low_waveform','correlation_coefficient_kullback_low_bw'],$
+      var_label=[probe2+'_MLAT',probe1+'_MLAT',probe2+'_MLT',probe1+'_MLT',probe2+'_L',probe1+'_L'],$
+      trange=trange_final
+    timebar,2.*median(bw_low1.y),varname='bw_low_combo',/databar,color=2,thick=2,linestyle=3
+    timebar,2.*median(bw_low2.y),varname='bw_low_combo',/databar,color=6,thick=1,linestyle=2      
+    pclose
+    
+    spawn,'convert -density 90 -background "#FFFFFF" -flatten '+fig_name_eps+'.eps '+fig_name_png+'.png'
+    
+    ;write_csv_rs,csv_path+intensity_flag+'_'+csv_name,mlat1.x,bw_up1.y,bw_up2.y,bw_low1.y,bw_low2.y,wna_up1_deg,wna_up2_deg,wna_low1_deg,wna_low2_deg,$
+    ;  l1.y,l2.y,mlt1.y,mlt2.y,mlat1.y,mlat2.y,dr.y,dphi.y,dz.y,cc_up.y,cc_low.y,cc_kb_wf.y,cc_kb_bw.y,cc_ps_bw.y
+    del_data,'*'
+  endfor
+  
+  csv_name=csv_path+year+'_lb_chorus_'+probe1+'_'+probe2+'_cc.csv'
+  
+  write_csv_rs,csv_name,$
+    index_rec,l_rec_5,mlt_rec_5,mlat_rec_5,dr_rec_5,dphi_rec_5,dz_rec_5,cc_median,cc_u_q,cc_80,cc_85,cc_90,cc_95,cc_max,header=['Index','L','MLT','MLAT','dr','dphi','dz','cc_50','cc_75','cc_80','cc_85','cc_90','cc_95','cc_100']
+
+END  

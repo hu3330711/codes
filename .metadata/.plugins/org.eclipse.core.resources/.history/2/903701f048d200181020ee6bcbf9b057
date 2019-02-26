@@ -1,0 +1,250 @@
+;;;;;;;----a code to output chorus wave amplitude of lower-band and
+;;;;;;;----upper-band chorus from fff data to compare with CRRES
+;;;;;;;----results
+
+;; pro compare_output, expect, calc, prefix,fmt
+;; 	e = STRCOMPRESS(STRING(expect,format=fmt),/REMOVE_ALL)
+;; 	c = STRCOMPRESS(STRING(calc,format=fmt),/REMOVE_ALL)
+;; 	if e eq c then correct='Ok' else correct='*** discrepancy ***'
+;; 	print,prefix,c,'         | ',e,'      | ',correct
+;; return
+;; end
+
+;;;bmodel='OP_quiet', 'T05', 'T89', or 'T96'
+pro lstar_cal_loop,sc=sc,t1=t1,bmodel=bmodel
+
+;; lib_name='/small/moonli/onera_desp_lib_4.2/onera_desp_lib_linux_x86_64.so'
+lib_name='/data1/small/moonli/IRBEM-4.4.0/onera_desp_lib_linux_x86_64.so'
+
+thm_init
+del_data,'*'
+
+timespan,t1,1,/day
+tr1=time_string(t1)
+tr2=time_string(t1+24*3600.)
+tst=time_struct(t1)
+year=tst.year
+month=tst.month
+day=tst.date
+get_timespan,t
+
+tsec1=t[0] & tsec2=t[1]
+
+lwidth='1'
+
+if sc eq 'a' then scn=1
+if sc eq 'b' then scn=2
+if sc eq 'c' then scn=3
+if sc eq 'd' then scn=4
+if sc eq 'e' then scn=5
+
+year_st=string(strn(year-2000),format='(I02)')
+month_st=string(strn(month),format='(I02)')
+day_st=string(strn(day),format='(I02)')
+date=year_st+month_st+day_st
+
+;; load_Lstar,probe=sc
+;; ;;;---------load AE index and interpolate---------------------------
+;; tr1_p12=time_double(tr1)-3*3600.
+;; timespan,time_string(tr1_p12),24*3600.+3*3600.,/sec
+
+;; kyoto_load_ae
+;; get_data,'kyoto_ae',data=ddae
+;; nae=size(ddae.x)
+
+;; AE_1h=dblarr(nae[1])
+;; AE_1h[0]=ddae.y[0]
+;; AE_3hmax=AE_1h
+;; iae=long(1)
+;; repeat begin
+;; if (iae le 60 and iae gt 0) then begin
+;; AE_1h[iae]=mean(ddae.y[0:iae-1])
+;; endif else begin
+;; AE_1h[iae]=mean(ddae.y[iae-60:iae-1])
+;; endelse
+;; iae=iae+1
+;; endrep until (iae eq nae[1])
+;; store_data,'AE_mean1h',data={x:ddae.x,y:AE_1h}
+;; ;tinterpol_mxn,'AE_mean_1h',eflux_esa_name,newname='kyoto_ae_int'
+;; ;get_data,'kyoto_ae_int',data=dae
+
+;; iae=long(1)
+;; repeat begin
+;; if (iae le 180 and iae gt 0) then begin
+;; AE_3hmax[iae]=max(ddae.y[0:iae-1])
+;; endif else begin
+;; AE_3hmax[iae]=max(ddae.y[iae-180:iae-1])
+;; endelse
+;; iae=iae+1
+;; endrep until (iae eq nae[1])
+;; store_data,'AE_max3h',data={x:ddae.x,y:AE_3hmax}
+
+timespan,tr1,tsec2-tsec1,/sec
+load_kpap,/clip
+
+;;;;;;;----------load position data--------------
+variable_state=strjoin('th'+sc+'_state_pos_sm')
+thm_load_state,probe=sc,/get_support_data,trange=[tr1,tr2]
+thm_cotrans,probe=sc,datatype='state_pos',out_coord='sm',out_suffix='_sm'
+mlt_l_lat,variable_state,MLT0=MLT0,L0=L0,lat0=lat0
+get_data,variable_state,data=data_state
+time_s=data_state.x
+
+store_data,'MLT',data={x:time_s,y:MLT0}
+store_data,'L',data={x:time_s,y:L0}
+store_data,'LAT',data={x:time_s,y:lat0*180./!pi}
+
+variable_lat='LAT'
+variable_L='L'
+
+get_data,'MLT',data=dMLT
+get_data,'L',data=dL
+get_data,'LAT',data=dLAT
+
+omni_load,median=1,/noplot,/init
+
+time_clip,'SYM_H',tr1,tr2
+time_clip,'Vx',tr1,tr2
+time_clip,'Pressure',tr1,tr2
+time_clip,'BY_GSM',tr1,tr2
+time_clip,'BZ_GSM',tr1,tr2
+
+get_data,'Vx_tclip',data=dvx0
+vx1=dvx0.y
+interp_gap,dvx0.x,vx1
+store_data,'Vx_r',data={x:dvx0.x,y:vx1}
+
+get_data,'Pressure_tclip',data=dp0
+p1=dp0.y
+interp_gap,dp0.x,p1
+store_data,'P_r',data={x:dp0.x,y:p1}
+
+get_data,'BY_GSM_tclip',data=dby0
+by1=dby0.y
+interp_gap,dby0.x,by1
+store_data,'BY_r',data={x:dby0.x,y:by1}
+
+get_data,'BZ_GSM_tclip',data=dbz0
+bz1=dbz0.y
+interp_gap,dbz0.x,bz1
+store_data,'BZ_r',data={x:dbz0.x,y:bz1}
+
+tinterpol_mxn,'kp_unsigned',variable_state,newname='kp_unsigned_int'
+get_data,'kp_unsigned_int',data=dkp
+get_data,variable_state,data=dpos
+
+;; tinterpol_mxn,'kyoto_ae',variable_state,newname='kyoto_ae_int'
+;; tinterpol_mxn,'AE_mean1h',variable_state,newname='AE_mean1h_int'
+;; tinterpol_mxn,'AE_max3h',variable_state,newname='AE_max3h_int'
+;; get_data,'kyoto_ae_int',data=dae
+;; get_data,'AE_mean1h_int',data=dae_mean1h
+;; get_data,'AE_max3h_int',data=dae_max3h
+
+tinterpol_mxn,'SYM_H',variable_state,newname='SYMH_int'
+tinterpol_mxn,'P_r',variable_state,newname='P_int'
+tinterpol_mxn,'BY_r',variable_state,newname='BY_int'
+tinterpol_mxn,'BZ_r',variable_state,newname='BZ_int'
+
+get_data,'SYMH_int',data=ddst
+get_data,'P_int',data=dp
+get_data,'BY_int',data=dby
+get_data,'BZ_int',data=dbz
+
+;;;;;;;;;;;------compute L using onera library---------
+tst=time_struct(time_s)
+
+year=tst.year
+month=tst.month
+day=tst.date
+doy=tst.doy
+sod=tst.sod
+hour=tst.hour
+minute=tst.min
+second=tst.sec
+
+ntime=long(n_elements(time_s))
+nn=ntime
+if bmodel eq 'T96' then kext = 7l
+if bmodel eq 'T89' then kext = 4l
+if bmodel eq 'OP_quiet' then kext = 5l
+if bmodel eq 'T05' then kext = 11l
+;; kext=7l;T96
+;; kext=4l;T89
+;; kext=5l;OP quiet
+options=lonarr(5)
+options[0]=1l
+options[1]=0l
+options[2]=0l
+sysaxes=4l
+
+iyear=lonarr(nn)
+iyear=long(year)
+idoy=lonarr(nn)
+idoy=long(doy)
+UT=dblarr(nn)
+UT=sod
+
+R0=6371.
+
+x1=dblarr(nn)
+x1=double(dpos.y[*,0]/R0)
+x2=dblarr(nn)
+x2=double(dpos.y[*,1]/R0)
+x3=dblarr(nn)
+x3=double(dpos.y[*,2]/R0)
+
+maginput=dblarr(25,nn)
+maginput[0,*]=double(dkp.y)
+maginput[1,*]=double(ddst.y)
+maginput[4,*]=double(dp.y)
+maginput[5,*]=double(dby.y)
+maginput[6,*]=double(dbz.y)
+
+Lm=dblarr(nn)
+Lstar=dblarr(nn)
+Blocal=dblarr(nn)
+Bmin=Lm
+XJ=Lm
+MLT=Lm
+
+;; stop
+print,'start calculating'
+
+result = call_external(lib_name, 'make_lstar_',$
+ntime,kext,options,sysaxes,iyear,idoy,ut, x1,x2,x3,$
+maginput,Lm,Lstar,Blocal,Bmin,XJ,MLT, /f_value)
+
+store_data,strjoin('th'+sc+'_Lm'),data={x:time_s,y:Lm},dlim={colors:'m',labels:'Lm'}
+store_data,strjoin('th'+sc+'_Lstar_W'),data={x:time_s,y:Lstar},dlim={colors:'b',labels:'Lstar'}
+options,strjoin('th'+sc+'_Lstar_W'),psym=1
+store_data,strjoin('th'+sc+'_Ls'),data=[strjoin('th'+sc+'_Lstar_W'),strjoin('th'+sc+'_Lstar'),'L',strjoin('th'+sc+'_Lm')]
+ylim,strjoin('th'+sc+'_Ls'),0,12,0
+store_data,strjoin('th'+sc+'_MLT_W'),data={x:time_s,y:MLT},dlim={colors:'b',labels:'MLT_W'}
+
+;; options,strjoin('th'+sc+'_Ls'),panel_size=2
+tplot_options,title='th'+sc
+tplot_options,'charsize',1.3
+
+;; tplot,[strjoin('th'+sc+'_Ls'),'SYM_H','Vx_r','P_r','BY_r','BZ_r']
+tplot,[strjoin('th'+sc+'_Ls')];,strjoin('th'+sc+'_Lm')]
+tlimit,[tr1,tr2]
+tplot,var_label=['MLT','L','LAT']
+
+
+figurename='/data1/small/moonli/themis/Lstar/Lstar_Wen/figure/'+bmodel+'/Lstar_'+date+'_th'+sc
+makepng, figurename
+
+;; tplot_save,strjoin('th'+sc+'_Lstar'),filename=strjoin('/small/moonli/data/Lstar_Wen/T96/Lstar_'+date+'_th'+sc)
+
+;;;;-----write to files-----
+filename_ascii='/data1/small/moonli/themis/Lstar/Lstar_Wen/data/'+bmodel+'/th'+sc+'/20'+year_st+'/th'+sc+'-Lstar-20'+date+'.dat'
+openw,/get_lun,lun,filename_ascii,width=250
+for i=0l,n_elements(time_s)-1 do begin
+printf,lun,format='(1i13,1i3,2e12.2)',$
+time_s[i],scn,Lstar[i],Lm[i]
+endfor
+close,lun
+free_lun,lun
+
+
+end

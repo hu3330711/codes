@@ -1,0 +1,457 @@
+
+pro command_history_juno
+
+dir_init
+plot_init,'ps'
+
+
+dataset=0  ; 0 loading original data, 1 loading saved data
+
+for num=0,31 do begin
+
+case num of 
+  
+  0:begin
+    trange=['2017-05-19/06:35','2017-05-19/06:55']
+    
+    tflag=trange
+    tflag2=tflag
+    end
+
+  1:begin
+    trange=['2016-08-27/12:00','2016-08-27/12:40']
+    trange=['2016-08-27/12:05','2016-08-27/12:25']
+ 
+    tflag=['2016-08-27/12:15','2016-08-27/12:20']
+    tflag2=tflag
+    end
+  2:begin
+    trange=['2016-08-27/13:00','2016-08-27/13:40']
+    trange=['2016-08-27/13:15','2016-08-27/13:30']
+
+    tflag=['2016-08-27/13:20','2016-08-27/13:24']
+    tflag2=tflag
+    end
+  3:begin
+    trange=['2016-12-11/16:00','2016-12-11/17:00']
+    trange=['2016-12-11/16:20','2016-12-11/16:35']
+
+    tflag=['2016-12-11/16:26','2016-12-11/16:33']
+    tflag2=tflag
+    end
+  4:begin
+    trange=['2016-12-11/17:00','2016-12-11/18:00']
+    trange=['2016-12-11/17:25','2016-12-11/17:40']
+
+    tflag=['2016-12-11/17:30','2016-12-11/17:34']
+    tflag2=tflag
+    end
+    
+  5:begin
+    trange=['2017-02-02/12:00','2017-02-02/13:00']
+    trange=['2017-02-02/12:20','2017-02-02/12:35']
+
+    tflag=['2017-02-02/12:27','2017-02-02/12:32']
+    tflag2=tflag
+    end
+    
+
+
+    
+  6:begin
+    trange=['2017-02-02/13:10','2017-02-02/14:10']
+    trange=['2017-02-02/13:25','2017-02-02/13:40']
+
+    tflag=['2017-02-02/13:29','2017-02-02/13:37']
+    tflag2=tflag
+    end
+    
+  7:begin
+    trange=['2017-03-27/07:50','2017-03-27/08:50']
+    trange=['2017-03-27/08:25','2017-03-27/08:40']
+
+    tflag=['2017-03-27/08:33','2017-03-27/08:36']
+    tflag2=tflag
+    end
+  8:begin
+    trange=['2017-03-27/09:00','2017-03-27/10:00']
+    trange=['2017-03-27/09:25','2017-03-27/09:40']
+
+    tflag=['2017-03-27/09:30','2017-03-27/09:37']
+    tflag2=tflag
+    end
+    
+   
+  9:begin
+    trange=['2017-05-19/05:10','2017-05-19/06:10']
+    trange=['2017-05-19/05:25','2017-05-19/05:45']
+    tflag=['2017-05-19/05:32','2017-05-19/05:40']
+    tflag2=tflag
+    end
+    
+  10:begin
+     trange=['2017-07-11/01:15','2017-07-11/01:30']
+     tflag=['2017-07-11/01:18:20','2017-07-11/01:25:20']
+     tflag2=['2017-07-11/01:23:30','2017-07-11/01:25:20']
+     end
+  11:begin
+     trange=['2017-07-11/02:20','2017-07-11/02:35']
+     tflag=['2017-07-11/02:22','2017-07-11/02:25:10']
+     tflag2=tflag
+     end
+  12:begin
+     trange=['2017-09-01/21:10','2017-09-01/21:25']
+     tflag=['2017-09-01/21:20','2017-09-01/21:24']
+     tflag2=tflag
+     end
+  13:begin
+     trange=['2017-09-01/22:15','2017-09-01/22:35']
+     tflag=['2017-09-01/22:19','2017-09-01/22:23']
+     tflag2=tflag
+     end
+  14:begin
+     trange=['2017-10-24/17:15','2017-10-24/17:30']
+     tflag=['2017-10-24/17:21','2017-10-24/17:25']
+     tflag2=tflag
+     end
+     
+  
+  
+  15:begin
+     trange=['2017-10-24/18:15','2017-10-24/18:30']
+     tflag=['2017-10-24/18:21','2017-10-24/18:28']
+     tflag2=tflag
+     end
+  16:begin
+     trange=['2017-12-16/17:20','2017-12-16/17:40']
+     tflag=['2017-12-16/17:29','2017-12-16/17:33:15']
+     tflag2=['2017-12-16/17:32','2017-12-16/17:33:15']
+     end
+  17:begin
+     trange=['2017-12-16/18:30','2017-12-16/18:40']
+     tflag=['2017-12-16/18:30:10','2017-12-16/18:36']
+     tflag2=['2017-12-16/18:30:10','2017-12-16/18:32:20']
+     end
+  18:begin
+     trange=['2018-02-07/13:25','2018-02-07/13:40']
+     tflag=['2018-02-07/13:33','2018-02-07/13:36']
+     tflag2=tflag
+     end
+  19:begin
+     trange=['2018-02-07/14:30','2018-02-07/14:50']
+     tflag=['2018-02-07/14:32','2018-02-07/14:42']
+     tflag2=tflag
+     end
+     
+
+  20:begin
+     trange=['2018-04-01/09:05','2018-04-01/09:25']
+     tflag=['2018-04-01/09:13','2018-04-01/09:22']
+     tflag2=tflag
+     end
+  21:begin
+     trange=['2018-04-01/10:25','2018-04-01/10:45']
+     tflag=['2018-04-01/10:28','2018-04-01/10:38']
+     tflag2=tflag
+     end
+  22:begin
+     trange=['2018-05-24/05:00','2018-05-24/05:20']
+     tflag=['2018-05-24/05:10','2018-05-24/05:15']
+     tflag2=tflag
+     end
+  23:begin
+     trange=['2018-05-24/06:05','2018-05-24/06:20']
+     tflag=['2018-05-24/06:11','2018-05-24/06:16']
+     tflag2=['2018-05-24/06:11','2018-05-24/06:12:45']
+     end
+  24:begin
+     trange=['2018-07-16/04:40','2018-07-16/04:55']
+     tflag=['2018-07-16/04:45','2018-07-16/04:51']
+     tflag2=tflag
+     end
+  25:begin
+     trange=['2018-07-16/05:50','2018-07-16/06:10']
+     tflag=['2018-07-16/05:53','2018-07-16/06:07'] 
+     tflag2=['2018-07-16/05:53','2018-07-16/05:58']
+     end
+  26:begin
+     trange=['2018-09-07/00:35','2018-09-07/00:55']
+     tflag=['2018-09-07/00:44','2018-09-07/00:50']
+     tflag2=tflag
+     end
+  27:begin
+     trange=['2018-09-07/01:40','2018-09-07/02:00']
+     tflag=['2018-09-07/01:44','2018-09-07/01:52'] ;redo
+     tflag2=tflag
+     end
+  28:begin
+     trange=['2018-10-29/20:40','2018-10-29/20:50']
+     tflag=['2018-10-29/20:46:30','2018-10-29/20:50'];redo
+     tflag2=tflag
+     end
+  29:begin
+     trange=['2018-10-29/21:40','2018-10-29/22:00']
+     tflag=['2018-10-29/21:46','2018-10-29/21:52']
+     tflag2=tflag
+     end
+  30:begin
+     trange=['2018-12-21/16:30','2018-12-21/16:50']
+     tflag=['2018-12-21/16:35','2018-12-21/16:46']
+     tflag2=tflag
+     end
+  31:begin
+     trange=['2018-12-21/17:45','2018-12-21/18:05'] 
+     tflag=['2018-12-21/17:48','2018-12-21/18:00']
+     tflag2=tflag
+     end
+     
+     ;10:begin
+       ;trange=['2017-05-19/06:10','2017-05-19/07:10']
+       ;tflag=['2017-05-19/06:39','2017-05-19/06:50']
+     ;end
+endcase
+
+;tflag=['2017-02-02/12:00','2017-02-02/14:10']
+;trange=tflag
+;trange=['2016-10-19','2016-10-20'] ;no data
+
+yy=strmid(trange[0],2,2)
+mm=strmid(trange[0],5,2)
+dd=strmid(trange[0],8,2)
+
+yymmdd_doy_conv,long(yy+mm+dd),doy_num
+doy_st=string(doy_num,format='(i3.3)')
+
+ephemeris_load,trange=trange
+juno_foot_load,yy,doy_st
+get_jade_proton,trange=trange
+get_jedi_proton,trange=trange
+;get_jedi_proton_hr,trange=trange
+
+if dataset eq 0 then begin
+
+
+  get_juno_b0,trange=trange
+  ;get_juno_wave_b,trange=trange,df=df
+  waves_survey_b_load,yy,mm,dd,df=df
+  waves_survey_e_load,yy,mm,dd,/time_interpol,df_el=dfel
+  
+  ;;; Load JEDI
+  filename=file_search('/projectnb/burbsp/big/SATELLITE/Juno/JEDI_Flux_binned_QM/tplot_20'+yy+doy_st, $
+    'eFlux_JEDI_JSOC_20'+yy+doy_st+'.tplot',/fold_case,count=exist_jedi)
+  if exist_jedi ne 0 then tplot_restore,filenames=filename[exist_jedi-1] else print,'Warning: No JEDI e data!'
+  get_data,'eFlux_JEDI_JSOC_SpinAverage',data=d
+  JEDI_data_names=['eFlux_JEDI_JSOC_E05','eFlux_JEDI_JSOC_E08','eFlux_JEDI_JSOC_E11','eFlux_JEDI_JSOC_E14',$
+    'eFlux_JEDI_JSOC_E18','eFlux_JEDI_JSOC_E22','eFlux_JEDI_JSOC_SpinAverage']
+  if exist_jedi ge 1 then begin
+    if n_elements(d.v) lt 10 then $
+      jEDI_data_names=['eFlux_JEDI_JSOC_E02','eFlux_JEDI_JSOC_E03','eFlux_JEDI_JSOC_E04','eFlux_JEDI_JSOC_E05',$
+      'eFlux_JEDI_JSOC_E06','eFlux_JEDI_JSOC_E07','eFlux_JEDI_JSOC_SpinAverage']
+  endif
+  
+  ;;; Load JADE
+  jade_eflux_sav_frederic,yy,doy_st,exist=exist_jade
+  if exist_jade eq 0 then begin
+    filename=file_search('/projectnb/burbsp/big/SATELLITE/Juno/JADE_Flux_binned_QM/tplot_20'+yy+doy_st, $
+      'eFlux_JADE_JSOC_20'+yy+doy_st+'.tplot',/fold_case,count=exist_jade)
+    if exist_jade ne 0 then tplot_restore,filenames=filename[exist_jade-1] else print,'Warning: No JADE e data!'
+    jade_data_names=['eFlux_JADE_JSOC_E04','eFlux_JADE_JSOC_E12','eFlux_JADE_JSOC_E20','eFlux_JADE_JSOC_E30',$
+      'eFlux_JADE_JSOC_E44','eFlux_JADE_JSOC_E50','eFlux_JADE_JSOC_SpinAverage']
+  endif else begin
+    jade_data_names=['eFlux_JADE_Frederic_E04','eFlux_JADE_Frederic_E12','eFlux_JADE_Frederic_E20','eFlux_JADE_Frederic_E30',$
+      'eFlux_JADE_Frederic_E44','eFlux_JADE_Frederic_E50','eFlux_JADE_Frederic_SpinAverage']
+  endelse
+  
+  tvar_interpol,tvars=['MShell_JRM09CS','LocalTime_Jovicentric','Lon_Jovicentric','IoPhase_Jovicentric','MLat_Jovicentric','Ew_LFR_LO','Bw_survey'],target='fcp',/overwrite,/nan_extrapolate
+  get_data,'fcp',data=fcp
+  get_data,'MShell_JRM09CS',data=L
+  get_data,'LocalTime_Jovicentric',data=localtime
+  get_data,'Lon_Jovicentric',data=lon
+  get_data,'IoPhase_Jovicentric',data=iophase
+  get_data,'MLat_Jovicentric',data=mlat
+  get_data,'Ew_LFR_LO',data=wave_e
+  get_data,'Bw_survey',data=wave_b
+
+  good_t=where(fcp.x ge time_double(tflag[0]) and fcp.x le time_double(tflag[1]))
+ 
+  time=fcp.x[good_t]
+  data_fcp=fcp.y[good_t]
+  data_l=l.y[good_t]
+  data_lt=localtime.y[good_t]
+  data_lon=lon.y[good_t]
+  data_iophase=iophase.y[good_t]
+  data_mlat=mlat.y[good_t]
+  data_wave_e=wave_e.y[good_t,*]
+  data_wave_b=wave_b.y[good_t,*]
+
+  data_ew=fltarr(n_elements(data_wave_e[*,0]))
+  data_bw=fltarr(n_elements(data_wave_b[*,0]))
+  for ind_num=0,n_elements(data_wave_e[*,0])-1 do begin
+    good_f=where(wave_e.v ge data_fcp[ind_num])
+    data_ew[ind_num]=sqrt(total(data_wave_e[ind_num,good_f]*dfel[good_f]))
+    good_f=where(wave_b.v ge data_fcp[ind_num])
+    data_bw[ind_num]=sqrt(total(data_wave_b[ind_num,good_f]*df[good_f]))
+  endfor
+
+  store_data,'Bw_above_fcp',data={x:time,y:data_bw}
+  store_data,'Ew_above_fcp',data={x:time,y:data_ew}
+  options,'Ew_LFR_HI_combo',zrange=[1e-15,1e-9],ytickunits='scientific'
+  options,'Ew_LFR_LO_combo',zrange=[1e-14,1e-4],ytickunits='scientific'
+  zlim,'eFlux_JEDI_JSOC_SpinAverage',2e0,1e6
+  options,'?w_above_fcp',/ylog
+
+
+  popen,!files.doc_dir+'figs/juno/survey_plot/version1/'+time_string(trange[0],format=6,prec=-2)+'_juno_overview_v1',xsize=9,ysize=11,units=cm,/encapsulated
+  tplot,['eFlux_JEDI_JSOC_SpinAverage','eFlux_JADE_Frederic_SpinAverage','Ew_LFR_HI_combo','Ew_LFR_LO_combo','Ew_above_fcp','Bw_survey_combo','Bw_above_fcp'],$
+    var_label=['IoPhase_Jovicentric','Lon_Jovicentric','MLat_Jovicentric','LocalTime_Jovicentric','MShell_JRM09CS','R_RJ_Jovicentric'],trange=trange
+  timebar,tflag[0],color=6,linestyle=2,thick=1
+  timebar,tflag[1],color=6,linestyle=2,thick=1
+  pclose
+
+  write_csv_rs,!files.doc_dir+'juno/version1/'+time_string(trange[0],format=6,prec=-2)+'_juno_wave_above_fcp_v1',$
+    time_string(time),data_l,data_lt,data_mlat,data_lon,data_iophase,data_bw,data_ew,$
+    HEADER=['Time','L','LT','MLat','Lon','Iophase','Bw','Ew']
+    
+    
+  good_t=where(fcp.x ge time_double(tflag2[0]) and fcp.x le time_double(tflag2[1]))
+
+  time=fcp.x[good_t]
+  data_fcp=fcp.y[good_t]
+  data_l=l.y[good_t]
+  data_lt=localtime.y[good_t]
+  data_lon=lon.y[good_t]
+  data_iophase=iophase.y[good_t]
+  data_mlat=mlat.y[good_t]
+  data_wave_e=wave_e.y[good_t,*]
+  data_wave_b=wave_b.y[good_t,*]
+
+  data_ew=fltarr(n_elements(data_wave_e[*,0]))
+  data_bw=fltarr(n_elements(data_wave_b[*,0]))
+  for ind_num=0,n_elements(data_wave_e[*,0])-1 do begin
+    good_f=where(wave_e.v ge data_fcp[ind_num])
+    data_ew[ind_num]=sqrt(total(data_wave_e[ind_num,good_f]*dfel[good_f]))
+    good_f=where(wave_b.v ge data_fcp[ind_num])
+    data_bw[ind_num]=sqrt(total(data_wave_b[ind_num,good_f]*df[good_f]))
+  endfor
+
+  store_data,'Bw_above_fcp',data={x:time,y:data_bw}
+  store_data,'Ew_above_fcp',data={x:time,y:data_ew}  
+  store_data,'BwEw_combo',data=['Ew_above_fcp','Bw_above_fcp']
+  options,'BwEw_combo',ylog=1,yrange=[1e-5,1e1],colors=[0,6],labels=['Ew','Bw'],ytickunits='scientific',labflag=-1
+  options,'Ew_above_fcp',color=0
+  options,'Bw_above_fcp',color=6
+  options,'JADE_ion_counts',zrange=[1e0,1e6]
+  zlim,'JEDI_ion_flux_SA',3e0,3e5
+  options,'eFlux_JEDI_JSOC_SpinAverage',ytitle='JEDI eFlux!C',ysubtitle='E [keV]'
+  options,'eFlux_JADE_Frederic_SpinAverage',ytitle='JADE eFlux!C',ysubtitle='E [eV]'
+  options,'Ew_LFR_HI_combo',ytitle='LFR HI!C',ysubtitle='f [Hz]'
+  options,'Ew_LFR_LO_combo',ytitle='LFR LO!C',ysubtitle='f [Hz]'
+  options,'Bw_survey_combo',ytitle='Bw!C',ysubtitle='f [Hz]'
+  options,'BwEw_combo',ytitle='Bw&Ew!C',ysubtitle='[nT, V/m]'
+  zlim,'JEDI_ion_hr_flux_SA',1e3,1e7
+  
+  if ~file_test(!files.doc_dir+'figs/juno/survey_plot/version4') then file_mkdir,!files.doc_dir+'figs/juno/survey_plot/version4'
+  popen,!files.doc_dir+'figs/juno/survey_plot/version4/'+time_string(trange[0],format=6,prec=-2)+'_juno_overview_v4',xsize=8.5,ysize=11,units=cm,/encapsulated
+  tplot,['JEDI_ion_flux_SA','JADE_ion_counts','eFlux_JEDI_JSOC_SpinAverage','eFlux_JADE_Frederic_SpinAverage','Ew_LFR_HI_combo','Ew_LFR_LO_combo','Bw_survey_combo','BwEw_combo'],$
+    var_label=['IoPhase_Jovicentric','Lon_Jovicentric','MLat_Jovicentric','LocalTime_Jovicentric','MShell_JRM09CS','R_RJ_Jovicentric'],trange=trange
+  timebar,tflag2[0],color=6,linestyle=2,thick=1
+  timebar,tflag2[1],color=6,linestyle=2,thick=1
+  pclose
+
+  write_csv_rs,!files.doc_dir+'juno/version2/'+time_string(trange[0],format=6,prec=-2)+'_juno_wave_above_fcp_v2',$
+    time_string(time),data_l,data_lt,data_mlat,data_lon,data_iophase,data_bw,data_ew,$
+    HEADER=['Time','L','LT','MLat','Lon','Iophase','Bw','Ew']
+ 
+
+endif else begin
+  cdf2tplot,!files.doc_dir+'juno/data_'+time_string(trange[0],format=6,prec=-2)+'.cdf'
+
+  tvar_interpol,tvars=['R_RJ_Jovicentric','MShell_JRM09CS','LocalTime_Jovicentric','Lon_Jovicentric','IoPhase_Jovicentric','MLat_Jovicentric','fcp','Bw_survey'],target='Ew_LFR_LO',/overwrite,/nan_extrapolate
+ 
+  options,'Bw_survey',ztitle='Bw!C!C[nT!u2!n/Hz]',spec=1,ylog=1,ytitle='Frequency!C',ysubtitle='[Hz]',ytickunits='scientific'
+  store_data,'Bw_survey_combo',data=['Bw_survey','fce','fcp','fLH']
+  ylim,'Bw_survey_combo',5e1,2e4,1
+  zlim,'Bw_survey_combo',1e-11,1e-2,1
+  options,'Ew_LFR_LO',ztitle='Ew!C!C[(V/m)!u2!n/Hz]',spec=1,ylog=1,ytitle='Frequency!C',ysubtitle='[Hz]',ytickunit='scientific'
+  store_data,'Ew_LFR_LO_combo',data=['Ew_LFR_LO','fce','fcp','fLH']
+  options,'Ew_LFR_LO_combo',ytitle='Ew_LFR_LO!C',yrange=[50,2e4],/ylog,/zlog
+  zlim,'Ew_LFR_LO_combo',1e-13,1e-4,1
+  get_data,'fcp',data=fcp
+  get_data,'MShell_JRM09CS',data=L
+  get_data,'LocalTime_Jovicentric',data=localtime
+  get_data,'Lon_Jovicentric',data=lon
+  get_data,'IoPhase_Jovicentric',data=iophase
+  get_data,'MLat_Jovicentric',data=mlat
+  get_data,'Ew_LFR_LO',data=wave_e
+  get_data,'Bw_survey',data=wave_b
+  get_data,'Bw_above_fcp',data=bw
+  get_data,'Ew_above_fcp',data=ew
+  get_data,'R_RJ_Jovicentric',data=rj
+
+  good_t=where(fcp.x ge time_double(tflag2[0]) and fcp.x le time_double(tflag2[1]))
+
+  time=fcp.x[good_t]
+  data_fcp=fcp.y[good_t]
+  data_l=l.y[good_t]
+  data_lt=localtime.y[good_t]
+  data_lon=lon.y[good_t]
+  data_iophase=iophase.y[good_t]
+  data_mlat=mlat.y[good_t]
+  data_wave_e=wave_e.y[good_t,*]
+  data_wave_b=wave_b.y[good_t,*]
+  data_bw=bw.y[good_t]
+  data_ew=ew.y[good_t]
+  data_rj=rj.y[good_t]
+  
+  outline=n_elements(time)
+  res_out=dblarr(10,outline)
+  
+  res_out[0,*]=time_double(time)
+  res_out[1,*]=data_l
+  res_out[2,*]=data_lt
+  res_out[3,*]=data_mlat
+  res_out[4,*]=data_lon
+  res_out[5,*]=data_iophase
+  res_out[6,*]=data_bw
+  res_out[7,*]=data_ew
+ ; res_out[8:50,*]=transpose(data_wave_b)
+ ; res_out[51:93,*]=transpose(data_wave_e)
+  res_out[8,*]=data_fcp
+  res_out[9,*]=data_rj
+
+  options,'?w_above_fcp',/ylog,ytickunits='scientific'
+  
+  options,'eFlux_JEDI_JSOC_SpinAverage',yrange=[20,1e3],/ylog,/zlog,zrange=[1e1,1e6],ystyle=1,zstyle=1,ytickunits='scientific',ztickunits='scientific',ytitle='eFlux JEDI!C',ysubtitle='[keV]',ztitle='eflux'
+  options,'eFlux_JADE_Frederic_SpinAverage',yrange=[1e2,1e5],/ylog,/zlog,zrange=[1e5,1e9],ystyle=1,zstyle=1,ytickunits='scientific',ztickunits='scientific',ytitle='eFlux JADE!C',ysubtitle='[eV]',ztitle='eflux'
+  options,'Ew_LFR_HI_combo',yrange=[2e4,2e5],zrange=[1e-15,1e-9],ystyle=1,zstyle=1,ytickunits='scientific',ztickunits='scientific'
+  options,'Ew_LFR_LO_combo',yrange=[50,2e4],zrange=[1e-13,1e-4],ystyle=1,zstyle=1,ytickunits='scientific',ztickunits='scientific'
+
+  options,'fcp',linestyle=3,color=200,thick=2
+  options,'fLH',linestyle=2,color=200,thick=2
+  options,'fce',linestyle=0,color=200,thick=2
+  options,'Ew_above_fcp',ytitle='Ew!C',ysubtitle='[V/m]'
+  options,'Bw_above_fcp',ytitle='Ew!C',ysubtitle='[nT]'
+  store_data,'BwEw_combo',data=['Ew_above_fcp','Bw_above_fcp']
+  options,'BwEw_combo',ylog=1,yrange=[1e-5,1e1],colors=[2,6],labels=['Ew','Bw']
+  options,'Ew_above_fcp',color=2
+  options,'Bw_above_fcp',color=6
+  popen,!files.doc_dir+'figs/juno/survey_plot/version3/'+time_string(trange[0],format=6,prec=-2)+'_juno_overview_v3',xsize=9,ysize=11,units=cm,/encapsulated
+  tplot,['eFlux_JEDI_JSOC_SpinAverage','eFlux_JADE_Frederic_SpinAverage','Ew_LFR_HI_combo','Ew_LFR_LO_combo','Bw_survey_combo','BwEw_combo'],$
+    var_label=['IoPhase_Jovicentric','Lon_Jovicentric','MLat_Jovicentric','LocalTime_Jovicentric','MShell_JRM09CS','R_RJ_Jovicentric'],trange=trange
+  timebar,tflag2[0],color=6,linestyle=2,thick=1
+  timebar,tflag2[1],color=6,linestyle=2,thick=1
+  pclose
+
+;store_data,'test',data=data={x:time_double('2010-01-01')+res_out[],y:transpose(wave_b),v:freq}
+ ; write_csv_rs,!files.doc_dir+'juno/version2/v3_'+time_string(trange[0],format=6,prec=-2)+'_juno_wave_above_fcp',$
+ ;   res_out
+  
+    
+endelse
+
+
+endfor
+ 
+;tplot2cdf,filename=!files.doc_dir+'juno/data_'+time_string(trange[0],format=6,prec=-2),tvars=['eFlux_JEDI_JSOC_SpinAverage','eFlux_JADE_Frederic_SpinAverage','Ew_above_fcp','Bw_above_fcp','Bw_survey','Ew_LFR_LO','Ew_LFR_HI','fce','fcp','fLH'],/default
+
+end

@@ -1,0 +1,156 @@
+
+for case_ind=2,2 do begin
+  case case_ind of
+    0:type='large_scale'
+    1:type='small_scale'
+    2:type='xlarge_scale'
+  endcase
+
+  ;cd,'/Users/shenxc/Dropbox/eventlist/Conj_RBSP/Sat_Conj_excel/duration_10min/'+type+''
+  dir_init
+  cd,!files.doc_dir+'doc/conj_list/raw/'
+  
+  for num=3,5 do begin
+    
+  
+  CASE num OF
+    0: begin
+      probe1='mms?'
+      probe2='mms?'
+    end
+    1: begin
+      probe1='mms?'
+      probe2='rbsp?'
+    end
+    2: begin
+      probe1='th?'
+      probe2='mms?'
+    end
+    3: begin
+      probe1='th?'
+      probe2='rbsp?'
+    end
+    4: begin
+      probe1='rbsp?'
+      probe2='rbsp?'
+    end
+    5: begin
+      probe1='th?'
+      probe2='th?'
+    end    
+          
+  ENDCASE
+  
+  ;test
+  probe1='tha' & probe2='rbspa'
+  
+  files=file_search('conj_btw_'+probe1+'_'+probe2+'_*.csv',count=count)
+  if count eq 0 then continue
+  
+    mlatst=[] & mlatet=[]
+    mlat_la=[] & mlat_mlta=[] & mlat_mlata=[]
+    mlat_lb=[] & mlat_mltb=[] & mlat_mlatb=[] 
+    mlat_dl=[] & mlat_dmlt=[] & mlat_dmlat=[]
+    mlat_dr=[] & mlat_dphi=[] & mlat_dz=[]
+    flag=[]
+    
+    for i=0, n_elements(files)-1 do begin
+      res=read_csv(files[i])
+      if n_elements(tag_names(res)) eq 1 then continue
+      mlatst=[mlatst,res.field01] & mlatet=[mlatet,res.field02] & mlat_la=[mlat_la,res.field03] & mlat_mlta=[mlat_mlta,res.field04] & mlat_mlata=[mlat_mlata,res.field05] & mlat_lb=[mlat_lb,res.field06]
+      mlat_mltb=[mlat_mltb,res.field07] & mlat_mlatb=[mlat_mlatb,res.field08] & mlat_dl=[mlat_dl,res.field09] & mlat_dmlt=[mlat_dmlt,res.field10] & mlat_dmlat=[mlat_dmlat,res.field11] & mlat_dr=[mlat_dr,res.field12]  & mlat_dphi=[mlat_dphi,res.field13]  & mlat_dz=[mlat_dz,res.field14]  & flag=[flag,res.field15]
+    endfor
+  
+  stop
+ ;  write_csv_rs,'/Users/shenxc/Dropbox/eventlist/Conj_RBSP/Sat_Conj_excel/duration_10min/'+type+'/new/conj_btw_'+probe1+'_'+probe2+'.csv',time_string(mlatst),time_string(mlatet),mlat_la,mlat_mlta,mlat_mlata,mlat_lb,mlat_mltb,mlat_mlatb,mlat_dl,mlat_dmlt,mlat_dmlat,$
+ ;   HEADER=['StartTime','EndTime','La','MLTa','MLATa','Lb','MLTb','MLATb','dL','dMLT','dMLAT']
+ ;;   
+ ;  file_delete,files
+ 
+   dt=time_double(mlatet)-time_double(mlatst)
+   ;print,total(dt)/60.
+  ; L=findgen(25)/5.+2
+  ; MLAT=findgen(24)
+   ;plot,mlat_la,mlat_mlta,psym=8,yrange=[0,24],ystyle=1,ytickinterval=4,xtitle='L',ytitle='MLT',title='Small Scale'
+   check=where(dt gt 15.*60)
+   print,dt(check)/60.
+   good=where(dt le 15.*60)
+   mlatst=mlatst[good]
+   mlatet=mlatet[good]
+   dt=dt[good]
+   
+   mlat_la=mlat_la[good]
+   mlat_mlta=mlat_mlta[good]
+ 
+   combine=strmid(probe1,0,2)+strmid(probe2,0,2)
+   CASE combine OF
+     'mmmm': psym=1
+     'mmrb': psym=2
+     'thrb': psym=9
+     'thmm': psym=5
+     'rbrb': psym=15
+     'thth': psym=7
+   ENDCASE
+  
+   CASE type OF
+     'xlarge_scale': color=0
+     'large_scale': color=2
+     'small_scale': color=6
+   ENDCASE
+   
+   if combine eq 'thrb' and type eq 'xlarge_scale' then begin
+     ;plot_init,'ps'
+     dir_init
+     popen,!files.fig_dir+'_multisate_data_distribution',xsize=9,ysize=9,units=cm,/encapsulated
+     cgPlot, mlat_la, mlat_mlta/24*2*!pi, /Polar, XStyle=5, YStyle=5, $
+       /NoData, Aspect=1.0, XRange=[-15, 15], YRange=[-15, 15], $
+       Position=[0.025, 0.025, 0.975, 0.975]
+  
+  ;   ; Draw axes through the center of the plot.
+  ;   cgAxis, /XAxis, 0, 0, XRange=[-15, 15], XStyle=1
+  ;   cgAxis, /YAxis, 0, 0, YRange=[-15, 15], YStyle=1
+  ;   
+  ;   ;add four circle
+  ;    A = FINDGEN(100) * (!PI*2/99.)
+  ;    cgPlot,cos(A), sin(A), Color=0, /Overplot
+  ;    cgPlot,5*cos(A), 5*sin(A), Color=0, /Overplot,linestyle=1
+  ;    cgPlot,10*cos(A), 10*sin(A), Color=0, /Overplot,linestyle=1
+  ;    cgPlot,15*cos(A), 15*sin(A), Color=0, /Overplot,linestyle=1
+          
+   endif
+  
+   ; Plot the data.
+   bad=where(flag eq 0)
+   mlat_la_b=mlat_la[bad]
+   mlat_mlta_b=mlat_mlta[bad]
+
+   good=where(flag eq 1)
+   mlat_la_g=mlat_la[good]
+   mlat_mlta_g=mlat_mlta[good]
+      
+   cgPlot,mlat_la_b, mlat_mlta_b/24*2*!pi, PSym=psym, Color=color, /Overplot, /Polar
+   cgPlot,mlat_la_g, mlat_mlta_g/24*2*!pi, PSym=psym, Color=6, /Overplot, /Polar
+   
+   print,combine
+   print,type
+   
+   endfor
+ endfor
+
+ cgLegend, Title=['RBSP-THEMIS','RBSP-RBSP','THEMIS-THEMIS'], PSym=[9,15,7],$
+    Color=[0,0,0], Location=[0, 1], $
+       Length=0.0, VSpace=2.0, /Box, /Background, BG_Color='Snow'
+     ; Draw axes through the center of the plot.
+     cgAxis, /XAxis, 0, 0, XRange=[-15, 15], XStyle=1
+     cgAxis, /YAxis, 0, 0, YRange=[-15, 15], YStyle=1
+
+     ;add four circle
+     A = FINDGEN(100) * (!PI*2/99.)
+     cgPlot,cos(A), sin(A), Color=0, /Overplot
+     cgPlot,5*cos(A), 5*sin(A), Color=0, /Overplot,linestyle=1
+     cgPlot,10*cos(A), 10*sin(A), Color=0, /Overplot,linestyle=1
+     cgPlot,15*cos(A), 15*sin(A), Color=0, /Overplot,linestyle=1
+        pclose   
+   stop 
+ cakeplot, dt,mlat_la,mlat_mlta
+END

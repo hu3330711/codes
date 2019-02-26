@@ -1,0 +1,15 @@
+CHROMACODING_VALUES=true
+IDLDT_COMMAND_LINE_CONFIRM_RESET=always
+IDLDT_VALUES=true
+IDL_DEVICE=X
+IDL_DLM_PATH=/project/burbsp/small/QM/library/IDL/NASA_CDF_Patch_IDL8.6\:<IDL_DEFAULT>\:+/project/burbsp/small/QM/library/IDL/icy/\:+/usr/postdoc/shenxc/idldlm/idl_geopack_105/
+IDL_GR_TILECACHESIZE=0
+IDL_PATH=+/share/pkg/envi/5.4/install/envi54/idl86/idlde/plugins\:+/share/pkg/envi/5.4/install/envi54/idl86/examples\:+/share/pkg/envi/5.4/install/envi54/idl86/lib\:+~/IDLWorkspace/\:+~/IDLWorkspace/\:+/projectnb/burbsp/home/xcshen/Project_M/code/Default/
+IDL_PATH_CACHE_DISABLE=0
+IDL_QUIET=0
+IDL_VALUES=true
+MACROS_FLOATING_TOOLBAR_HEIGHT=36
+MACROS_FLOATING_TOOLBAR_WIDTH=36
+MACROS_FLOATING_TOOLBAR_X=0
+coolItemsOrder=org.eclipse.ui.workbench.file\:com.rsi.idldt.ui.textedit.toolbar\:com.rsi.idldt.ui.toolbar.debugTools
+eclipse.preferences.version=1

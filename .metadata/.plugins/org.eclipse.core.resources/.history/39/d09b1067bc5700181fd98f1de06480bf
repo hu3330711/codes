@@ -1,0 +1,11 @@
+pro plot_init
+
+device,decompose=0
+loadct,39
+!p.font=-1
+!p.background='ffffff'xl
+!p.color=0
+
+tplot_options,'ygap',.5           ; Set gap distance between tplot panels.
+
+end

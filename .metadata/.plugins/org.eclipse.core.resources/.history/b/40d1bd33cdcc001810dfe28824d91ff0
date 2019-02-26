@@ -1,0 +1,56 @@
+PRO get_themis_location,probe=probe,trange=trange,facmat=facmat
+
+  thm_load_state, probe = probe, coord = 'gsm', trange = trange, suffix = '_gsm_coordinates'
+  cotrans,'th'+probe+'_state_pos_gsm_coordinates','th'+probe+'_state_pos_sm_coordinates',/GSM2SM
+  
+  get_data, strjoin('th'+probe+'_state_pos_sm_coordinates'), data = tmp
+  If(is_struct(tmp) Eq 0) Then Begin
+    dprint, 'Missing: '+'th'+probe+'_state_pos_sm_coordinates'
+    return
+  Endif
+  
+;  ttrace2equator,strjoin('th'+probe+'_state_pos_sm_coordinates'),newname='efoot_geo',external_model='t89',par=1.0D,/km,$
+;    in_coord='sm',out_coord='geo'
+;  xyz_to_polar,'efoot_geo'
+;  tkm2re,'efoot_geo_mag'
+;  tplot_rename,'efoot_geo_mag_re','th'+probe+'_L'
+
+  get_data, strjoin('th'+probe+'_state_pos_gsm_coordinates'), data = d, dlimits=dl
+  data = transpose( [[d.x],[d.y]] )
+  
+  ;Get l-shell value
+  shells = calculate_lshell(data)
+  
+  ;Store data
+  store_data, 'th'+probe+'_L', data = {x:d.x ,y:shells/6371. }
+  
+  tkm2re,'th'+probe+'_state_pos_gsm_coordinates'
+  tplot_rename,'th'+probe+'_state_pos_gsm_coordinates_re','th'+probe+'_pos_gsm'
+  
+  options,'th'+probe+'_L',ytitle='L'
+  
+  store_data, 'th'+probe+'_R', data = {x:tmp.x, y:sqrt(tmp.y[*, 0]^2+tmp.y[*, 1]^2+tmp.y[*, 2]^2)/6371.}, $
+    dlim = {colors:[0], labels:['R'],ysubtitle:'(km)', labflag:1, constant:0, ytitle:'R'}
+  MLT = atan(tmp.y[*, 1]/tmp.y[*, 0])*180/!pi/15.+12
+  if(n_elements(where(tmp.y[*, 0] lt 0)) gt 1) then MLT[where(tmp.y[*, 0] lt 0)] = $
+    (atan(tmp.y[where(tmp.y[*, 0] lt 0), 1]/tmp.y[where(tmp.y[*, 0] lt 0), 0])+!pi)*180/!pi/15.+12
+  if(n_elements(where(MLT[*] gt 24)) gt 1) then MLT[where(MLT[*] ge 24)] = MLT[where(MLT[*] ge 24)]-24
+  store_data, 'th'+probe+'_MLT', data = {x:tmp.x, y:MLT}, $
+    dlim = {colors:[0], labels:['MLT'], ysubtitle:'[km]', labflag:1, constant:0, ytitle:'MLT'}
+  MLAT = atan(tmp.y[*, 2]/sqrt(tmp.y[*, 0]^2+tmp.y[*, 1]^2))*180/!pi
+  store_data, 'th'+probe+'_MLAT', data = {x:tmp.x, y:MLAT}, $
+    dlim = {colors:[0], labels:['MLAT'], ysubtitle:'[deg]', labflag:1, constant:0, ytitle:'MLAT'}
+    
+  if keyword_set(facmat) then begin
+    ;Load Data
+    thm_load_state,probe=probe, coord='gei',/get_support_data,trange=trange
+    thm_load_fgm, probe=probe, trange=trange, coord=['gsm'], datatype=['fgs'], level=2,  /cal_spin_harmonics, /cal_dac_offset, /cal_tone_removal
+    get_themis_b0,probe=probe,trange=trange
+     
+    ;compute the DC magnetic field using ? minute smoothing window
+    
+    tsmooth2, 'th'+probe+'_fgs_gsm', 20.*8, newname='th'+probe+'_fgs_gsm_dc'
+    fac_matrix_make, 'th'+probe+'_fgs_gsm_dc', other_dim='Rgeo', pos_var_name='th'+probe+'_state_pos',newname = 'th'+probe+'_rotmat'
+  endif  
+    
+END    

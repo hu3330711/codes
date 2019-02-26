@@ -1,0 +1,78 @@
+dir_init
+!p.charsize=1.6
+
+files=file_search(!files.doc_dir+'juno/*_juno_wave_above_fcp',count=count)
+
+if count eq 0 then stop
+
+time=[] & mshell=[]
+localtime=[] & mlat=[] & lon=[]
+iophase=[] & bw=[] & ew=[]
+
+
+
+for i=0, n_elements(files)-1 do begin
+  res=read_csv(files[i],N_TABLE_HEADER=1)
+  if n_elements(tag_names(res)) eq 1 then continue
+  time=[time,res.field1] & mshell=[mshell,res.field2] & localtime=[localtime,res.field3] & mlat=[mlat,res.field4] & lon=[lon,res.field5] & iophase=[iophase,res.field6]
+  bw=[bw,res.field7] & ew=[ew,res.field8]
+endfor
+
+
+popen,!files.doc_dir+'figs/Juno_wave_stat_result_IoPhase_MShell',xsize=8,ysize=10,units=cm,/encapsulated
+  bin_data,iophase,mshell,alog10(bw),xout=xout,yout=yout,zout=zout,countout=countout,xbins=36,ybins=20,xrange=[0,360],yrange=[2,22],num_shreshold=1
+  bin_plot,xout,yout,zout,ct=72,reverse=1,ytitle='M shell',ztitle='log10(Bw)',$
+    position=[0.2,0.68,0.8,0.98],xtickinterval=90,xtickformat='(A1)',aspect=0.7
+  bin_data,iophase,mshell,alog10(ew),xout=xout,yout=yout,zout=zout,countout=countout,xbins=36,ybins=20,xrange=[0,360],yrange=[2,22],num_shreshold=1
+  bin_plot,xout,yout,zout,ct=72,reverse=1,ytitle='M shell',ztitle='log10(Ew)',$
+    position=[0.2,0.38,0.8,0.68],xtickinterval=90,/noerase,xtickformat='(A1)',aspect=0.7
+  bin_plot,xout,yout,alog10(countout),ct=71,reverse=1,xtitle='Io Phase [deg]',ytitle='M shell',ztitle='log10(# of Samples)',$
+    position=[0.2,0.08,0.8,0.38],/noerase,xtickinterval=90,aspect=0.7
+pclose
+
+
+popen,!files.doc_dir+'figs/Juno_wave_stat_result_MLT_MShell',xsize=8,ysize=10,units=cm,/encapsulated
+  bin_data,localtime,mshell,alog10(bw),xout=xout,yout=yout,zout=zout,countout=countout,xbins=36,ybins=20,xrange=[0,24],yrange=[2,22],num_shreshold=1
+  bin_plot,xout,yout,zout,ct=72,reverse=1,ytitle='M Shell',ztitle='log10(Bw)',$
+    position=[0.2,0.68,0.8,0.98],xtickformat='(A1)',xtickinterval=6,aspect=0.7
+  bin_data,localtime,mshell,alog10(ew),xout=xout,yout=yout,zout=zout,countout=countout,xbins=36,ybins=20,xrange=[0,24],yrange=[2,24],num_shreshold=1
+  bin_plot,xout,yout,zout,ct=72,reverse=1,ytitle='M Shell',ztitle='log10(Ew)',$
+    position=[0.2,0.38,0.8,0.68],/noerase,xtickformat='(A1)',xtickinterval=6,aspect=0.7
+  bin_plot,xout,yout,alog10(countout),ct=71,reverse=1,xtitle='MLT [hour]',ytitle='M Shell',ztitle='log10(# of Samples)',$
+    position=[0.2,0.08,0.8,0.38],/noerase,xtickinterval=6,aspect=0.7
+pclose
+
+popen,!files.doc_dir+'figs/Juno_wave_stat_result_Lon_MShell',xsize=8,ysize=10,units=cm,/encapsulated
+bin_data,lon,mshell,alog10(bw),xout=xout,yout=yout,zout=zout,countout=countout,xbins=36,ybins=20,xrange=[0,360],yrange=[2,22],num_shreshold=1
+bin_plot,xout,yout,zout,ct=72,reverse=1,ytitle='M Shell',ztitle='log10(Bw)',$
+  position=[0.2,0.68,0.8,0.98],xtickformat='(A1)',xtickinterval=90,aspect=0.7
+bin_data,lon,mshell,alog10(ew),xout=xout,yout=yout,zout=zout,countout=countout,xbins=36,ybins=20,xrange=[0,360],yrange=[2,24],num_shreshold=1
+bin_plot,xout,yout,zout,ct=72,reverse=1,ytitle='M Shell',ztitle='log10(Ew)',$
+  position=[0.2,0.38,0.8,0.68],/noerase,xtickformat='(A1)',xtickinterval=90,aspect=0.7
+bin_plot,xout,yout,alog10(countout),ct=71,reverse=1,xtitle='Longitude [deg]',ytitle='M Shell',ztitle='log10(# of Samples)',$
+  position=[0.2,0.08,0.8,0.38],/noerase,xtickinterval=90,aspect=0.7
+pclose
+
+popen,!files.doc_dir+'figs/Juno_wave_stat_result_IoPhase_MLT',xsize=8,ysize=10,units=cm,/encapsulated
+  bin_data,iophase,localtime,alog10(bw),xout=xout,yout=yout,zout=zout,countout=countout,xbins=36,ybins=24,xrange=[0,360],yrange=[0,24],num_shreshold=1
+  bin_plot,xout,yout,zout,ct=72,reverse=1,ytitle='MLT [hour]',ztitle='log10(Bw)',$
+    position=[0.2,0.68,0.8,0.98],xtickinterval=90,yticlinterval=6,xtickformat='(A1)',aspect=0.7
+  bin_data,iophase,localtime,alog10(ew),xout=xout,yout=yout,zout=zout,countout=countout,xbins=36,ybins=24,xrange=[0,360],yrange=[0,24],num_shreshold=1
+  bin_plot,xout,yout,zout,ct=72,reverse=1,ytitle='MLT [hour]',ztitle='log10(Ew)',$
+    position=[0.2,0.38,0.8,0.68],xtickinterval=90,yticlinterval=6,/noerase,xtickformat='(A1)',aspect=0.7
+  bin_plot,xout,yout,alog10(countout),ct=71,reverse=1,xtitle='Io Phase [deg]',ytitle='MLT [hour]',ztitle='log10(# of Samples)',$
+    position=[0.2,0.08,0.8,0.38],/noerase,xtickinterval=90,yticlinterval=6,aspect=0.7
+pclose
+
+popen,!files.doc_dir+'figs/Juno_wave_stat_result_MShell_MLat',xsize=8,ysize=10,units=cm,/encapsulated
+bin_data,mshell,mlat,alog10(bw),xout=xout,yout=yout,zout=zout,countout=countout,xbins=40,ybins=18,xrange=[2,22],yrange=[-90,90],num_shreshold=1
+bin_plot,xout,yout,zout,ct=72,reverse=1,ytitle='M Shell',ztitle='log10(Bw)',$
+  position=[0.2,0.68,0.8,0.98],xtickformat='(A1)',ytickinterval=45,aspect=0.7
+bin_data,mshell,mlat,alog10(ew),xout=xout,yout=yout,zout=zout,countout=countout,xbins=40,ybins=18,xrange=[2,22],yrange=[-90,90],num_shreshold=1
+bin_plot,xout,yout,zout,ct=72,reverse=1,ytitle='M Shell',ztitle='log10(Ew)',$
+  position=[0.2,0.38,0.8,0.68],/noerase,xtickformat='(A1)',ytickinterval=45,aspect=0.7
+bin_plot,xout,yout,alog10(countout),ct=71,reverse=1,xtitle='MLT [hour]',ytitle='M Shell',ztitle='log10(# of Samples)',$
+  position=[0.2,0.08,0.8,0.38],/noerase,ytickinterval=45,aspect=0.7
+pclose
+
+end

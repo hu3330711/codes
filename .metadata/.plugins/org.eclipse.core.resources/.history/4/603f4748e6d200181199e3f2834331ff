@@ -1,0 +1,106 @@
+;
+;Generate a time list that is included in both list-A and list-B
+
+
+
+
+PRO cross_btw_two_list,st1=st1,et1=et1,st2=st2,et2=et2,outst=outst,outet=outet,err=err
+err=0
+good_st_tmp=[]
+good_et_tmp=[]
+tmp_st1=time_double(st1) & tmp_et1=time_double(et1)
+tmp_st2=time_double(st2) & tmp_et2=time_double(et2)
+
+ind_tmp=sort(tmp_st1) 
+tmp_st1=tmp_st1[ind_tmp] & tmp_et1=tmp_et1[ind_tmp]
+ind_tmp=sort(tmp_st2) 
+tmp_st2=tmp_st2[ind_tmp] & tmp_et2=tmp_et2[ind_tmp]
+
+for index_num=0,n_elements(tmp_st1)-1 do begin
+  ;TYPE A
+  ;--------1111111111------------
+  ;-------------1111111111-------
+  good=where(tmp_st2 ge tmp_st1[index_num] and tmp_st2 lt tmp_et1[index_num] and tmp_et2 ge tmp_et1[index_num],count)
+  if count gt 1 then stop
+  if count eq 1 then begin
+    good_st_tmp=[good_st_tmp,tmp_st2[good]]
+    good_et_tmp=[good_et_tmp,tmp_et1[index_num]]
+  endif
+  
+  
+  ;TYPE B
+  ;-------------1111111111-------
+  ;--------1111111111------------
+  good=where(tmp_st2 le tmp_st1[index_num] and tmp_et2 le tmp_et1[index_num] and tmp_et2 gt tmp_st1[index_num],count)
+  if count gt 1 then stop
+  if count eq 1 then begin
+    good_st_tmp=[good_st_tmp,tmp_st1[index_num]]
+    good_et_tmp=[good_et_tmp,tmp_et2[good]]
+  endif
+  
+  ;TYPE C
+  ;--------1111111111-----------
+  ;----------111111-------------
+  good=where(tmp_st2 ge tmp_st1[index_num] and tmp_et2 lt tmp_et1[index_num],count)
+  if count ge 1 then begin
+    good_st_tmp=[good_st_tmp,tmp_st2[good]]
+    good_et_tmp=[good_et_tmp,tmp_et2[good]]
+  endif
+  
+  ;TYPE D
+  ;----------111111-------------
+  ;--------1111111111-----------
+  good=where(tmp_st2 le tmp_st1[index_num] and tmp_et2 ge tmp_et1[index_num],count)
+  if count ge 1 then begin
+    good_st_tmp=[good_st_tmp,tmp_st1[good]]
+    good_et_tmp=[good_et_tmp,tmp_et1[good]]
+  endif
+  
+endfor
+
+
+;for ind_1=0,n_elements(tmp_st1)-1 do begin
+;  for ind_2=0,n_elements(tmp_st2)-1 do begin
+;    if tmp_st1[ind_1] ge tmp_st2[ind_2] and tmp_st1[ind_1] le tmp_et2[ind_2] then begin
+;      good_st_tmp=[good_st_tmp,tmp_st1[ind_1]]
+;      good_et_tmp=[good_et_tmp,min([tmp_et1[ind_1],tmp_et2[ind_2]])]
+;    endif
+;    if tmp_et1[ind_1] ge tmp_st2[ind_2] and tmp_et1[ind_1] le tmp_et2[ind_2] then begin
+;      good_st_tmp=[good_st_tmp,max([tmp_st1[ind_1],tmp_st2[ind_2]])]
+;      good_et_tmp=[good_et_tmp,tmp_et1[ind_1]]
+;    endif
+;    if tmp_st1[ind_1] lt tmp_st2[ind_2] and tmp_et1[ind_1] gt tmp_et2[ind_2] then begin
+;      good_st_tmp=[good_st_tmp,tmp_st2[ind_2]]
+;      good_et_tmp=[good_et_tmp,tmp_et2[ind_2]]
+;    endif
+;  endfor
+;endfor
+;if n_elements(good_st_tmp) le 0 then begin
+;  err=1
+;  return
+;endif
+
+if n_elements(good_st_tmp) eq 0 then begin
+  err=1
+  return
+endif 
+
+if n_elements(good_st_tmp) eq 1 then begin
+  outst=good_st_tmp
+  outet=good_et_tmp
+endif
+
+if n_elements(good_st_tmp) gt 1 then begin
+  ind=sort(good_st_tmp)
+  good_st_tmp=good_st_tmp[ind] & good_et_tmp=good_et_tmp[ind]
+  dt=good_st_tmp[1:-1]-good_st_tmp[0:-2]
+  good=where(dt gt 0)
+  
+  good_st_tmp=[good_st_tmp[0],good_st_tmp[good+1]]
+  good_et_tmp=[good_et_tmp[0],good_et_tmp[good+1]]
+  
+  outst=good_st_tmp
+  outet=good_et_tmp
+endif
+return
+END

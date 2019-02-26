@@ -1,0 +1,441 @@
+PRO chorus_conj_output_and_plot,probe1,probe2,st,et,l_out,mlt_out,mlat_out,d_radial,d_azimuthal,d_parallel,nooverwrite=nooverwrite
+  
+  plot_init,'ps'
+  probes=[probe1,probe2]
+  
+  f_name=!files.doc_dir+'doc/final_data/raw/wave_parameters_conj_btw_'+probe1+'_'+probe2+'_'+strtrim(time_string(st,format=6))+'TO'+strtrim(time_string(et,format=6))+'v2.0.csv'
+  if keyword_set(nooverwrite) then begin
+    ;CHECK FILE EXISTENCE
+    file_num=file_search(f_name)
+    if size(file_num,/n_dim) eq 1 then begin
+      print,'exist!'
+      return
+    endif
+  endif
+  
+  for prb_ind=0,1 do begin
+    tvar_interpol,tvars=[probes[prb_ind]+'_burst_tmp_fac'],trange=[st,et],dt=1/8196.
+    twavpol,probes[prb_ind]+'_burst_tmp_fac_interp',nopfft=500.,steplength=50., bin_freq=1
+    get_data,probes[prb_ind]+'_burst_tmp_fac_interp_waveangle',data=wna_tmp,dlim=dlim_tmp
+    store_data,probes[prb_ind]+'_burst_tmp_fac_interp_waveangle_deg',data={x:wna_tmp.x,y:wna_tmp.y*180./!pi,v:wna_tmp.v},dlim=dlim_tmp
+    ;LOAD B0 data
+    CASE strmid(probes[prb_ind],0,2) of
+      'rb': begin 
+              get_b0state,probe=strmid(probes[prb_ind],0,1,/REVERSE_OFFSET),trange=[st,et] 
+            end  
+      'th': begin
+              get_themis_b0,probe=strmid(probes[prb_ind],0,1,/REVERSE_OFFSET),trange=[time_double(st)-10.*60,time_double(et)+10.*60] 
+              tvar_interpol,tvars=[probes[prb_ind]+'_sw_flag'],target=probes[prb_ind]+'_burst_tmp_fac_interp_powspec',/overwrite
+            end  
+      'mm': begin
+              get_mms_b0,probe=strmid(probes[prb_ind],0,1,/REVERSE_OFFSET),trange=[time_double(st)-10.*60,time_double(et)+10.*60]
+            end           
+    END
+    
+    
+    
+    tvar_interpol,tvars=[probes[prb_ind]+'_L',probes[prb_ind]+'_fce_eq',probes[prb_ind]+'_fce_eq_half',probes[prb_ind]+'_fce_eq_tenth'],target=probes[prb_ind]+'_burst_tmp_fac_interp_powspec',/overwrite
+    
+    ;CALCULATE BW FOR UPPER AND LOWER BANDS
+    get_data,probes[prb_ind]+'_burst_tmp_fac_interp_powspec',data=bpow
+    get_data,probes[prb_ind]+'_fce_eq',data=fce
+    get_data,probes[prb_ind]+'_burst_tmp_fac_interp_waveangle_deg',data=wna,dlim=dlim
+    get_data,probes[prb_ind]+'_burst_tmp_fac_interp_degpol',data=degp
+    wna.y[where(bpow.y le 1e-8 or degp.y le 0.7)]=!values.f_nan
+    store_data,probes[prb_ind]+'_burst_tmp_fac_interp_waveangle_deg_r',data=wna,dlim=dlim
+    bw_up=bpow.x*!values.f_nan & bw_low=bpow.x*!values.f_nan & wna_up=wna.x*!values.f_nan & wna_low=wna.x*!values.f_nan
+    for ind_tmp=0,n_elements(bpow.x)-1 do begin
+      up_band=[0.5*fce.y[ind_tmp],fce.y[ind_tmp]]
+      low_band=[0.1*fce.y[ind_tmp],0.5*fce.y[ind_tmp]]
+      good_v_up=where(bpow.v ge up_band[0] and bpow.v le up_band[1])
+      good_v_low=where(bpow.v ge low_band[0] and bpow.v le low_band[1])
+      bw_up[ind_tmp]=sqrt(total(reform(bpow.y[ind_tmp,good_v_up]))*mean(bpow.v[1:-1]-bpow.v[0:-2]))
+      bw_low[ind_tmp]=sqrt(total(reform(bpow.y[ind_tmp,good_v_low]))*mean(bpow.v[1:-1]-bpow.v[0:-2]))
+      if good_v_up[0] ne -1 then wna_up[ind_tmp]=median(wna.y[ind_tmp,good_v_up])
+      if good_v_low[0] ne -1 then wna_low[ind_tmp]=median(wna.y[ind_tmp,good_v_low])
+    endfor
+    store_data,probes[prb_ind]+'_bw_up',data={x:bpow.x,y:bw_up*1000.}
+    store_data,probes[prb_ind]+'_bw_low',data={x:bpow.x,y:bw_low*1000.}
+    store_data,probes[prb_ind]+'_burst_Bfac_waveangle_up',data={x:wna.x,y:wna_up}
+    store_data,probes[prb_ind]+'_burst_Bfac_waveangle_low',data={x:wna.x,y:wna_low}
+    store_data,probes[prb_ind]+'_powspec_combo',data=[probes[prb_ind]+'_burst_tmp_fac_interp_powspec',probes[prb_ind]+'_fce_eq',probes[prb_ind]+'_fce_eq_half',probes[prb_ind]+'_fce_eq_tenth']
+    store_data,probes[prb_ind]+'_wna_combo',data=[probes[prb_ind]+'_burst_tmp_fac_interp_waveangle_deg_r',probes[prb_ind]+'_fce_eq',probes[prb_ind]+'_fce_eq_half',probes[prb_ind]+'_fce_eq_tenth']
+  endfor
+  
+  split_vec,probes[0]+'_burst_tmp_fac'
+  split_vec,probes[1]+'_burst_tmp_fac'
+  
+  tsmooth2,probes[0]+'_burst_tmp_fac',819 ;10 Hz
+  dif_data,probes[0]+'_burst_tmp_fac',probes[0]+'_burst_tmp_fac_sm',newname=probes[0]+'_burst_tmp_fac_above_10Hz'
+  
+  tsmooth2,probes[1]+'_burst_tmp_fac',819 ;10 Hz
+  dif_data,probes[1]+'_burst_tmp_fac',probes[1]+'_burst_tmp_fac_sm',newname=probes[1]+'_burst_tmp_fac_above_10Hz'
+  
+  running_cross_correlation,probes[0]+'_burst_tmp_fac_above_10Hz',probes[1]+'_burst_tmp_fac_above_10Hz',boxpoints=round(8196./20),shiftpoints=round(8196./20/2)
+  time_range_second=[time_double(st)+20./8196,time_double(et)-20./8196]
+  
+  tvar_interpol,tvars=['cross_correlation'],target=probes[0]+'_burst_tmp_fac_interp_powspec',/overwrite
+  
+  ;output goes here
+  get_data,probes[0]+'_L',data=la
+  get_data,probes[0]+'_bw_up',data=bw_up_a
+  get_data,probes[0]+'_bw_low',data=bw_low_a
+  get_data,probes[0]+'_burst_Bfac_waveangle_up',data=wna_up_a
+  get_data,probes[0]+'_burst_Bfac_waveangle_low',data=wna_low_a
+  get_data,probes[1]+'_bw_up',data=bw_up_b
+  get_data,probes[1]+'_bw_low',data=bw_low_b
+  get_data,probes[1]+'_burst_Bfac_waveangle_up',data=wna_up_b
+  get_data,probes[1]+'_burst_Bfac_waveangle_low',data=wna_low_b
+  get_data,'cross_correlation',data=cc
+  
+  
+  dt=max(cc.x)-min(cc.x)
+  if dt lt 0.5 then begin
+    write_log,strjoin(strupcase(probes),' & ')+': '+strjoin(time_string([st,et],prec=2),' To ')+' dt<0.5'
+    return
+  endif
+  time_output_1sec=findgen(round(dt))+min(cc.x)+0.5
+  c_op=n_elements(time_output_1sec)
+  bw_up_a_1sec=fltarr(c_op) & bw_low_a_1sec=fltarr(c_op) & wna_up_a_1sec=fltarr(c_op) & wna_low_a_1sec=fltarr(c_op)
+  bw_up_b_1sec=fltarr(c_op) & bw_low_b_1sec=fltarr(c_op) & wna_up_b_1sec=fltarr(c_op) & wna_low_b_1sec=fltarr(c_op)
+  cc_1sec=fltarr(c_op) & flag_sw=intarr(c_op)
+  for ind_out_f=0,n_elements(time_output_1sec)-1 do begin
+    good_tmp=where(cc.x ge time_output_1sec[ind_out_f]-0.5 and cc.x lt time_output_1sec[ind_out_f]+0.5)
+    bw_up_a_1sec[ind_out_f]=mean(bw_up_a.y[good_tmp],/nan) & bw_low_a_1sec[ind_out_f]=mean(bw_low_a.y[good_tmp],/nan) & wna_up_a_1sec[ind_out_f]=mean(wna_up_a.y[good_tmp],/nan) & wna_low_a_1sec[ind_out_f]=mean(wna_low_a.y[good_tmp],/nan)
+    bw_up_b_1sec[ind_out_f]=mean(bw_up_b.y[good_tmp],/nan) & bw_low_b_1sec[ind_out_f]=mean(bw_low_b.y[good_tmp],/nan) & wna_up_b_1sec[ind_out_f]=mean(wna_up_b.y[good_tmp],/nan) & wna_low_b_1sec[ind_out_f]=mean(wna_low_b.y[good_tmp],/nan)
+    cc_1sec[ind_out_f]=max(cc.y[good_tmp],/nan)
+    if mean(la.y[good_tmp]) le 7.5 then flag_sw[ind_out_f]=0 else begin
+      ;NEED TO BE IMPROVED, ADD MMS?
+      get_data,probes[0]+'_sw_flag',data=flag_tmp_1
+      get_data,probes[1]+'_sw_flag',data=flag_tmp_2
+      if total(flag_tmp_1.y[good_tmp],/nan) ge 10 or total(flag_tmp_2.y[good_tmp],/nan) ge 10 then flag_sw[ind_out_f]=1 else flag_sw[ind_out_f]=0
+    endelse
+  endfor
+  
+  ;Flag 0-not in sheath or solar wind; 1-in sheath or solar wind
+  
+  store_data,'sw_flag',data={x:time_output_1sec,y:flag_sw}
+  store_data,probes[0]+'_bw_up_int',data={x:time_output_1sec,y:bw_up_a_1sec}
+  store_data,probes[0]+'_bw_low_int',data={x:time_output_1sec,y:bw_low_a_1sec}
+  store_data,probes[0]+'_wna_up_int',data={x:time_output_1sec,y:wna_up_a_1sec}
+  store_data,probes[0]+'_wna_low_int',data={x:time_output_1sec,y:wna_low_a_1sec}
+  store_data,probes[1]+'_bw_up_int',data={x:time_output_1sec,y:bw_up_b_1sec}
+  store_data,probes[1]+'_bw_low_int',data={x:time_output_1sec,y:bw_low_b_1sec}
+  store_data,probes[1]+'_wna_up_int',data={x:time_output_1sec,y:wna_up_b_1sec}
+  store_data,probes[1]+'_wna_low_int',data={x:time_output_1sec,y:wna_low_b_1sec}
+  store_data,'cross_correlation_interp',data={x:time_output_1sec,y:cc_1sec}
+  
+  store_data,'cc_combo',data=['cross_correlation','cross_correlation_interp'],dlim={colors:[0,6]}
+  options,'cross_correlation_interp',psym=2
+  options,'cc_combo',yrange=[0,1],ystyle=1,ytickinterval=0.25
+  options,'*int',psym=2
+  options,'sw_flag',yrange=[0.8,1.2],color=1,psym=8,panel_size=0.1,ytitle='',label=['SW'],xstyle=-3,ystyle=-3,thick=3
+  store_data,'bw_up_combo',data=[probes[0]+'_bw_up',probes[1]+'_bw_up',probes[0]+'_bw_up_int',probes[1]+'_bw_up_int']
+  store_data,'bw_low_combo',data=[probes[0]+'_bw_low',probes[1]+'_bw_low',probes[0]+'_bw_low_int',probes[1]+'_bw_low_int']
+  store_data,'wna_up_combo',data=[probes[0]+'_burst_Bfac_waveangle_up',probes[1]+'_burst_Bfac_waveangle_up',probes[0]+'_wna_up_int',probes[1]+'_wna_up_int']
+  store_data,'wna_low_combo',data=[probes[0]+'_burst_Bfac_waveangle_low',probes[1]+'_burst_Bfac_waveangle_low',probes[0]+'_wna_low_int',probes[1]+'_wna_low_int']
+  options,'bw_up_combo',labels=[probe1,probe2],colors=[2,6,2,6],labflag=-1,ytitle='Bw_up!C',ysubtitle='[pT]'
+  options,'bw_low_combo',labels=[probe1,probe2],colors=[2,6,2,6],labflag=-1,ytitle='Bw_low!C',ysubtitle='[pT]'
+  options,'wna_up_combo',labels=[probe1,probe2],colors=[2,6,2,6],labflag=-1,ytitle='WNA_up!C',ysubtitle='[deg]'
+  options,'wna_low_combo',labels=[probe1,probe2],colors=[2,6,2,6],labflag=-1,ytitle='WNA_low!C',ysubtitle='[deg]'
+  options,'cross_correlation',yrange=[0,1],ystyle=1,ytitle='C.C.!C',ytickinterval=0.25
+  options,'*_fce_*',color=200,thick=2
+  options,'*_powspec_combo',yrange=[1e2,4e3],ystyle=1,ylog=1,zlog=1,zrange=[1e-10,1e-4],ytickunits='scientific',ztickunits='scientific',ytitle='Frequency!C',ysubtitle='[Hz]',ztitle='[(nT)!E2!N/Hz]'
+  options,'*_wna_combo',yrange=[1e2,4e3],ystyle=1,ylog=1,zrange=[0,90],ytickunits='scientific',ztickinterval=30,ytitle='Frequency!C',ysubtitle='[Hz]',ztitle='WNA [deg]',panel_size=0.75
+  tplot_options,'title',strupcase(probe1)+'&'+strupcase(probe2)+': dr='+strtrim(round(abs(d_radial)),1)+'km dphi='+strtrim(round(abs(d_azimuthal)),1)+'km dz='+strtrim(round(abs(d_parallel)),1)+'km'
+  options,'bw*combo',panel_size=0.7,/ynozero
+  options,'wna*combo',panel_size=0.7,yrange=[0,90],ystyle=1,ytickinterval=30
+  options,'cc_combo',panel_size=0.7
+  options,probes[0]+'_L',ytitle='L!E'+probes[0]
+  options,probes[1]+'_L',ytitle='L!E'+probes[1]
+  options,probes[0]+'_MLT',ytitle='MLT'
+  options,probes[1]+'_MLT',ytitle='MLT'
+  options,probes[0]+'_MLAT',ytitle='MLAT'
+  options,probes[1]+'_MLAT',ytitle='MLAT'
+  
+  popen,!files.fig_dir+'figs/conj_burst/conj_burst_'+probe1+'_'+probe2+'_'+strtrim(time_string(st,format=6),1)+'TO'+strtrim(time_string(et,format=6),1)+'_v2.0',xsize=8,ysize=10,units=cm,/encapsulated
+    tplot,[probes[0]+'_powspec_combo',probes[1]+'_powspec_combo','sw_flag',probes[0]+'_wna_combo',probes[1]+'_wna_combo','bw_up_combo','bw_low_combo','wna_up_combo','wna_low_combo','cc_combo'],var_label=[probes[1]+'_MLAT',probes[0]+'_MLAT',probes[1]+'_MLT',probes[0]+'_MLT',probes[1]+'_L',probes[0]+'_L'],trange=time_range_second
+  pclose
+  
+  noe=n_elements(time_output_1sec)
+  l_out_f=replicate(l_out,noe) & mlt_out_f=replicate(mlt_out,noe)  & mlat_out_f=replicate(mlat_out,noe)  & d_radial_f=replicate(d_radial,noe)  & d_azimuthal_f=replicate(d_azimuthal,noe)  & d_parallel_f=replicate(d_parallel,noe) 
+  write_csv_rs,f_name,$
+    time_double(time_output_1sec),bw_up_a_1sec,bw_low_a_1sec,wna_up_a_1sec,wna_low_a_1sec,bw_up_b_1sec,bw_low_b_1sec,wna_up_b_1sec,wna_low_b_1sec,cc_1sec,flag_sw,l_out_f,mlt_out_f,mlat_out_f,d_radial_f,d_azimuthal_f,d_parallel_f,$
+    HEADER=['Time','Bw_up_a','Bw_low_a','WNA_up_a','WNA_low_a','Bw_up_b','Bw_low_b','WNA_up_b','WNA_low_b','CC','Flag_sw','L','MLT','MLAT','dr','dphi','dz']
+  return
+END
+
+PRO coordinate_to_fac,probe,newname=newname,trange=trange,err=err
+  tvar=probe+'_burst_tmp_tvar'
+  CASE strmid(probe,0,2) of
+    'rb': begin
+            if (time_double(trange[1])-time_double(trange[0])) lt 5 then goto, bad_dt
+            rbsp_load_state,probe=strmid(probe,0,1,/REVERSE_OFFSET),datatype=['mat_dsc','spinper','spinphase'],/no_spice_load,trange=[time_double(trange[0])-5.*60,trange[1]+5.*60],dt=0.01
+            if ~tvar_exist(probe+'_mat_dsc') then return
+            rbsp_despin,strmid(probe,0,1,/REVERSE_OFFSET),tvar,/uvw,newname=probe+'_burst_Bdsc'
+            if ~tvar_exist(probe+'_burst_Bdsc') then return
+            rbsp_cotrans,probe+'_burst_Bdsc',probe+'_burst_Bgse',/dsc2gse,mat_dsc=probe+'_mat_dsc'
+            get_emfisis_l3,probe=strmid(probe,0,1,/REVERSE_OFFSET),trange=trange,coord='gse',timeres='1sec'
+            get_mageis_l2,probe=strmid(probe,0,1,/REVERSE_OFFSET),trange=trange
+            get_B0state,probe=strmid(probe,0,1,/REVERSE_OFFSET),trange=trange
+            cotrans,probe+'_ect_mageis_L2_Position',probe+'_Position_gei',/GEO2GEI
+            ;ROTATE TO FAC
+            tsmooth2,probe+'_emfisis_l3_1sec_gse_Mag',601
+            fac_matrix_make,probe+'_emfisis_l3_1sec_gse_Mag_sm', other_dim='Rgeo', pos_var_name=probe+'_Position_gei',newname = probe+'_rotmat'
+            tvector_rotate,probe+'_rotmat', probe+'_burst_Bgse', newname = probe+'_burst_Bfac'
+            tplot_rename,probe+'_burst_Bfac',newname
+          end
+    'th': begin
+            get_themis_bfield_burst,probe=strmid(probe,0,1,/REVERSE_OFFSET),trange=trange
+            tplot_rename,probe+'_scw_fac',newname
+            thm_load_esa,probe=strmid(probe,0,1,/REVERSE_OFFSET),trange=trange,level='l2',datatype='peir_en_eflux'
+            get_data,'th'+strmid(probe,0,1,/REVERSE_OFFSET)+'_peir_en_eflux',data=eflux
+            energy_ch=reform(eflux.v[0,*])
+            index_good_energy=where(finite(energy_ch))
+            good_energy=energy_ch[index_good_energy]
+            eflux_tmp=eflux.y[*,index_good_energy]
+            max_energy=fltarr(n_elements(eflux.x))
+            sw_flag=intarr(n_elements(eflux.x))
+            for index_time_tmp=0,n_elements(eflux.x)-1 do begin
+              eflux_tmp_ti=reform(eflux_tmp[index_time_tmp,*])
+              max_energy[index_time_tmp]=good_energy[where(eflux_tmp_ti eq max(eflux_tmp_ti))]
+              if max_energy[index_time_tmp] ge 500 and max_energy[index_time_tmp] le 2000 then sw_flag[index_time_tmp]=1 else sw_flag[index_time_tmp]=0
+            endfor
+            store_data,probe+'_sw_flag',data={x:eflux.x,y:sw_flag}
+            store_data,probe+'_max_energy',data={x:eflux.x,y:max_energy}
+          end
+    'mm': begin
+            dprint,'mms is not included yet!'
+            return
+          end
+  END
+  return
+  bad_dt:
+    err=1
+    return
+END
+;
+;Purpose: to generate wave parameters and figures when two satellites are in location conjunction
+;Input: 
+;      varla: variable contains L-value of sc-a
+;      varmlta: variable contains MLT of sc-a
+;      varmlata: variable contains MLAT of sc-a
+;      varlb, varmltb, varmlatb: similar as above but for sc-b
+;      deltal=delta(varla-varlb), similar for deltamlt and deltamlat
+;      probe1: sc-a
+;      probe2: sc-b
+;      trange: time range to be analized
+;      
+;Output:
+;      Figures and wave parameters
+;
+;Latest update by Xiaochen Shen on 2018-10-04
+;
+;
+PRO conj_two_sat,varla,varmlta,varmlata,varlb,varmltb,varmlatb,difkm,deltal,deltamlt,deltamlat,probe1=probe1,probe2=probe2,trange=trange
+
+  If not keyword_set(deltal) then begin
+    print,'delta L is not given; it will be set to 0.1'
+    deltal=0.1
+  Endif
+  
+  If not keyword_set(deltamlt) then begin
+    print,'delta MLT is not given; it will be set to 0.5'
+    deltamlt=0.5
+  Endif
+  
+  If not keyword_set(deltamlat) then begin
+    print,'delta MLAT is not given; it will be set to 0'
+    deltamlat=0
+  Endif
+  
+  duration=trange
+;  dt=round(time_double(duration[1])-time_double(duration[0]))
+;  time_srs=findgen(round(dt/5.))*5.+time_double(duration[0])
+;  store_data,'time_reference',data={x:time_srs,y:time_srs}
+;  
+;  tinterpol_mxn,varlb,'time_reference',/overwrite
+;  tinterpol_mxn,varmltb,'time_reference',/overwrite
+;  tinterpol_mxn,varmlatb,'time_reference',/overwrite
+;  tinterpol_mxn,varla,'time_reference',/overwrite
+;  tinterpol_mxn,varmlta,'time_reference',/overwrite
+;  tinterpol_mxn,varmlata,'time_reference',/overwrite
+  
+  get_data,varla,data=la
+  get_data,varlb,data=lb
+  
+  get_data,varmlta,data=mlta
+  get_data,varmltb,data=mltb
+  
+  get_data,varmlata,data=mlata
+  get_data,varmlatb,data=mlatb
+  
+  get_data,difkm,data=diff_fac
+  
+  cri_l=abs(la.y-lb.y)
+  cri_mlt=abs(mlta.y-mltb.y)
+  cri_mlat=abs(mlata.y-mlatb.y)
+  
+;  mlatevent='0.0'
+;  mltevent='0.0'
+;  levent='0.0'
+  
+  good=where((cri_l le deltal) and (cri_mlt le deltamlt) and (cri_mlat gt deltamlat),count)
+  if count gt 1 then begin
+    mlatevent=la.x[good]
+    la_data=la.y[good]
+    mlta_data=mlta.y[good]
+    mlata_data=mlata.y[good]
+    lb_data=lb.y[good]
+    mltb_data=mltb.y[good]
+    mlatb_data=mlatb.y[good]
+    dr_data=reform(diff_fac.y[good,0])
+    dphi_data=reform(diff_fac.y[good,1])
+    dz_data=reform(diff_fac.y[good,2])
+  endif else begin
+    write_csv_rs,!files.doc_dir+'doc/conj_btw_'+probe1+'_'+probe2+'_'+strmid(trange[0],0,10)+'To'+strmid(trange[1],0,10)+'_dl'+deltal+'_dmlt'+deltamlt+'_dmlat'+deltamlat+'_MLAT.csv','NoEvent'
+    return
+  endelse
+  
+;  For i=0,n_elements(la.x)-1 do begin
+;    
+;    if (cri_l[i] le deltal) and (cri_mlt[i] le deltamlt) and (cri_mlat[i] gt deltamlat) then mlatevent=[mlatevent,la.x[i]]
+;    ;if (cri_l[i] le deltal) and (cri_mlt[i] gt deltamlt) and (cri_mlat[i] le deltamlat) then mltevent=[mltevent,la.x[i]] ;not yet used
+;    ;if (cri_l[i] gt deltal) and (cri_mlt[i] le deltamlt) and (cri_mlat[i] le deltamlat) then levent=[levent,la.x[i]]     ;not yet used
+;  
+;  Endfor
+  
+  mlatst=[] & mlatet=[]
+  mlat_la=[] & mlat_mlta=[] & mlat_mlata=[]
+  mlat_lb=[] & mlat_mltb=[] & mlat_mlatb=[]
+  mlat_dl=[] & mlat_dmlt=[] & mlat_dmlat=[]
+  mlat_dr=[] & mlat_dphi=[] & mlat_dz=[]
+
+  ;>>>>>>>>>>>>>>>>>>时间差为10分钟<<<<<<<<<<<<<<<<<<<<<<<<<
+  ;******************一、考虑除了最后一个之外的事件******************************
+  mlatst=[mlatst,mlatevent[0]]
+  index_tmp=0
+  for mlat_num_ind=0,n_elements(mlatevent)-2 DO BEGIN
+    if n_elements(mlatst) eq n_elements(mlatet) then begin
+      mlatst=[mlatst,mlatevent[mlat_num_ind]] 
+      index_tmp=mlat_num_ind
+    endif else begin
+      if time_double(mlatevent[mlat_num_ind])-max(time_double(mlatst)) le 10.*60 and time_double(mlatevent[mlat_num_ind+1])-max(time_double(mlatst)) le 10.*60 then continue 
+      mlatet=[mlatet,mlatevent[mlat_num_ind]]
+      mlat_la=[mlat_la,mean(la_data[index_tmp:mlat_num_ind],/nan)]
+      mlat_mlta=[mlat_mlta,mean(mlta_data[index_tmp:mlat_num_ind],/nan)]
+      mlat_mlata=[mlat_mlata,mean(mlata_data[index_tmp:mlat_num_ind],/nan)]
+      mlat_lb=[mlat_lb,mean(lb_data[index_tmp:mlat_num_ind],/nan)]
+      mlat_mltb=[mlat_mltb,mean(mltb_data[index_tmp:mlat_num_ind],/nan)]
+      mlat_mlatb=[mlat_mlatb,mean(mlatb_data[index_tmp:mlat_num_ind],/nan)]
+      mlat_dl=[mlat_dl,mean(abs(la_data[index_tmp:mlat_num_ind]-lb_data[index_tmp:mlat_num_ind]),/nan)]
+      mlat_dmlt=[mlat_dmlt,mean(abs(mlta_data[index_tmp:mlat_num_ind]-mltb_data[index_tmp:mlat_num_ind]),/nan)]
+      mlat_dmlat=[mlat_dmlat,mean(abs(mlata_data[index_tmp:mlat_num_ind]-mlatb_data[index_tmp:mlat_num_ind]),/nan)]
+      mlat_dr=[mlat_dr,mean(dr_data[index_tmp:mlat_num_ind],/nan)]
+      mlat_dphi=[mlat_dphi,mean(dphi_data[index_tmp:mlat_num_ind],/nan)]
+      mlat_dz=[mlat_dz,mean(dz_data[index_tmp:mlat_num_ind],/nan)] 
+    endelse
+  endfor
+  
+  ;******************二、考虑最后一个事件*************************************
+  if n_elements(mlatst) ne n_elements(mlatet) and time_double(mlatevent[n_elements(mlatevent)-1])-max(time_double(mlatst)) le 10.*60 then begin
+    mlatet=[mlatet,mlatevent[mlat_num_ind]]
+    mlat_la=[mlat_la,mean(la_data[index_tmp:mlat_num_ind],/nan)]
+    mlat_mlta=[mlat_mlta,mean(mlta_data[index_tmp:mlat_num_ind],/nan)]
+    mlat_mlata=[mlat_mlata,mean(mlata_data[index_tmp:mlat_num_ind],/nan)]
+    mlat_lb=[mlat_lb,mean(lb_data[index_tmp:mlat_num_ind],/nan)]
+    mlat_mltb=[mlat_mltb,mean(mltb_data[index_tmp:mlat_num_ind],/nan)]
+    mlat_mlatb=[mlat_mlatb,mean(mlatb_data[index_tmp:mlat_num_ind],/nan)]
+    mlat_dl=[mlat_dl,mean(abs(la_data[index_tmp:mlat_num_ind]-lb_data[index_tmp:mlat_num_ind]),/nan)]
+    mlat_dmlt=[mlat_dmlt,mean(abs(mlta_data[index_tmp:mlat_num_ind]-mltb_data[index_tmp:mlat_num_ind]),/nan)]
+    mlat_dmlat=[mlat_dmlat,mean(abs(mlata_data[index_tmp:mlat_num_ind]-mlatb_data[index_tmp:mlat_num_ind]),/nan)]
+    mlat_dr=[mlat_dr,mean(dr_data[index_tmp:mlat_num_ind],/nan)]
+    mlat_dphi=[mlat_dphi,mean(dphi_data[index_tmp:mlat_num_ind],/nan)]
+    mlat_dz=[mlat_dz,mean(dz_data[index_tmp:mlat_num_ind],/nan)]
+  endif
+  
+  if n_elements(mlatst) ne n_elements(mlatet) then mlatst=mlatst[0:n_elements(mlatst)-2]
+  if n_elements(mlatst) eq n_elements(mlatet) then print,'done!' else stop
+  
+
+ 
+;previous version start from here ---------------------------------------  
+;  for tx=1,n_elements(mlatevent)-2 do begin
+;    If n_elements(mlatst) eq n_elements(mlatet) then begin
+;      mlatst=[mlatst,mlatevent[tx]]
+;    Endif else begin
+;      If (time_double(mlatevent[tx+1])-time_double(mlatevent[tx])) le 2.*60 then continue
+;      mlatet=[mlatet,mlatevent[tx]]
+;      time_index=where(time_double(la.x) ge time_double(mlatst[n_elements(mlatst)-1]) and time_double(la.x) le time_double(mlatet[n_elements(mlatet)-1]))
+;      mlat_la=[mlat_la,mean(la.y[time_index],/nan)]
+;      mlat_mlta=[mlat_mlta,mean(mlta.y[time_index],/nan)]
+;      mlat_mlata=[mlat_mlata,mean(mlata.y[time_index],/nan)]
+;      mlat_lb=[mlat_lb,mean(lb.y[time_index],/nan)]
+;      mlat_mltb=[mlat_mltb,mean(mltb.y[time_index],/nan)]
+;      mlat_mlatb=[mlat_mlatb,mean(mlatb.y[time_index],/nan)]
+;      mlat_dl=[mlat_dl,mean(abs(la.y[time_index]-lb.y[time_index]),/nan)]
+;      mlat_dmlt=[mlat_dmlt,mean(abs(mlta.y[time_index]-mltb.y[time_index]),/nan)]
+;      mlat_dmlat=[mlat_dmlat,mean(abs(mlata.y[time_index]-mlatb.y[time_index]),/nan)]
+;    Endelse
+;  endfor
+;  If n_elements(mlatst) ne n_elements(mlatet) then begin1
+;    mlatet=[mlatet,mlatevent[n_elements(mlatevent)-1]]
+;    
+;    time_index=where(time_double(la.x) ge time_double(mlatst[n_elements(mlatst)-1]) and time_double(la.x) le time_double(mlatet[n_elements(mlatet)-1]))
+;    mlat_la=[mlat_la,mean(la.y[time_index],/nan)]
+;    mlat_mlta=[mlat_mlta,mean(mlta.y[time_index],/nan)]
+;    mlat_mlata=[mlat_mlata,mean(mlata.y[time_index],/nan)]
+;    mlat_lb=[mlat_lb,mean(lb.y[time_index],/nan)]
+;    mlat_mltb=[mlat_mltb,mean(mltb.y[time_index],/nan)]
+;    mlat_mlatb=[mlat_mlatb,mean(mlatb.y[time_index],/nan)]
+;    mlat_dl=[mlat_dl,mean(abs(la.y[time_index]-lb.y[time_index]),/nan)]
+;    mlat_dmlt=[mlat_dmlt,mean(abs(mlta.y[time_index]-mltb.y[time_index]),/nan)]
+;    mlat_dmlat=[mlat_dmlat,mean(abs(mlata.y[time_index]-mlatb.y[time_index]),/nan)]
+;  Endif
+;previous version end here ------------------------------------------------  
+
+;CHECK IF BURST MODE DATA EXISTS, IF YES, OUTPUT PLOT AND EXCEL
+burst_flag = intarr(n_elements(mlatst))
+for ind_num=0,n_elements(mlatst)-1 do begin
+  check_time=[time_double(mlatst[ind_num]),time_double(mlatet[ind_num])]
+  if (check_time[1]-check_time[0]) gt 60.*20 then burst_flag[ind_num]=-1 else burst_flag[ind_num]=burst_check(sc=probe1,trange=check_time)*burst_check(sc=probe2,trange=check_time)
+  stop
+  if burst_flag[ind_num] eq 1 then begin
+     
+    time_clip,probe1+'_burst_tmp_tvar',check_time[0],check_time[1],/replace
+    time_clip,probe2+'_burst_tmp_tvar',check_time[0],check_time[1],/replace
+    ;CONVERT CONTINUOUS TIME ARRAY INTO EVENT LIST THEN FIND THE CROSS SECTION BTW THEM  
+    cont_data_to_list,probe1+'_burst_tmp_tvar',start_time=st_tmp_1,end_time=et_tmp_1,/no_csv
+    cont_data_to_list,probe2+'_burst_tmp_tvar',start_time=st_tmp_2,end_time=et_tmp_2,/no_csv
+    cross_btw_two_list,st1=st_tmp_1,et1=et_tmp_1,st2=st_tmp_2,et2=et_tmp_2,outst=comb_st,outet=comb_et,err=err
+    
+    
+    if err eq 1 then burst_flag[ind_num]=0 else begin
+      
+      coordinate_to_fac,probe1,newname=probe1+'_burst_tmp_fac',trange=check_time,err=err
+      coordinate_to_fac,probe2,newname=probe2+'_burst_tmp_fac',trange=check_time,err=err
+      
+      if ~tvar_exist(probe1+'_burst_tmp_fac') or ~tvar_exist(probe2+'_burst_tmp_fac') then begin
+        burst_flag[ind_num]=-2
+        continue
+      endif
+      if err eq 1 then begin
+        burst_flag[ind_num]=0
+        continue
+      endif
+      for file_ind=0,n_elements(comb_st)-1 do chorus_conj_output_and_plot,probe1,probe2,comb_st[file_ind],comb_et[file_ind],mlat_la[ind_num],mlat_mlta[ind_num],mlat_mlata[ind_num],mlat_dr[ind_num]*6371.,mlat_dphi[ind_num]*6371.,mlat_dz[ind_num]*6371.,nooverwrite=0
+    endelse
+    
+  endif
+  del_data,'*_burst_tmp_fac'
+endfor
+
+ ; if n_elements(lst) ge 2 then write_csv,!files.doc_dir+'doc/conj_btw_'+probe1+'_'+probe2+'_'+strmid(trange[0],0,10)+'To'+strmid(trange[1],0,10)+'_L.csv',time_string(lst[1:*]),time_string(let[1:*])
+ ; if n_elements(mltst) ge 2 then write_csv,!files.doc_dir+'doc/conj_btw_'+probe1+'_'+probe2+'_'+strmid(trange[0],0,10)+'To'+strmid(trange[1],0,10)+'_MLT.csv',time_string(mltst[1:*]),time_string(mltet[1:*])
+  if n_elements(mlatst) ge 1 then write_csv_rs,!files.doc_dir+'doc/conj_list/raw/conj_btw_'+probe1+'_'+probe2+'_'+strmid(time_string(duration[0]),0,10)+'To'+strmid(time_string(duration[1]),0,10)+'_dl'+deltal+'_dmlt'+deltamlt+'_dmlat'+deltamlat+'_w_km.csv',time_string(mlatst),time_string(mlatet),mlat_la,mlat_mlta,mlat_mlata,mlat_lb,mlat_mltb,mlat_mlatb,mlat_dl,mlat_dmlt,mlat_dmlat,mlat_dr*6371.,mlat_dphi*6371.,mlat_dz*6371.,burst_flag,$
+    HEADER=['StartTime','EndTime','La','MLTa','MLATa','Lb','MLTb','MLATb','dL','dMLT','dMLAT','dr','dphi','dz','BurstFlag']
+ 
+  Return
+
+END
+

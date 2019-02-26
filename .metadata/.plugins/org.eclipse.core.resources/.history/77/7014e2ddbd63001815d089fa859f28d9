@@ -1,0 +1,55 @@
+PRO mms_emic_polorization
+    
+;parameters set
+tstart='2015-09-10/13:00'
+timespan,tstart,4,/hours
+get_timespan,trange
+
+smthP_togetFAC=8*60.*30 ;30 min at 8hz resolution 
+;smthP_togetFAC=16*60.*30 ;30 min at 16hz resolution
+
+probe='1'
+
+mms_init,local_data_dir='/projectnb/burbsp/big/SATELLITE/mms/'
+mms_load_state, probes=probe, level='def', datatypes='pos'
+mms_load_fgm, probes=probe
+
+mms_cotrans_transformer,'mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gei','gse','gei'
+
+get_data,'mms'+probe+'_fgm_b_gsm_srvy_l2',data=tmp,dlim=dlim
+store_data,'mms'+probe+'_fgm_b_gsm_srvy_l2',data={x:tmp.x,y:tmp.y[*,0:2]},dlim=dlim  
+
+ts=tmp.x[0]
+te=tmp.x[n_elements(tmp.x)-1]
+
+num=(te-ts)*8.
+timesrs=dblarr(num)
+
+for i=0,num-1 do timesrs[i]=tmp.x[0]+1/8.*i
+
+print, time_string(timesrs)
+
+store_data,'time_reference',data={x:time,y:time}
+
+tinterpol_mxn,'mms'+probe+'_fgm_b_gsm_srvy_l2','time_reference',/overwrite
+
+;compute the DC magnetic field using ? minute smoothing window
+tsmooth2, 'mms'+probe+'_fgm_b_gsm_srvy_l2', smthP_togetFAC, newname='mms'+probe+'_fgm_b_gsm_srvy_l2_DC'
+fac_matrix_make, 'mms'+probe+'_fgm_b_gsm_srvy_l2_DC', other_dim='Xgse', pos_var_name='mms'+probe+'_mec_r_gei',newname = 'rotmat'
+tvector_rotate, 'rotmat','mms'+probe+'_fgm_b_gsm_srvy_l2', newname = 'mms'+probe+'_fgm_b_fac_srvy_l2'
+
+get_data,'mms'+probe+'_fgm_b_fac_srvy_l2',data=tmp,dlim=dlim
+good=where(tmp.x ge time_double(trange[0]) and tmp.x le time_double(trange[1]))
+store_data,'mms'+probe+'_fgm_b_fac_srvy_l2_clip',data={x:tmp.x[good],y:tmp.y[good,*]},dlim=dlim
+
+twavpol,'mms'+probe+'_fgm_b_fac_srvy_l2_clip',nopfft=1024,steplength=128
+
+ylim,'mms'+probe+'_fgm_b_fac_srvy_l2_clip_powspec',0.1,0.5,1
+zlim,'mms'+probe+'_fgm_b_fac_srvy_l2_clip_powspec',1e-6,1e0,1
+
+tplot,'mms'+probe+'_fgm_b_fac_srvy_l2_clip_powspec'
+
+;epssave,'20160105_MMS_Wang'
+stop
+
+END

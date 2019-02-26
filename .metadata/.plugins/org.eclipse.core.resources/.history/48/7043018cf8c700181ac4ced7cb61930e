@@ -1,0 +1,8 @@
+pro test,out=out
+
+if 3 le 2 then return else begin
+  for i=0,3 do print,i
+endif
+
+
+END

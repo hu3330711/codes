@@ -1,0 +1,50 @@
+;Purpose:
+;         to check if burst mode data is exist or not
+;
+;Input: 
+;         trange
+;         probe
+;         
+;         
+Function burst_check,sc=sc,trange=trange
+  
+  burst_ind=0
+  
+  ;LOAD DATA
+  CASE strmid(sc,0,2) OF
+      'rb': begin
+              get_rbsp_emfisis_L2_burst,probe=strmid(sc,0,1,/ REVERSE_OFFSET),trange=trange
+              if ~tvar_exist(sc+'_burst_Buvw') then goto,nodata
+              tplot_rename,sc+'_burst_Buvw',sc+'_burst_tmp_tvar'
+            end
+      'mm': begin
+              mms_load_scm,probes=strmid(sc,0,1,/ REVERSE_OFFSET),trange=trange,data_rate='brst', datatype='scb'
+              stop
+              if ~tvar_exist(sc+'_scm_acb_gse_scb_brst_l2') then goto,nodata
+              tplot_rename,sc+'_scm_acb_gse_scb_brst_l2',sc+'_burst_tmp_tvar'
+            end      
+      'th': begin
+              get_themis_bfield_burst,probe=strmid(sc,0,1,/ REVERSE_OFFSET),trange=trange,/raw
+              if ~tvar_exist(sc+'_scw') then goto,nodata
+              tplot_rename,sc+'_scw',sc+'_burst_tmp_tvar'
+              
+              get_data,sc+'_burst_tmp_tvar',data=tmp
+              tmp_x=tmp.y[*,0] & tmp_y=tmp.y[*,1] & tmp_z=tmp.y[*,2] 
+              d_tmp=tmp.y[1:-1,*]-tmp.y[0:-2,*]
+              d_tmp_x=reform(d_tmp[*,0]) & d_tmp_y=reform(d_tmp[*,1]) & d_tmp_z=reform(d_tmp[*,2])
+              d_tmp_x_pre=[1,d_tmp_x[0:-2]] & d_tmp_y_pre=[1,d_tmp_y[0:-2]] & d_tmp_z_pre=[1,d_tmp_z[0:-2]] 
+              good_data=where((d_tmp_x ne 0 or d_tmp_y ne 0 or d_tmp_z ne 0) and (d_tmp_x_pre ne 0 or d_tmp_y_pre ne 0 or d_tmp_z_pre ne 0) and (finite(tmp_x) or finite(tmp_y) or finite(tmp_z)),count_tmp)
+              if count_tmp gt 1 then store_data,sc+'_burst_tmp_tvar',data={x:tmp.x[good_data],y:tmp.y[good_data,*]} else goto,nodata
+            end  
+  ENDCASE
+
+  get_data,sc+'_burst_tmp_tvar',data=burst_tmp_data
+  good=where(time_double(burst_tmp_data.x) gt time_double(trange[0]) and time_double(burst_tmp_data.x) lt time_double(trange[1]),count)
+  if count gt 4000 then burst_ind=1 ;at least 4000 data points which is close to half a second
+  
+  return,burst_ind
+  
+  nodata:
+  return,0
+  
+END

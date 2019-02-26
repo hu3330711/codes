@@ -1,0 +1,42 @@
+pro tmedian,varname,mode
+;
+varname=varname
+mode=mode
+
+get_data,varname,data=tmp,dlim=dlim
+t0=t/2.
+d=tmp.y
+
+num=1 ; 0 for running median, 1 for median during 1 day
+
+if num eq 0 then begin
+  t0=t/2.
+  t=t
+  for i=0,n_elements(tmp.x)-1 do begin
+    if i le t0 or i ge (n_elements(tmp.x)-1-t0) then begin
+      d[i,*]=!values.f_nan
+    endif else begin
+      for j=0,n_elements(tmp.y[*])-1 do begin
+        ta=i-t0 & tb=i+t0
+        d[i,j]=cgpercentiles(tmp.y[ta:tb,j],Percentiles=0.5)
+      endfor
+    endelse
+  endfor
+endif
+
+if num eq 1 then begin
+  if mode eq 0 then begin
+    for i=0,n_elements(tmp.v[*])-1 do begin
+      d[*,i]=cgpercentiles(tmp.y[*,i],Percentiles=0.5)
+    endfor
+  endif else begin
+    for i=0,n_elements(tmp.v[1,*])-1 do begin
+      d[*,i]=cgpercentiles(tmp.y[*,i],Percentiles=0.5)
+    endfor
+  endelse
+  
+endif
+
+store_data,varname+'_sm',data={x:tmp.x,y:d,v:tmp.v},dlim=dlim
+return
+end

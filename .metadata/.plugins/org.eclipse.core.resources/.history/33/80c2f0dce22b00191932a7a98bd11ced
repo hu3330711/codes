@@ -1,0 +1,52 @@
+
+
+;Ground station L and MLT
+
+dir_init
+
+;atha chbg ekat fsim fsmi fykn gbay glyn
+
+site='atha chbg ekat fsim fsmi fykn gbay glyn'
+trange=['2009-08-17/22','2009-08-17/24']
+thm_load_gmag,trange=trange,site=site,/subtract_average
+stop
+tvar_interpol,tvars='thg_mag_'+site,trange=trange,dt=60.*10,/overwrite
+get_data,'thg_mag_'+site,alim=alim,data=d
+
+
+data_att=alim.data_att
+latitude=data_att.SITE_LATITUDE
+longitude=data_att.SITE_LONGITUDE
+
+alt=make_array(n_elements(d.x),value=6371.,/float)
+lat=make_array(n_elements(d.x),value=latitude,/float)
+lon=make_array(n_elements(d.x),value=longitude,/float)
+
+result=sphere_to_xyz(transpose([[alt],[lat],[lon]]),/degrees)
+
+store_data,'GMAG_'+site+'_geo',data={x:d.x,y:transpose(result)}
+
+cotrans,'GMAG_'+site+'_geo','GMAG_'+site+'_gei',/geo2gei
+cotrans,'GMAG_'+site+'_gei','GMAG_'+site+'_gse',/gei2gse
+cotrans,'GMAG_'+site+'_gse','GMAG_'+site+'_gsm',/gse2gsm
+cotrans,'GMAG_'+site+'_gsm','GMAG_'+site+'_sm',/gsm2sm
+
+;lstar_cal_qd,'GMAG_'+site+'_sm',trange=trange,bmodel='T89',dt=10.*60
+
+get_data,'GMAG_'+site+'_sm',data=tmp
+
+  MLT = atan(tmp.y[*, 1]/tmp.y[*, 0])*180/!pi/15.+12
+  
+if(n_elements(where(tmp.y[*, 0] lt 0)) gt 1) then MLT[where(tmp.y[*, 0] lt 0)] = $
+  (atan(tmp.y[where(tmp.y[*, 0] lt 0), 1]/tmp.y[where(tmp.y[*, 0] lt 0), 0])+!pi)*180/!pi/15.+12
+if(n_elements(where(MLT[*] gt 24)) gt 1) then MLT[where(MLT[*] ge 24)] = MLT[where(MLT[*] ge 24)]-24
+store_data, 'GMAG_'+site+'_MLT', data = {x:tmp.x, y:MLT}, $
+  dlim = {colors:[0], labels:['MLT'], ysubtitle:'[km]', labflag:1, constant:0, ytitle:'MLT'}
+MLAT = atan(tmp.y[*, 2]/sqrt(tmp.y[*, 0]^2+tmp.y[*, 1]^2))*180/!pi
+store_data, 'GMAG_'+site+'_MLAT', data = {x:tmp.x, y:MLAT}, $
+  dlim = {colors:[0], labels:['MLAT'], ysubtitle:'[deg]', labflag:1, constant:0, ytitle:'MLAT'}
+
+
+    
+stop
+end

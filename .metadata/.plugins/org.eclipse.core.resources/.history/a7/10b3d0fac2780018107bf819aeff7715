@@ -1,0 +1,65 @@
+PRO rbsp_summary_survey,probe=probe,trange=trange
+
+  if not keyword_set(trange) then begin
+    dprint,'trange should be set'
+    return 
+  endif
+
+  plot_init
+  rbsp_init
+  
+  ttmp=time_string(time_double(trange))
+
+  yy0=strmid(ttmp[0],2,2)
+  mm0=strmid(ttmp[0],5,2)
+  dd0=strmid(ttmp[0],8,2)
+  time=strmid(ttmp[0],11,2)
+  dt=time_double(ttmp[1])-time_double(ttmp[0])
+
+  date=time_string(time_double(strmid(ttmp[0],0,10)))
+  date_next=time_string(time_double(strmid(date,0,10))+24.*60*60)
+  trangewvlt=[date,date_next]
+  
+  del_data,'*'
+  timespan, ttmp[0],dt,/seconds
+  
+  get_b0state,probe=probe,trange=trange
+  get_emphisis_l4,probe=probe,trange=trange
+  get_magnetometer_tdpwrspc,probe=probe,trange=trange
+  
+  rbsp_load_spice_kernels
+  rbsp_load_emfisis,probe=probe,coord='gsm',/get_support_data
+  ;get_position_gsm_sm,yy,mm,dd,probe
+  rbsp_load_spice_state,probe=probe,coord='gei',/no_spice_load
+
+  tsmooth2, 'rbsp'+probe+'_emfisis_l3_4sec_gsm_Mag', 15.*30, newname='rbsp'+probe+'_emfisis_l3_4sec_gsm_Mag_DC' ;30 min
+
+  fac_matrix_make, 'rbsp'+probe+'_emfisis_l3_4sec_gsm_Mag_DC', other_dim='Xgse', pos_var_name='rbsp'+probe+'_state_pos_gei',newname = 'rotmat'
+  ;tvector_rotate, 'rotmat', 'rbsp'+probe+'_efw_efield_inertial_frame_gsm', newname = 'rbsp'+probe+'_efw_efield_inertial_frame_fac'
+  tvector_rotate, 'rotmat', 'rbsp'+probe+'_emfisis_l3_4sec_gsm_Mag', newname = 'rbsp'+probe+'_emfisis_l3_4sec_fac_Mag'
+
+  ;tsmooth2,'rbsp'+probe+'_emfisis_l3_4sec_fac_Mag', 15.*30, newname='rbsp'+probe+'_emfisis_l3_4sec_fac_Mag_DC' ;30 min
+  ;dif_data,'rbsp'+probe+'_emfisis_l3_4sec_fac_Mag','rbsp'+probe+'_emfisis_l3_4sec_gsm_Mag_DC',newname='rbsp'+probe+'_emfisis_l3_4sec_fac_Mag_DCremoved'
+  ;split_vec,'rbsp'+probe+'_emfisis_l3_4sec_fac_Mag_DCremoved'
+  thm_ui_wavelet,'rbsp'+probe+'_emfisis_l3_4sec_fac_Mag',new_names,trangewvlt
+  options,'rbsp'+probe+'_emfisis_l3_4sec_fac_Mag_x_wv_pow',yrange=[0.001,0.1],ystyle=1,zrange=[2e-3,2e4],ytitle='B!Ir!N!C',ysubtitle='freq (Hz)',ytickunits='scientific',ztickunits='scientific',ztitle='nT!E2!N/Hz'
+  options,'rbsp'+probe+'_emfisis_l3_4sec_fac_Mag_y_wv_pow',yrange=[0.001,0.1],ystyle=1,zrange=[2e-3,2e4],ytitle='B!Ia!N!C',ysubtitle='freq (Hz)',ytickunits='scientific',ztickunits='scientific',ztitle='nT!E2!N/Hz'
+  options,'rbsp'+probe+'_emfisis_l3_4sec_fac_Mag_z_wv_pow',yrange=[0.001,0.1],ystyle=1,zrange=[2e-3,2e4],ytitle='B!Ip!N!C',ysubtitle='freq (Hz)',ytickunits='scientific',ztickunits='scientific',ztitle='nT!E2!N/Hz'
+
+  options,'rbsp'+probe+'_emfisis_l3_4sec_fac_Mag_x',ytitle='B!Ir!N!C',ysubtitle='(nT)'
+  options,'rbsp'+probe+'_emfisis_l3_4sec_fac_Mag_y',ytitle='B!Ia!N!C',ysubtitle='(nT)'
+  options,'rbsp'+probe+'_emfisis_l3_4sec_fac_Mag_z',ytitle='B!Ip!N!C',ysubtitle='(nT)'
+  
+  store_data,'bsum_combo',data=['bsum','fce_eq','fce_eq_half','fce_eq_tenth','fLHR']
+  store_data,'esum_combo',data=['esum','fce_eq','fce_eq_half','fce_eq_tenth','fLHR']
+  options,'fLHR',color=188
+  ylim,'*sum_combo',30,1e4,1
+  
+  omni_hro_load,trange=trange
+  
+  tplot,['OMNI_HRO_1min_Pressure','bsum_combo','esum_combo','rbsp'+probe+'_Bw_mag_combo','rbsp'+probe+'_emfisis_l3_4sec_fac_Mag_x_wv_pow','rbsp'+probe+'_emfisis_l3_4sec_fac_Mag_y_wv_pow','rbsp'+probe+'_emfisis_l3_4sec_fac_Mag_z_wv_pow']
+  
+  stop
+
+
+END

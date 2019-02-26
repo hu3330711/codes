@@ -1,0 +1,58 @@
+;Iuputs
+;    probes: consist of two probes from rbspa, rbspb, mms1-4, tha-e.
+;    dl:     sepration within dL
+;    dmlt:   sepration within dMLT
+;    dmlat:  sepration gt dmlat
+
+PRO find_conj_main,trange=trange,probes=probes,dl=dl,dmlt=dmlt,dmlat=dmlat
+
+  trange_all=trange
+  
+  plot_init,'ps' 
+  dir_init
+
+  run_start_time=trange_all[0] & run_end_time=time_string(time_double(trange_all[0])+60.*60*24*30)
+  
+  if strmid(probes[0],0,2) eq 'rb' or strmid(probes[1],0,2) eq 'rb' then rbsp_load_spice_kernels,trange=trange_all
+  
+  while time_double(run_start_time) lt time_double(trange_all[1]) do begin
+    if time_double(run_end_time) gt time_double(trange_all[1]) then run_end_time=trange_all[1]
+    trange_part=[run_start_time,run_end_time]
+    
+    CASE strmid(probes[0],0,2) OF
+      'rb': get_mageis_l2,probe=strmid(probes[0],0,1,/ REVERSE_OFFSET),trange=trange_part,/facmat 
+      'mm': get_mms_location,probe=strmid(probes[0],0,1,/ REVERSE_OFFSET),trange=trange_part,/facmat 
+      'th': get_themis_location,probe=strmid(probes[0],0,1,/ REVERSE_OFFSET),trange=trange_part,/facmat 
+    ELSE: PRINT, 'probe should be set as mms?,th? or rbsp?'
+    ENDCASE
+
+    CASE strmid(probes[1],0,2) OF
+      'rb': get_mageis_l2,probe=strmid(probes[1],0,1,/ REVERSE_OFFSET),trange=trange_part,/facmat 
+      'mm': get_mms_location,probe=strmid(probes[1],0,1,/ REVERSE_OFFSET),trange=trange_part,/facmat 
+      'th': get_themis_location,probe=strmid(probes[1],0,1,/ REVERSE_OFFSET),trange=trange_part,/facmat 
+      ELSE: PRINT, 'probe should be set as mms?,th? or rbsp?'
+    ENDCASE
+    
+    ;Difference in GSM coordinates
+    tvars=[probes[0]+'_pos_gsm',probes[1]+'_pos_gsm',probes[0]+'_L',probes[0]+'_MLT',probes[0]+'_MLAT',probes[1]+'_L',probes[1]+'_MLT',probes[1]+'_MLAT',probes[0]+'_rotmat',probes[1]+'_rotmat']
+    tvar_interpol,tvars=tvars,trange=trange_part,dt=30.,/overwrite
+    dif_data,probes[0]+'_pos_gsm',probes[1]+'_pos_gsm',newname='pos_diff_gsm'
+    tvector_rotate, probes[0]+'_rotmat', 'pos_diff_gsm', newname = probes[0]+'_pos_diff_fac'
+    tvector_rotate, probes[1]+'_rotmat', 'pos_diff_gsm', newname = probes[1]+'_pos_diff_fac'
+    get_data,probes[0]+'_pos_diff_fac',data=dif_1
+    get_data,probes[1]+'_pos_diff_fac',data=dif_2
+    get_data,probes[0]+'_MLAT',data=mlat_1
+    get_data,probes[1]+'_MLAT',data=mlat_2
+
+    dif_out=dif_1
+    ind_replace=where(abs(mlat_2.y) lt abs(mlat_1.y),count)
+    if count ge 1 then dif_out.y[ind_replace,*]=dif_2.y[ind_replace,*]
+    
+    store_data,'diff_fac_low_lat',data=dif_out
+    
+    conj_two_sat,probes[0]+'_L',probes[0]+'_MLT',probes[0]+'_MLAT',probes[1]+'_L',probes[1]+'_MLT',probes[1]+'_MLAT','diff_fac_low_lat',dl,dmlt,dmlat,probe1=probes[0],probe2=probes[1],trange=trange_part
+    run_start_time=time_string(time_double(run_start_time)+60.*60*24*30)
+    run_end_time=time_string(time_double(run_end_time)+60.*60*24*30)
+  endwhile
+  
+END

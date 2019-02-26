@@ -1,0 +1,8 @@
+pro output_txt, variable, filename = filename;,format=format
+;; print a variable to a txtfile
+file_delete, filename, /allow_nonexistent
+openw,lun1,filename,/get_lun
+printf,lun1,variable;,format='(A16,A16,A16,A16,A16,A16,A16,A16,A16)'
+close,lun1
+free_lun,lun1
+end

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Default/MultiSateEMIC/conj_two_sat.pro&apos; to &apos;conj_two_sat_back.pro&apos;" description="Rename resource &apos;conj_two_sat.pro&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="MultiSateEMIC/conj_two_sat.pro" name="conj_two_sat_back.pro" stamp="1536198653728" updateReferences="true"/>
+</session>

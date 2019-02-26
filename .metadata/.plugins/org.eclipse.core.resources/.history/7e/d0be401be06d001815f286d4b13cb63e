@@ -1,0 +1,51 @@
+pro get_magnetometer_tdpwrspc,yy,mm,dd,sc
+  fre_min=0.1 & fre_max=10 & PB_min=1e-4 & PB_max=1e2
+
+  filename=file_search('/projectnb/burbsp/big/SATELLITE/rbsp/emfisis.physics.uiowa.edu/Flight/RBSP-'+sc+'/L3/20'+yy+'/'+mm+'/'+dd+'/', $
+    'rbsp-'+sc+'_magnetometer_hires-sm_emfisis-L3_20'+yy+mm+dd+'_v*.*.*.cdf',/fold_case,count=count)
+  if count eq 0 then return else exist=1
+  cdf2tplot,file=filename[count-1],/get_support_data
+
+  ;;;;;dynamic power spectrum------
+  get_data,'Mag',data=d
+
+stop
+
+  tdpwrspc,'Mag',nboxpoints=round(192./0.05),bin=1
+
+  get_data,'Mag_x_dpwrspc',data=dx
+  get_data,'Mag_y_dpwrspc',data=dy
+  get_data,'Mag_z_dpwrspc',data=dz
+
+  bwave_x=dx.y
+  bwave_y=dy.y
+  bwave_z=dz.y
+
+  bwave_T=bwave_x+bwave_y+bwave_z
+  
+  store_data,'Bw_x',data={x:dx.x,v:reform(dx.v[0,*]),y:bwave_x}
+  store_data,'Bw_y',data={x:dy.x,v:reform(dy.v[0,*]),y:bwave_y}
+  store_data,'Bw_z',data={x:dz.x,v:reform(dz.v[0,*]),y:bwave_z}
+  store_data,'Bw_mag',data={x:dz.x,v:reform(dz.v[0,*]),y:bwave_t}
+
+  options,'Bw_?','spec',1
+  ylim,'Bw_?',fre_min,fre_max,1
+  zlim,'Bw_?',pb_min,pb_max,1
+  options,'Bw_?',ytitle='Frequency!C!C(Hz)',ysubtitle=' '
+  options,'Bw_x',ztitle='BxBx!C!C((nT)!U2!N/Hz)'
+  options,'Bw_y',ztitle='ByBy!C!C((nT)!U2!N/Hz)'
+  options,'Bw_z',ztitle='BzBz!C!C((nT)!U2!N/Hz)'
+  options,'Bw_mag',ztitle='Magnetometer!C!C(nT!U2!N/Hz)',spec=1,ztickformat='exponent',ytitle='Frequency!C!C(Hz)',$
+    ysubtitle=' ',yrange=[fre_min,fre_max],/ylog,ystyle=1,zrange=[pb_min,pb_max],/zlog,zstyle=1
+
+  get_B0state,yy,mm,dd,sc
+  get_data,'fcp_eq',data=d
+  store_data,'fche_eq',data={x:d.x,y:d.y/4}
+  store_data,'fco_eq',data={x:d.x,y:d.y/16}
+  options,'fcp_eq',linestyle=0,colors='w'
+  options,'fche_eq',linestyle=2,colors='w'
+  options,'fco_eq',linestyle=1,colors='w'
+  store_data,'Bw_mag_combo',data=['Bw_mag','fche_eq','fco_eq','fcp_eq']
+  options,'Bw_mag_combo',ztitle='Magnetometer!C!C(nT!U2!N/Hz)',ztickformat='exponent',ytitle='Frequency!C!C(Hz)',$
+    ysubtitle=' ',yrange=[fre_min,fre_max],/ylog,ystyle=1,zrange=[pb_min,pb_max],/zlog,zstyle=1
+end

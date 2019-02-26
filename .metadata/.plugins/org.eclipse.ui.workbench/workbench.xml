@@ -1,0 +1,673 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workbench version="2.0">
+<workbenchAdvisor/>
+<window height="850" width="1436" x="0" y="25">
+<fastViewData fastViewLocation="1024">
+<orientation position="512" view="org.eclipse.debug.ui.DebugView"/>
+</fastViewData>
+<perspectiveBar>
+<itemSize x="0"/>
+</perspectiveBar>
+<coolbarLayout>
+<coolItem id="org.eclipse.ui.workbench.file" itemType="typeToolBarContribution" x="269" y="63"/>
+<coolItem id="com.rsi.idldt.ui.textedit.toolbar" itemType="typeToolBarContribution" x="354" y="63"/>
+<coolItem id="com.rsi.idldt.ui.toolbar.debugTools" itemType="typeToolBarContribution" x="496" y="63"/>
+</coolbarLayout>
+<page aggregateWorkingSetId="Aggregate for window 1525308554420" focus="true" label="Workspace - IDL">
+<editors>
+<editorArea activeWorkbook="DefaultEditorWorkbook">
+<info part="DefaultEditorWorkbook">
+<folder appearance="1" expanded="2">
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
+<part id="0"/>
+<part id="1"/>
+<part id="2"/>
+<part id="3"/>
+<part id="4"/>
+<part id="5"/>
+<part id="6"/>
+<part id="7"/>
+<part id="8"/>
+<part id="9"/>
+<part id="10"/>
+<part id="11"/>
+<part id="12"/>
+<part id="13"/>
+<part id="14"/>
+<part id="15"/>
+<part id="16"/>
+<part id="17"/>
+<part id="18"/>
+<part id="19"/>
+<part id="20"/>
+<part id="21"/>
+<part id="22"/>
+<part id="23"/>
+<part id="24"/>
+<part id="25"/>
+<part id="26"/>
+<part id="27"/>
+<part id="28"/>
+<part id="29"/>
+<part id="30"/>
+<part id="31"/>
+<part id="32"/>
+<part id="33"/>
+<part id="34"/>
+<part id="35"/>
+<part id="36"/>
+<part id="37"/>
+<part id="38"/>
+<part id="39"/>
+<part id="40"/>
+<part id="41"/>
+<part id="42"/>
+<part id="43"/>
+<part id="44"/>
+<part id="45"/>
+<part id="46"/>
+<part id="47"/>
+<part id="48"/>
+<part id="49"/>
+<part id="50"/>
+<part id="51"/>
+<part id="52"/>
+<part id="53"/>
+<part id="54"/>
+<part id="55"/>
+<part id="56"/>
+<part id="57"/>
+<part id="58"/>
+<part id="59"/>
+<part id="60"/>
+<part id="61"/>
+<part id="62"/>
+</presentation>
+</folder>
+</info>
+</editorArea>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="conj_location_analysis_old.pro" partName="conj_location_analysis_old.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/command_history/conj_location_analysis_old.pro" title="conj_location_analysis_old.pro" tooltip="IDL_code/command_history/conj_location_analysis_old.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/command_history/conj_location_analysis_old.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="4691" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="command_history_combine_csv_to_one.pro" partName="command_history_combine_csv_to_one.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/command_history/command_history_combine_csv_to_one.pro" title="command_history_combine_csv_to_one.pro" tooltip="IDL_code/command_history/command_history_combine_csv_to_one.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/command_history/command_history_combine_csv_to_one.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="3180" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="check_location_main.pro" partName="check_location_main.pro" title="check_location_main.pro" tooltip="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/analysis/check_location_main.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/analysis/check_location_main.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="0" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="themis_ne_survey.pro" partName="themis_ne_survey.pro" title="themis_ne_survey.pro" tooltip="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Survey/themis_ne_survey.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Survey/themis_ne_survey.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="121" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="sc_location_generation.pro" partName="sc_location_generation.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/save_data/sc_location_generation.pro" title="sc_location_generation.pro" tooltip="IDL_code/save_data/sc_location_generation.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/save_data/sc_location_generation.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="194" selectionOffset="4240" selectionTopPixel="1116"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="chorus_fff_main.pro" partName="chorus_fff_main.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/from_wen/fff_chorus/chorus_fff_main.pro" title="chorus_fff_main.pro" tooltip="IDL_code/from_wen/fff_chorus/chorus_fff_main.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/from_wen/fff_chorus/chorus_fff_main.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1075" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="get_emfisis_l2_magnetometer.pro" partName="get_emfisis_l2_magnetometer.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/load_data/get_emfisis_l2_magnetometer.pro" title="get_emfisis_l2_magnetometer.pro" tooltip="IDL_code/load_data/get_emfisis_l2_magnetometer.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/load_data/get_emfisis_l2_magnetometer.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="639" selectionOffset="455" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="command_history_check_sc_mp_pp.pro" partName="command_history_check_sc_mp_pp.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/command_history/command_history_check_sc_mp_pp.pro" title="command_history_check_sc_mp_pp.pro" tooltip="IDL_code/command_history/command_history_check_sc_mp_pp.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/command_history/command_history_check_sc_mp_pp.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1843" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="cakeplot.pro" partName="cakeplot.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Tools/cakeplot.pro" title="cakeplot.pro" tooltip="IDL_code/Tools/cakeplot.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/Tools/cakeplot.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1495" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="rbsp_whistler_survey_w_flag.pro" partName="rbsp_whistler_survey_w_flag.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Survey/rbsp_whistler_survey_w_flag.pro" title="rbsp_whistler_survey_w_flag.pro" tooltip="IDL_code/Survey/rbsp_whistler_survey_w_flag.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/Survey/rbsp_whistler_survey_w_flag.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2641" selectionTopPixel="774"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="ulf_wave_find_rbsp.pro" partName="ulf_wave_find_rbsp.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/EMIC/ulf_wave_find_rbsp.pro" title="ulf_wave_find_rbsp.pro" tooltip="IDL_code/EMIC/ulf_wave_find_rbsp.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/EMIC/ulf_wave_find_rbsp.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="11798" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="emic_wave_find_rbsp.pro" partName="emic_wave_find_rbsp.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/auto_find/emic_wave_find_rbsp.pro" title="emic_wave_find_rbsp.pro" tooltip="IDL_code/auto_find/emic_wave_find_rbsp.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/auto_find/emic_wave_find_rbsp.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="830" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="thm_ui_wavelet.pro" partName="thm_ui_wavelet.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/MultiSateEMIC/thm_ui_wavelet.pro" title="thm_ui_wavelet.pro" tooltip="Default/MultiSateEMIC/thm_ui_wavelet.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/MultiSateEMIC/thm_ui_wavelet.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2581" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="poes_flux_survey.pro" partName="poes_flux_survey.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Survey/poes_flux_survey.pro" title="poes_flux_survey.pro" tooltip="IDL_code/Survey/poes_flux_survey.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/Survey/poes_flux_survey.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="68" selectionOffset="7494" selectionTopPixel="1979"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="untitled_6.pro" partName="untitled_6.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/command_history/untitled_6.pro" title="untitled_6.pro" tooltip="IDL_code/command_history/untitled_6.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/command_history/untitled_6.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="83" selectionOffset="60" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="calculate_loss_cone.pro" partName="calculate_loss_cone.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Tools/calculate_loss_cone.pro" title="calculate_loss_cone.pro" tooltip="IDL_code/Tools/calculate_loss_cone.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/Tools/calculate_loss_cone.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="837" selectionTopPixel="112"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="conj_burst_chorus_wave_parameters_main_v2.pro" partName="conj_burst_chorus_wave_parameters_main_v2.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/save_data/conj_burst_chorus_wave_parameters_main_v2.pro" title="conj_burst_chorus_wave_parameters_main_v2.pro" tooltip="IDL_code/save_data/conj_burst_chorus_wave_parameters_main_v2.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/save_data/conj_burst_chorus_wave_parameters_main_v2.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="10631" selectionOffset="0" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="idl_run_for_parameters.pro" partName="idl_run_for_parameters.pro" title="idl_run_for_parameters.pro" tooltip="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/test/idl_run_for_parameters.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/test/idl_run_for_parameters.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="557" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="conj_location_analysis_burst_a_point_each_conjunction_binplot.pro" partName="conj_location_analysis_burst_a_point_each_conjunction_binplot.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/analysis/conj_location_analysis_burst_a_point_each_conjunction_binplot.pro" title="conj_location_analysis_burst_a_point_each_conjunction_binplot.pro" tooltip="IDL_code/analysis/conj_location_analysis_burst_a_point_each_conjunction_binplot.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/analysis/conj_location_analysis_burst_a_point_each_conjunction_binplot.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="986" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="get_tsy_params.pro" partName="get_tsy_params.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/external/IDL_GEOPACK/get_tsy_params.pro" title="get_tsy_params.pro" tooltip="Default/spedas_3_00/idl/external/IDL_GEOPACK/get_tsy_params.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/external/IDL_GEOPACK/get_tsy_params.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="14" selectionOffset="2674" selectionTopPixel="886"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="load_kpap.pro" partName="load_kpap.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/from_wen/Lstar/load_kpap.pro" title="load_kpap.pro" tooltip="IDL_code/from_wen/Lstar/load_kpap.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/from_wen/Lstar/load_kpap.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1265" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="get_mageis_hr.pro" partName="get_mageis_hr.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/load_data/get_mageis_hr.pro" title="get_mageis_hr.pro" tooltip="IDL_code/load_data/get_mageis_hr.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/load_data/get_mageis_hr.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1023" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="get_magnetometer_tdpwrspc.pro" partName="get_magnetometer_tdpwrspc.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/load_data/get_magnetometer_tdpwrspc.pro" title="get_magnetometer_tdpwrspc.pro" tooltip="IDL_code/load_data/get_magnetometer_tdpwrspc.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/load_data/get_magnetometer_tdpwrspc.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2887" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="wav_data.pro" partName="wav_data.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/tools/tplot/wvlt/wav_data.pro" title="wav_data.pro" tooltip="Default/spedas_3_00/idl/general/tools/tplot/wvlt/wav_data.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/tools/tplot/wvlt/wav_data.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="6281" selectionTopPixel="3636"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="wavelet2.pro" partName="wavelet2.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/tools/tplot/wvlt/wavelet2.pro" title="wavelet2.pro" tooltip="Default/spedas_3_00/idl/general/tools/tplot/wvlt/wavelet2.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/tools/tplot/wvlt/wavelet2.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1265" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="wavelet.pro" partName="wavelet.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/tools/tplot/wvlt/wavelet.pro" title="wavelet.pro" tooltip="Default/spedas_3_00/idl/general/tools/tplot/wvlt/wavelet.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/tools/tplot/wvlt/wavelet.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="12820" selectionTopPixel="4879"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="chisqr_cvf.pro" partName="chisqr_cvf.pro" title="chisqr_cvf.pro" tooltip="/share/pkg/envi/5.4/install/envi54/idl86/lib/chisqr_cvf.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/share/pkg/envi/5.4/install/envi54/idl86/lib/chisqr_cvf.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1916" selectionTopPixel="91"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="rbsp_emic_survey.pro" partName="rbsp_emic_survey.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Survey/rbsp_emic_survey.pro" title="rbsp_emic_survey.pro" tooltip="IDL_code/Survey/rbsp_emic_survey.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/Survey/rbsp_emic_survey.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="504" selectionOffset="3057" selectionTopPixel="558"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="omni_survey.pro" partName="omni_survey.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Survey/omni_survey.pro" title="omni_survey.pro" tooltip="IDL_code/Survey/omni_survey.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/Survey/omni_survey.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="34" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="omni_hro_load.pro" partName="omni_hro_load.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/missions/ISTP/omni_hro_load.pro" title="omni_hro_load.pro" tooltip="Default/spedas_3_00/idl/general/missions/ISTP/omni_hro_load.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/missions/ISTP/omni_hro_load.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2135" selectionTopPixel="110"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="get_arase_b0.pro" partName="get_arase_b0.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/load_data/get_arase_b0.pro" title="get_arase_b0.pro" tooltip="IDL_code/load_data/get_arase_b0.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/load_data/get_arase_b0.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="91" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="get_arase_mgf_l2.pro" partName="get_arase_mgf_l2.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/load_data/get_arase_mgf_l2.pro" title="get_arase_mgf_l2.pro" tooltip="IDL_code/load_data/get_arase_mgf_l2.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/load_data/get_arase_mgf_l2.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1044" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="tsmooth2.pro" partName="tsmooth2.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/science/wind/tsmooth2.pro" title="tsmooth2.pro" tooltip="Default/spedas_3_00/idl/general/science/wind/tsmooth2.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/science/wind/tsmooth2.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1977" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="rbsp_load_state.pro" partName="rbsp_load_state.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/missions/rbsp/spacecraft/rbsp_load_state.pro" title="rbsp_load_state.pro" tooltip="Default/spedas_3_00/idl/general/missions/rbsp/spacecraft/rbsp_load_state.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/missions/rbsp/spacecraft/rbsp_load_state.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="35094" selectionTopPixel="19440"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="lstar_cal_main.pro" partName="lstar_cal_main.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/from_wen/Lstar/lstar_cal_main.pro" title="lstar_cal_main.pro" tooltip="IDL_code/from_wen/Lstar/lstar_cal_main.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/from_wen/Lstar/lstar_cal_main.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="128" selectionOffset="165" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="chorus_fff_loop.pro" partName="chorus_fff_loop.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/from_wen/fff_chorus/chorus_fff_loop.pro" title="chorus_fff_loop.pro" tooltip="IDL_code/from_wen/fff_chorus/chorus_fff_loop.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/from_wen/fff_chorus/chorus_fff_loop.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="17377" selectionTopPixel="7992"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="kyoto_load_ae.pro" partName="kyoto_load_ae.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/missions/kyoto/kyoto_load_ae.pro" title="kyoto_load_ae.pro" tooltip="Default/spedas_3_00/idl/general/missions/kyoto/kyoto_load_ae.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/missions/kyoto/kyoto_load_ae.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="5049" selectionTopPixel="4539"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="cal_rbsp_efw_fbk_cc.pro" partName="cal_rbsp_efw_fbk_cc.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/test/cal_rbsp_efw_fbk_cc.pro" title="cal_rbsp_efw_fbk_cc.pro" tooltip="IDL_code/test/cal_rbsp_efw_fbk_cc.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/test/cal_rbsp_efw_fbk_cc.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2253" selectionTopPixel="442"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="event20140227.pro" partName="event20140227.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/EMIC/event20140227.pro" title="event20140227.pro" tooltip="IDL_code/EMIC/event20140227.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/EMIC/event20140227.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="189" selectionOffset="546" selectionTopPixel="165"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="chorus_parameters_generation_from_cdf.pro" partName="chorus_parameters_generation_from_cdf.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/save_data/chorus_parameters_generation_from_cdf.pro" title="chorus_parameters_generation_from_cdf.pro" tooltip="IDL_code/save_data/chorus_parameters_generation_from_cdf.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/save_data/chorus_parameters_generation_from_cdf.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="5" selectionOffset="961" selectionTopPixel="888"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="scatter_plot.pro" partName="scatter_plot.pro" title="scatter_plot.pro" tooltip="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Tools/scatter_plot.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Tools/scatter_plot.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="76" selectionOffset="298" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="spd_download.pro" partName="spd_download.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/spedas_tools/spd_download/spd_download.pro" title="spd_download.pro" tooltip="Default/spedas_3_00/idl/general/spedas_tools/spd_download/spd_download.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/spedas_tools/spd_download/spd_download.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="9" selectionOffset="5169" selectionTopPixel="2022"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="spd_download_file.pro" partName="spd_download_file.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/spedas_tools/spd_download/spd_download_file.pro" title="spd_download_file.pro" tooltip="Default/spedas_3_00/idl/general/spedas_tools/spd_download/spd_download_file.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/spedas_tools/spd_download/spd_download_file.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="8773" selectionTopPixel="4103"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="rbsp_load_spice_kernels.pro" partName="rbsp_load_spice_kernels.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/missions/rbsp/spacecraft/rbsp_load_spice_kernels.pro" title="rbsp_load_spice_kernels.pro" tooltip="Default/spedas_3_00/idl/general/missions/rbsp/spacecraft/rbsp_load_spice_kernels.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/missions/rbsp/spacecraft/rbsp_load_spice_kernels.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2024" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="lstar_cal_qd.pro" partName="lstar_cal_qd.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/save_data/lstar_cal_qd.pro" title="lstar_cal_qd.pro" tooltip="IDL_code/save_data/lstar_cal_qd.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/save_data/lstar_cal_qd.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="0" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="file_retrieve.pro" partName="file_retrieve.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/misc/file_retrieve.pro" title="file_retrieve.pro" tooltip="Default/spedas_3_00/idl/general/misc/file_retrieve.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/misc/file_retrieve.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="9133" selectionTopPixel="2503"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="plot_init.pro" partName="plot_init.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Tools/plot_init.pro" title="plot_init.pro" tooltip="IDL_code/Tools/plot_init.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/Tools/plot_init.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="796" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="cdf_load_vars.pro" partName="cdf_load_vars.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/CDF/cdf_load_vars.pro" title="cdf_load_vars.pro" tooltip="Default/spedas_3_00/idl/general/CDF/cdf_load_vars.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/CDF/cdf_load_vars.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="7891" selectionTopPixel="2502"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="rbsp_despin.pro" partName="rbsp_despin.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/missions/rbsp/efw/rbsp_despin.pro" title="rbsp_despin.pro" tooltip="Default/spedas_3_00/idl/general/missions/rbsp/efw/rbsp_despin.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/missions/rbsp/efw/rbsp_despin.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="141" selectionOffset="5622" selectionTopPixel="2780"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="fgm_load_autoplot.pro" partName="fgm_load_autoplot.pro" title="fgm_load_autoplot.pro" tooltip="/projectnb/burbsp/home/xcshen/Project_M/code/Default/Juno/MAG/fgm_load_autoplot.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/projectnb/burbsp/home/xcshen/Project_M/code/Default/Juno/MAG/fgm_load_autoplot.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="822" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="juno_summary_plot.pro" partName="juno_summary_plot.pro" title="juno_summary_plot.pro" tooltip="/projectnb/burbsp/home/xcshen/Project_M/code/Default/Survey/juno_summary_plot.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/projectnb/burbsp/home/xcshen/Project_M/code/Default/Survey/juno_summary_plot.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2734" selectionTopPixel="904"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="get_juno_jedi.pro" partName="get_juno_jedi.pro" title="get_juno_jedi.pro" tooltip="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/load_data/get_juno_jedi.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/load_data/get_juno_jedi.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="8" selectionOffset="76" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="get_juno_b0.pro" partName="get_juno_b0.pro" title="get_juno_b0.pro" tooltip="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/load_data/get_juno_b0.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/load_data/get_juno_b0.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="28" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="get_efw_l2.pro" partName="get_efw_l2.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/load_data/get_efw_l2.pro" title="get_efw_l2.pro" tooltip="IDL_code/load_data/get_efw_l2.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/load_data/get_efw_l2.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="822" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="file_dailynames.pro" partName="file_dailynames.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/Default/spedas_3_00/idl/general/misc/file_dailynames.pro" title="file_dailynames.pro" tooltip="Default/spedas_3_00/idl/general/misc/file_dailynames.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Default/spedas_3_00/idl/general/misc/file_dailynames.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="11" selectionOffset="882" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="waves_survey_e_load.pro" partName="waves_survey_e_load.pro" title="waves_survey_e_load.pro" tooltip="/projectnb/burbsp/home/xcshen/Project_M/code/Default/Juno/Waves/waves_survey_e_load.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/projectnb/burbsp/home/xcshen/Project_M/code/Default/Juno/Waves/waves_survey_e_load.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2752" selectionTopPixel="1221"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="command_history_juno.pro" partName="command_history_juno.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/command_history/command_history_juno.pro" title="command_history_juno.pro" tooltip="IDL_code/command_history/command_history_juno.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/command_history/command_history_juno.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="21" selectionOffset="113" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="write_csv_rs.pro" partName="write_csv_rs.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Tools/write_csv_rs.pro" title="write_csv_rs.pro" tooltip="IDL_code/Tools/write_csv_rs.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/Tools/write_csv_rs.pro"/>
+<editorState selectionHorizontalPixel="1682" selectionLength="6" selectionOffset="3537" selectionTopPixel="1278"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="command_history_juno_plot.pro" partName="command_history_juno_plot.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/command_history/command_history_juno_plot.pro" title="command_history_juno_plot.pro" tooltip="IDL_code/command_history/command_history_juno_plot.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/command_history/command_history_juno_plot.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="3020" selectionTopPixel="637"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="cgaxis.pro" partName="cgaxis.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/Tools/cg/cgaxis.pro" title="cgaxis.pro" tooltip="IDL_code/Tools/cg/cgaxis.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/Tools/cg/cgaxis.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="6" selectionOffset="9328" selectionTopPixel="2096"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="sav_spin_mat_main.pro" partName="sav_spin_mat_main.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/save_data/sav_spin_mat_main.pro" title="sav_spin_mat_main.pro" tooltip="IDL_code/save_data/sav_spin_mat_main.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/save_data/sav_spin_mat_main.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1269" selectionTopPixel="0"/>
+</editor>
+<editor id="com.rsi.idldt.proeditor.ProEditor" name="conj_burst_chorus_wave_parameters_main_v3.pro" partName="conj_burst_chorus_wave_parameters_main_v3.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/save_data/conj_burst_chorus_wave_parameters_main_v3.pro" title="conj_burst_chorus_wave_parameters_main_v3.pro" tooltip="IDL_code/save_data/conj_burst_chorus_wave_parameters_main_v3.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/save_data/conj_burst_chorus_wave_parameters_main_v3.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1489" selectionTopPixel="0"/>
+</editor>
+<editor activePart="true" focus="true" id="com.rsi.idldt.proeditor.ProEditor" name="command_history_vlf_survey.pro" partName="command_history_vlf_survey.pro" path="/usr2/postdoc/shenxc/IDLWorkspace/IDL_code/command_history/command_history_vlf_survey.pro" title="command_history_vlf_survey.pro" tooltip="IDL_code/command_history/command_history_vlf_survey.pro" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/IDL_code/command_history/command_history_vlf_survey.pro"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="4566" selectionTopPixel="1935"/>
+</editor>
+</editors>
+<views>
+<view id="org.eclipse.ui.navigator.ProjectExplorer" partName="Project Explorer">
+<viewState CommonNavigator.LINKING_ENABLED="0" org.eclipse.ui.navigator.resources.workingSets.showTopLevelWorkingSets="0"/>
+</view>
+<view id="com.rsi.idldt.ui.views.CommandHistoryView" partName="Command History">
+<viewState columnWidth0="579" grp200="1" grp201="1" grp202="1" grp203="1" grp205="1" grp206="1" showTreeView="1" sortColumn="1" sortDirection="128"/>
+</view>
+<view id="com.rsi.idldt.console.IDLConsoleView" partName="IDL Console">
+<viewState/>
+</view>
+<view id="org.eclipse.debug.ui.DebugView" partName="Debug">
+<viewState/>
+</view>
+<view id="org.eclipse.ui.views.ProblemView" partName="Problems">
+<viewState PRIMARY_SORT_FIELD="org.eclipse.ui.ide.severityAndDescriptionField" categoryGroup="org.eclipse.ui.ide.severity" markerContentGenerator="org.eclipse.ui.ide.problemsGenerator" partName="Problems">
+<columnWidths org.eclipse.ui.ide.locationField="105" org.eclipse.ui.ide.markerType="105" org.eclipse.ui.ide.pathField="140" org.eclipse.ui.ide.resourceField="105" org.eclipse.ui.ide.severityAndDescriptionField="350"/>
+<visible IMemento.internal.id="org.eclipse.ui.ide.severityAndDescriptionField"/>
+<visible IMemento.internal.id="org.eclipse.ui.ide.resourceField"/>
+<visible IMemento.internal.id="org.eclipse.ui.ide.pathField"/>
+<visible IMemento.internal.id="org.eclipse.ui.ide.locationField"/>
+<visible IMemento.internal.id="org.eclipse.ui.ide.markerType"/>
+</viewState>
+</view>
+<view id="org.eclipse.debug.ui.VariableView" partName="Variables">
+<viewState/>
+</view>
+</views>
+<perspectives activePart="com.rsi.idldt.console.IDLConsoleView" activePerspective="com.rsi.idldt.ui.IDLPerspective">
+<perspective editorAreaTrimState="2" editorAreaVisible="1" fixed="0" version="0.016">
+<descriptor class="com.rsi.idldt.internal.ui.IDLPerspectiveFactory" id="com.rsi.idldt.ui.IDLPerspective" label="IDL"/>
+<alwaysOnActionSet id="com.rsi.idldt.ui.actionSets.CmdLine"/>
+<alwaysOnActionSet id="com.rsi.idldt.ui.actionSets.Run"/>
+<alwaysOnActionSet id="com.rsi.idldt.ui.actionSets.Wizard"/>
+<alwaysOnActionSet id="com.rsi.idldt.ui.actionSets.Help"/>
+<alwaysOnActionSet id="com.rsi.idldt.ui.MacroActionSet"/>
+<alwaysOnActionSet id="org.eclipse.ui.cheatsheets.actionSet"/>
+<alwaysOnActionSet id="org.eclipse.search.searchActionSet"/>
+<alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.annotationNavigation"/>
+<alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.navigation"/>
+<alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo"/>
+<alwaysOnActionSet id="org.eclipse.ui.actionSet.keyBindings"/>
+<alwaysOnActionSet id="org.eclipse.ui.actionSet.openFiles"/>
+<alwaysOnActionSet id="org.eclipse.ui.NavigateActionSet"/>
+<alwaysOnActionSet id="org.eclipse.debug.ui.breakpointActionSet"/>
+<alwaysOnActionSet id="com.rsi.idldt.ui.CodingActionSet"/>
+<alwaysOnActionSet id="org.eclipse.debug.ui.debugActionSet"/>
+<show_view_action id="org.eclipse.search.ui.views.SearchView"/>
+<show_view_action id="org.eclipse.ui.views.ProblemView"/>
+<show_view_action id="org.eclipse.ui.views.TaskList"/>
+<show_view_action id="org.eclipse.ui.views.BookmarkView"/>
+<hide_toolbar_item_id id="org.eclipse.ui.edit.text.toggleShowSelectedElementOnly"/>
+<view id="org.eclipse.ui.navigator.ProjectExplorer"/>
+<view id="org.eclipse.debug.ui.VariableView"/>
+<view id="com.rsi.idldt.console.IDLConsoleView"/>
+<view id="com.rsi.idldt.ui.views.CommandHistoryView"/>
+<view id="org.eclipse.ui.views.ProblemView"/>
+<fastViews>
+<view id="org.eclipse.debug.ui.DebugView" ratio="0.3"/>
+</fastViews>
+<fastViewBars/>
+<layout>
+<mainWindow>
+<info folder="true" part="left">
+<folder activePageID="com.rsi.idldt.console.IDLConsoleView" appearance="2" expanded="2">
+<page content="org.eclipse.ui.navigator.ProjectExplorer" label="Project Explorer"/>
+<page content="org.eclipse.debug.ui.VariableView" label="Variables"/>
+<page content="com.rsi.idldt.console.IDLConsoleView" label="IDL Console"/>
+<page content="com.rsi.idldt.ui.views.CommandHistoryView" label="Command History"/>
+<page content="org.eclipse.ui.views.ProblemView" label="Problems"/>
+<page content="org.eclipse.ui.views.ContentOutline" label="LabelNotFound"/>
+<page content="org.eclipse.ui.views.ResourceNavigator" label="LabelNotFound"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
+<part id="0"/>
+<part id="1"/>
+<part id="2"/>
+<part id="3"/>
+<part id="4"/>
+</presentation>
+</folder>
+</info>
+<info folder="true" part="stickyFolderRight" ratio="0.7495049" ratioLeft="757" ratioRight="253" relationship="2" relative="left">
+<folder appearance="2" expanded="2">
+<page content="org.eclipse.help.ui.HelpView" label="LabelNotFound"/>
+<page content="org.eclipse.ui.internal.introview" label="LabelNotFound"/>
+<page content="org.eclipse.ui.cheatsheets.views.CheatSheetView" label="LabelNotFound"/>
+</folder>
+</info>
+<info part="com.rsi.idldt.HierarchyView" ratio="0.7" ratioLeft="707" ratioRight="303" relationship="2" relative="left"/>
+<info folder="true" part="bottom" ratio="0.6729291" ratioLeft="788" ratioRight="383" relationship="4" relative="left">
+<folder appearance="2" expanded="2">
+<page content="org.eclipse.search.ui.views.SearchView" label="LabelNotFound"/>
+<page content="org.eclipse.debug.ui.BreakpointView" label="LabelNotFound"/>
+<page content="*" label="LabelNotFound"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory"/>
+</folder>
+</info>
+<info part="org.eclipse.ui.editorss" ratio="0.2660916" ratioLeft="401" ratioRight="1106" relationship="2" relative="left"/>
+</mainWindow>
+</layout>
+</perspective>
+</perspectives>
+<workingSets/>
+<navigationHistory>
+<editors>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" path="/IDL_code/command_history/command_for_qqshi.pro"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" path="/Default/spedas_3_00/idl/projects/themis/ground/thm_load_gmag.pro"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" path="/IDL_code/Tools/plot_init.pro"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" path="/IDL_code/save_data/conj_burst_chorus_wave_parameters_main_v3.pro"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" path="/IDL_code/save_data/sav_spin_mat_main.pro"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" path="/IDL_code/test/cal_rbsp_efw_fbk_cc.pro"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" path="/IDL_code/command_history/command_history_vlf_survey.pro"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" path="/IDL_code/command_history/command_history_juno_plot.pro"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" path="/IDL_code/command_history/command_history_juno.pro"/>
+<editor factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" uri="file:/projectnb/burbsp/home/xcshen/Project_M/code/Default/Juno/Trajectory/ephemeris_load.pro"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" path="/IDL_code/command_history/conj_location_analysis_old.pro"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" path="/IDL_code/command_history/command_history_juno.pro"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" path="/IDL_code/command_history/command_history_vlf_survey.pro"/>
+</editors>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="103" y="0"/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="152" y="0"/>
+</item>
+<item historyLabel="thm_load_gmag.pro" index="1">
+<position/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="152" y="0"/>
+</item>
+<item historyLabel="thm_load_gmag.pro" index="1">
+<position info="not_deleted" x="9773" y="16"/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="152" y="0"/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="202" y="0"/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="202" y="0"/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="1755" y="0"/>
+</item>
+<item historyLabel="plot_init.pro" index="2">
+<position info="not_deleted" x="796" y="0"/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="1760" y="175"/>
+</item>
+<item historyLabel="conj_burst_chorus_wave_parameters_main_v3.pro" index="3">
+<position info="not_deleted" x="1489" y="0"/>
+</item>
+<item historyLabel="sav_spin_mat_main.pro" index="4">
+<position info="not_deleted" x="1269" y="0"/>
+</item>
+<item historyLabel="cal_rbsp_efw_fbk_cc.pro" index="5">
+<position info="not_deleted" x="441" y="0"/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="340" y="0"/>
+</item>
+<item historyLabel="cal_rbsp_efw_fbk_cc.pro" index="5">
+<position info="not_deleted" x="2811" y="0"/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="340" y="0"/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="93" y="0"/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="1755" y="0"/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="103" y="0"/>
+</item>
+<item historyLabel="command_for_qqshi.pro" index="0">
+<position info="not_deleted" x="1755" y="0"/>
+</item>
+<item historyLabel="cal_rbsp_efw_fbk_cc.pro" index="5">
+<position info="not_deleted" x="2253" y="0"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="6">
+<position info="not_deleted" x="956" y="0"/>
+</item>
+<item historyLabel="cal_rbsp_efw_fbk_cc.pro" index="5">
+<position info="not_deleted" x="2253" y="0"/>
+</item>
+<item historyLabel="command_history_juno_plot.pro" index="7">
+<position info="not_deleted" x="5059" y="0"/>
+</item>
+<item historyLabel="command_history_juno.pro" index="8">
+<position info="not_deleted" x="6546" y="0"/>
+</item>
+<item historyLabel="command_history_juno.pro" index="8">
+<position info="not_deleted" x="6769" y="0"/>
+</item>
+<item historyLabel="command_history_juno.pro" index="8">
+<position info="not_deleted" x="4173" y="0"/>
+</item>
+<item historyLabel="ephemeris_load.pro" index="9">
+<position info="not_deleted" x="1811" y="0"/>
+</item>
+<item historyLabel="ephemeris_load.pro" index="9">
+<position info="not_deleted" x="4" y="14"/>
+</item>
+<item historyLabel="command_history_juno.pro" index="8">
+<position info="not_deleted" x="4180" y="0"/>
+</item>
+<item historyLabel="ephemeris_load.pro" index="9">
+<position info="not_deleted" x="455" y="0"/>
+</item>
+<item historyLabel="conj_location_analysis_old.pro" index="10">
+<position info="not_deleted" x="4691" y="0"/>
+</item>
+<item historyLabel="command_history_juno.pro" index="11">
+<position info="not_deleted" x="113" y="21"/>
+</item>
+<item historyLabel="conj_location_analysis_old.pro" index="10">
+<position info="not_deleted" x="4691" y="0"/>
+</item>
+<item historyLabel="command_history_juno.pro" index="11">
+<position info="not_deleted" x="113" y="21"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="0" y="0"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="778" y="0"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="2109" y="0"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="81" y="0"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="1529" y="0"/>
+</item>
+<item historyLabel="command_history_juno.pro" index="11">
+<position info="not_deleted" x="113" y="21"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="582" y="0"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="921" y="0"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="949" y="0"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="921" y="0"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="948" y="0"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="949" y="0"/>
+</item>
+<item historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="818" y="0"/>
+</item>
+<item active="true" historyLabel="command_history_vlf_survey.pro" index="12">
+<position info="not_deleted" x="949" y="0"/>
+</item>
+</navigationHistory>
+<input factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/" type="8"/>
+</page>
+<workbenchWindowAdvisor/>
+<actionBarAdvisor/>
+<trimLayout>
+<trimArea IMemento.internal.id="128">
+<trimItem IMemento.internal.id="org.eclipse.ui.internal.WorkbenchWindow.topBar"/>
+</trimArea>
+<trimArea IMemento.internal.id="1024">
+<trimItem IMemento.internal.id="org.eclise.ui.internal.FastViewBar"/>
+<trimItem IMemento.internal.id="org.eclipse.jface.action.StatusLineManager"/>
+<trimItem IMemento.internal.id="org.eclipse.ui.internal.progress.ProgressRegion"/>
+</trimArea>
+</trimLayout>
+</window>
+<mruList>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="command_history_vlf_survey.pro" tooltip="IDL_code/command_history/command_history_vlf_survey.pro">
+<persistable path="/IDL_code/command_history/command_history_vlf_survey.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="ephemeris_load.pro" tooltip="/projectnb/burbsp/home/xcshen/Project_M/code/Default/Juno/Trajectory/ephemeris_load.pro">
+<persistable uri="file:/projectnb/burbsp/home/xcshen/Project_M/code/Default/Juno/Trajectory/ephemeris_load.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="thm_load_gmag.pro" tooltip="Default/spedas_3_00/idl/projects/themis/ground/thm_load_gmag.pro">
+<persistable path="/Default/spedas_3_00/idl/projects/themis/ground/thm_load_gmag.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="tplot_multiaxis.pro" tooltip="Default/spedas_3_00/idl/general/tplot/tplot_multiaxis.pro">
+<persistable path="/Default/spedas_3_00/idl/general/tplot/tplot_multiaxis.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="command_for_qqshi.pro" tooltip="IDL_code/command_history/command_for_qqshi.pro">
+<persistable path="/IDL_code/command_history/command_for_qqshi.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="sav_spin_mat_main.pro" tooltip="IDL_code/save_data/sav_spin_mat_main.pro">
+<persistable path="/IDL_code/save_data/sav_spin_mat_main.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="cgplot.pro" tooltip="IDL_code/Tools/cg/cgplot.pro">
+<persistable path="/IDL_code/Tools/cg/cgplot.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="bin_plot.pro" tooltip="IDL_code/Tools/bin_plot.pro">
+<persistable path="/IDL_code/Tools/bin_plot.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="cgaxis.pro" tooltip="IDL_code/Tools/cg/cgaxis.pro">
+<persistable path="/IDL_code/Tools/cg/cgaxis.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="bin_data.pro" tooltip="IDL_code/Tools/bin_data.pro">
+<persistable path="/IDL_code/Tools/bin_data.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="command_history_juno_plot.pro" tooltip="IDL_code/command_history/command_history_juno_plot.pro">
+<persistable path="/IDL_code/command_history/command_history_juno_plot.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="ptr_extract.pro" tooltip="Default/spedas_3_00/idl/general/misc/ptr_extract.pro">
+<persistable path="/Default/spedas_3_00/idl/general/misc/ptr_extract.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="timebar.pro" tooltip="Default/spedas_3_00/idl/general/tplot/timebar.pro">
+<persistable path="/Default/spedas_3_00/idl/general/tplot/timebar.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="write_csv_rs.pro" tooltip="IDL_code/Tools/write_csv_rs.pro">
+<persistable path="/IDL_code/Tools/write_csv_rs.pro"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="com.rsi.idldt.proeditor.ProEditor" name="get_juno_wave_b.pro" tooltip="IDL_code/load_data/get_juno_wave_b.pro">
+<persistable path="/IDL_code/load_data/get_juno_wave_b.pro"/>
+</file>
+</mruList>
+</workbench>

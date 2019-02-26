@@ -1,0 +1,142 @@
+pro ulf_wave_find_themis
+  del_data, '*'
+  CLOSE,/all
+  year='2013'
+  trange=[year+' 1 1',year+' 1 5']
+  ;trangefft=['2007-07-04/13:20','2007-07-04/24:10'] 
+  sc='a'
+  smthP_togetFAC=900.
+  
+  thm_load_state, probe=sc, datatype='pos_gsm',trange=trange
+  thm_load_state,probe=sc, coord='gei',/get_support_data,trange=trange
+  thm_load_fgm,probe=sc, datatype = ['fgl','fgl_btotal'],coord=['gsm'], level = 'l2', trange=trange
+  omni_hro_load,trange=trange
+  
+  tsmooth2, 'th'+sc+'_fgl_gsm', smthP_togetFAC, newname='th'+sc+'_fgl_gsm_dc'
+  fac_matrix_make, 'th'+sc+'_fgl_gsm_dc', other_dim='Phism', pos_var_name='th'+sc+'_state_pos',newname = 'rotmat'
+  tvector_rotate, 'rotmat',  'th'+sc+'_fgl_gsm', newname = 'th'+sc+'_fgl_fac'
+  
+  split_vec,'th'+sc+'_fgl_fac'
+  tkm2re,'th'+sc+'_state_pos_gsm'
+  split_vec, 'th'+sc+'_state_pos_gsm_re'
+  
+  nboxpoints=1024
+
+  tdpwrspc, 'th'+sc+'_fgl_fac_x', nboxpoints=nboxpoints, nshiftpoints=682,bin=1,trange=trange
+ ; time_shift, 'th'+sc+'_fgl_gsm_x_dpwrspc', nboxpoints/2.*3.
+  tmedian,'th'+sc+'_fgl_fac_x_dpwrspc',180
+
+  get_data,'th'+sc+'_fgl_btotal',data=bt
+  fce = 28.*bt.y
+  store_data,'fce_a',data={x:bt.x,y:fce}
+  store_data,'fcp_a',data={x:bt.x,y:fce/1836.}
+  store_data,'fche_a',data={x:bt.x,y:fce/7344.}
+  store_data,'fco_a',data={x:bt.x,y:fce/29376.}
+  
+  get_data,'th'+sc+'_fgl_fac_x_dpwrspc',data=d
+  
+  
+  ;time_clip,'background_sm',d.x[0],d.x[n_elements(d.x)-1]
+  get_data,'th'+sc+'_fgl_fac_x_dpwrspc_sm',data=bg
+  
+
+  
+  store_data,'th'+sc+'_fgl_fac_x_ratio',data={x:d.x,y:alog10(d.y/bg.y)-1,v:d.v}
+  
+  ratio=alog10(d.y/bg.y)-1
+  
+  fmax=fltarr(n_elements(d.x))
+  ftop=fltarr(n_elements(d.x))
+  fbtm=fltarr(n_elements(d.x))
+  
+  for i=0,n_elements(d.x)-1 do begin
+    rr=reform(ratio[i,*])
+    bad=where(rr lt 0)
+    good=where(rr ge 0, count)
+    if count eq 0 then continue
+    rr[bad]=!values.F_nan
+    pmax=where(rr eq max(rr,/nan),count)
+    if count eq 0 then continue
+    fmax[i]=d.v[i,pmax[0]]
+    fbtm[i]=d.v[i,good[0]]
+    endn=n_elements(good)-1 
+    ftop[i]=d.v[i,good[endn]]
+ 
+  endfor
+  
+  bad=where(fmax eq 0.)
+  fmax[bad]=!values.F_nan
+  bad=where(ftop eq 0.)
+  ftop[bad]=!values.F_nan
+  bad=where(fbtm eq 0.)
+  fbtm[bad]=!values.F_nan
+  
+  
+
+  ;连续四个点都有数据才保留，否则就去除单个的散点，整个数据最后三个点懒得考虑了，以后可以加上。
+  for i=158,n_elements(d.x)-4 do begin
+    judge=fmax[i]*fmax[i+1]*fmax[i+2]*fmax[i+3]
+    badt=where(bt.x ge d.x[i])
+    if ((judge gt 0) eq 0) or (bt.y[badt[0]] ge 500.) then begin ;or (fbtm[i] le 0.05)
+      fmax[i]=!values.F_nan
+      ftop[i]=!values.F_nan
+      fbtm[i]=!values.F_nan      
+    endif else begin
+      i=i+3    
+    endelse
+    
+  endfor
+  
+  
+  goodt=where(fmax gt 0,count)
+  time_list=time_string(d.x[goodt],TFORMAT='YYYY MM DD hh mm ss')
+  
+  get_data,'th'+sc+'_state_pos_gsm_re',data=pos
+  get_data,'th'+sc+'_fgl_fac',data=b
+  posx=fltarr(count)
+  posy=fltarr(count)
+  posz=fltarr(count)
+  bx=fltarr(count)
+  by=fltarr(count)
+  bz=fltarr(count)
+  power=fltarr(count)
+  for j=0,n_elements(time_list)-1 do begin
+    power[j]=max(d.y[goodt[j],*])
+    goodt=where(pos.x ge time_list[j])
+    posx[j]=pos.y[goodt[0],0]
+    posy[j]=pos.y[goodt[0],1]
+    posz[j]=pos.y[goodt[0],2]
+    goodt=where(b.x ge time_list[j])
+    bx[j]=b.y[goodt[0],0]
+    by[j]=b.y[goodt[0],1]
+    bz[j]=b.y[goodt[0],2]
+  endfor
+  print,'done!'
+  ;输出事件列表
+  output_txt, time_list, filename = '~/list'+year+'THEMIS'+sc+'.txt'
+  
+  ylim,'th'+sc+'_fgl_fac_x_ratio',0,1
+  ylim,'th'+sc+'_fgl_fac_x_dpwrspc_sm',0,1,0
+  ylim,'th'+sc+'_fgl_fac_x_dpwrspc',0,1,0
+  options,'th'+sc+'_fgl_fac_x_ratio',spec=1
+  zlim,'th'+sc+'_fgl_fac_x_ratio',0.001,10,1
+  zlim,'th'+sc+'_fgl_fac_x_dpwrsp*',1e-5,1e5,1
+  
+  store_data,'dot1',data={x:d.x,y:ftop}
+  store_data,'dot2',data={x:d.x,y:fmax}
+  store_data,'dot3',data={x:d.x,y:fbtm}
+  store_data,'dot',data=['dot1','dot2','dot3']
+  ylim,'dot',0,1,0
+  options,'dot',Psym=1,sym_size=1
+  options,'dot2',color=6
+  
+  options,'f*a','color',1
+  options,'f*a',thick=3
+  
+  store_data,'SpectralDensity',data=['th'+sc+'_fgl_fac_x_dpwrspc','fcp_a','fche_a','fco_a']
+  store_data,'SpectralDensity_median',data=['th'+sc+'_fgl_fac_x_dpwrspc_sm','fcp_a','fche_a','fco_a']
+  store_data,'Ratio',data=['th'+sc+'_fgl_fac_x_ratio','fcp_a','fche_a','fco_a']
+
+  tplot,['th'+sc+'_fgl_btotal','SpectralDensity','SpectralDensity_median','Ratio','dot'],trange=trange;['2007-07-04/13:30','2007-07-04/16:00'] 
+  stop
+end

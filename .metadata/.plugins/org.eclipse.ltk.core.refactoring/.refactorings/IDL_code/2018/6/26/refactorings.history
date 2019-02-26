@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Code/ASI/thm_asi_v2&apos; to &apos;thm_asi_v2.pro&apos;" description="Rename resource &apos;thm_asi_v2&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="ASI/thm_asi_v2" name="thm_asi_v2.pro" stamp="1529963235431" updateReferences="true"/>
+</session>

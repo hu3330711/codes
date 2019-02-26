@@ -1,0 +1,174 @@
+pro bz_impulse_find_omni,year=year
+  del_data, '*'
+  CLOSE,/all
+  dir_init
+  trange=[year+' 1 1',year+' 12 31']
+
+  window_size=40.*60. ;30 mins
+  window_size_small=3.*60 ;3 mins
+  shift_win=1.*60     ;1 mins
+ ;-------------------------------
+
+  n1=0.01                                     ;至少99%的prevBz是大于0的 
+  n1_post=0.99                                     ;至少99%的postBz是小于-2的   
+  n2=5.0                                      ;prev最大Bz与最小绝对值Bz的差在n2以内
+  n3=3.0                                      ;post最大Bz与最小绝对值Bz的差在n3以上
+  n4=window_size/60./2.*0.7                   ;保证有n3个dbz/dt是大于0以及有n3个dbz/dt是小于0的
+  n5=-0.004                                    ;有一个较大的dbz/dt slope
+  n6=1.5                                      ; bz_pre_small < 1.5*bz_post_small
+  
+  events =['no time']
+  day=trange[0]
+  end_day=trange[1]
+
+  omni_hro_load,trange=trange
+  variable='OMNI_HRO_1min_BZ_GSM'
+  get_data,variable, data=d
+  deriv_data,variable
+  get_data, variable+'_ddt', data = ddt
+  
+  good=where(ddt.y le n5,count)
+
+  ;;----------------------------------------
+  for i=0,count-1 do begin
+    tm=d.x[good[i]]
+    ts=tm-1.*window_size
+    te=tm+1.*window_size
+    ts_small=tm-window_size_small
+    te_small=tm+window_size_small
+    
+    if (te GT max(d.x,/nan)) then BREAK
+    if (ts lt min(d.x,/nan)) then continue
+    
+    prev_good=where(d.x ge ts-1.5*60 and d.x le tm-1.5*60)
+    post_good=where(d.x ge tm+1.5*60 and d.x le te+1.5*60)
+
+    prev_good_small=where(d.x ge ts_small-1.5*60 and d.x le tm-1.5*60)
+    post_good_small=where(d.x ge tm+1.5*60 and d.x le te_small+1.5*60)
+
+    prev_bz=d.y[prev_good] & prev_dbz=ddt.y[prev_good]
+    post_bz=d.y[post_good] & post_dbz=ddt.y[post_good]
+    prev_small_bz=d.y[prev_good_small] & post_small_bz=d.y[post_good_small]
+
+    if percentiles(prev_bz,value=n1,/nan) lt 0 then continue   ;排除前窗口Bz小于0的
+    ;print,'1'
+    if percentiles(post_bz,value=0.75,/nan) gt -5. then continue  ;排除后窗口Bz最大值大于0的，即都得小于0
+    ;print,'2'
+    ;if percentiles(post_small_bz,value=n1_post,/nan) gt -1.5 then continue  ;排除后小窗口Bz最大值大于-1的，即小窗口内都得小于-2
+    ;print,'3'
+    ;if max(prev_bz,/nan) gt n2 then continue
+    ;if max(post_bz,/nan)-min(abs(post_bz),/nan) lt n3 then continue
+
+    ;posi=where(post_dbz gt 0,countp)
+    ;nega=where(post_dbz lt 0,countn)
+
+    ;if countp le n4 or countn le n4 then goto,jump1
+
+    events = [[events], [time_string(tm)]]
+    
+  endfor
+  
+;  ts=time_double(trange[0])
+;  tm=time_double(trange[0])+1.*window_size
+;  te=time_double(trange[0])+2.*window_size
+;
+;  ;START OF THE LOOP 
+;  while te le time_double(trange[1]) do begin
+;    
+;    ts_small=tm-window_size_small
+;    te_small=tm+window_size_small
+;    
+;    prev_good=where(d.x ge ts and d.x le tm)
+;    post_good=where(d.x ge tm and d.x le te)
+;    
+;    prev_good_small=where(d.x ge ts_small and d.x le tm)
+;    post_good_small=where(d.x ge tm and d.x le te_small)
+;    
+;
+;    
+;    prev_bz=d.y[prev_good] & prev_dbz=ddt.y[prev_good]
+;    post_bz=d.y[post_good] & post_dbz=ddt.y[post_good]
+;    prev_small_bz=d.y[prev_good_small] & post_small_bz=d.y[post_good_small]
+;    
+;    print,time_string([ts_small,tm])
+;    print,time_string([tm,te_small])
+;    print,time_string([ts,te])
+;    print,percentiles(prev_bz,value=n1,/nan)
+;    print,max(prev_bz,/nan)
+;    print,percentiles(post_bz,value=n1_post,/nan)
+;    print,percentiles(post_small_bz,value=n1_post,/nan)
+;    stop
+;    
+;    if percentiles(prev_bz,value=n1,/nan) lt 0 then goto,jump1   ;排除前窗口Bz小于0的
+;    if percentiles(post_bz,value=n1_post,/nan) gt -1 then goto,jump1  ;排除后窗口Bz最大值大于-1的，即都得小于-1
+;    if percentiles(post_small_bz,value=n1_post,/nan) gt -1.5 then goto,jump1  ;排除后小窗口Bz最大值大于-1的，即小窗口内都得小于-2
+;    
+;    if max(prev_bz,/nan) gt n2 then goto,jump1
+;    ;if max(post_bz,/nan)-min(abs(post_bz),/nan) lt n3 then goto,jump1
+;    
+;    ;posi=where(post_dbz gt 0,countp)
+;    ;nega=where(post_dbz lt 0,countn)
+;    
+;    ;if countp le n4 or countn le n4 then goto,jump1
+;    
+;    events = [[events], [time_string(tm)]]
+;   print,events
+;   stop
+;    jump1:
+;    ts=ts+shift_win
+;    tm=tm+shift_win
+;    te=te+shift_win
+;  endwhile
+;  ;END OF LOOP
+
+  events = events(*, 1:*)
+  j=0
+  
+  ;>>>>>>>>>>>>>>>>>>相邻两个事件如果时间差为30分钟以内，则只留下前面一个<<<<<<<<<<<<<<<<<<<<<<<<<
+  ;******************一、考虑除了最后一个之外的事件******************************
+  WHILE j ne n_elements(events(0,*))-3 DO BEGIN
+    time_diff=time_double(events(j+1))-time_double(events(j))
+    if time_diff lt 60.*45 then begin
+      events_v= [events(0:j), events(j+2:*)]
+      events=TRANSPOSE(events_v)
+    endif else begin
+      j=j+1
+    endelse
+  endwhile
+  ;******************二、考虑最后一个事件*************************************
+  i_last=n_elements(events(0,*))-2
+  time_diff_last=time_double(events(i_last+1))-time_double(events(i_last))
+  if time_diff_last lt 60.*45 then begin
+    events_v= events(0:i_last)
+    events=TRANSPOSE(events_v)
+  endif
+  print,events
+  print,'done!'
+  ;输出事件列表
+  output_txt, events, filename = !files.doc_dir+'list_Bz_s_'+year+'.txt'
+  ;画出omni图
+  plot_init,'ps'
+  options,'OMNI_HRO_1min_Pressure',ytitle='Pdyn!C',ysubtitle='(nPa)'
+  options,'OMNI_HRO_1min_proton_density',ytitle='Density!C',ysubtitle='(#/cc)'
+  options,'OMNI_HRO_1min_Vx',ytitle='Vx!C',ysubtitle='(km/s)'
+  get_data,'OMNI_HRO_1min_BX_GSE',data=data_bx
+  get_data,'OMNI_HRO_1min_BY_GSM',data=data_by
+  get_data,'OMNI_HRO_1min_BZ_GSM',data=data_bz
+  store_data,'OMNI_HRO_1min_BT',data={x:data_bx.x,y:sqrt((data_bx.y)^2+(data_by.y)^2+(data_bz.y)^2)}
+  
+  store_data,'OMNI_HRO_1min_B_combo',data=['OMNI_HRO_1min_BT','OMNI_HRO_1min_BZ_GSM']
+  options,'OMNI_HRO_1min_BX_GSE',color=0
+  options,'OMNI_HRO_1min_BZ_GSM',color=254
+  options,'OMNI_HRO_1min_B_combo',ytitle='B!C',ysubtitle='(nT)',labels=['Btotal','Bz_GSM'],labflag=-1,colors=[0,254]
+
+  options,'OMNI_HRO_1min_AE_INDEX',ytitle='AE!C',ysubtitle='(nT)'
+  tplot_options,'title','Bz_fluctuation'
+  popen,!files.doc_dir+'Omni_Bz_s_'+year
+  for ij=0,n_elements(events)-1 do begin
+    tplot,['OMNI_HRO_1min_AE_INDEX','OMNI_HRO_1min_B_combo','OMNI_HRO_1min_Pressure','OMNI_HRO_1min_proton_density','OMNI_HRO_1min_Vx'],trange=[time_string(time_double(events[ij])-1.*60*60),time_string(time_double(events[ij])+2.*60*60)]
+    timebar,events[ij],linestyle=2,thick=3,color=6
+    timebar,0,varname='OMNI_HRO_1min_B_combo',/databar,linestyle=2,thick=3,color=0
+    timebar,time_string(time_double(events[ij])+window_size),linestyle=2,thick=2,color=2
+  endfor
+  pclose
+end

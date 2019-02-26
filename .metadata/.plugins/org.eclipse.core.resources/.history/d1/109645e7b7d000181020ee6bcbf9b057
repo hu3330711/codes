@@ -1,0 +1,47 @@
+PRO get_mms_location,probe=probe,trange=trange,facmat=facmat
+  
+  dir_init
+  mms_init,local_data_dir=!mms.local_data_dir
+  mms_load_state, probes=probe, level='def', datatypes='pos',trange=trange
+  
+;  ttrace2equator,strjoin('mms'+probe+'_mec_r_sm'),newname='efoot_geo2',external_model='t89',par=1.0D,/km,$
+;    in_coord='sm',out_coord='geo'
+;  xyz_to_polar,'efoot_geo2'
+;  tkm2re,'efoot_geo2_mag'
+;  tplot_rename,'efoot_geo2_mag_re','mms'+probe+'_L2'
+  
+  cotrans,'mms'+probe+'_mec_r_sm','mms'+probe+'_mec_r_gsm',/sm2gsm
+  cotrans,'mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_r_gse',/GSM2GSE
+  cotrans,'mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gei',/GSE2GEI
+  
+  tkm2re,'mms'+probe+'_mec_r_gsm'
+  get_data,'mms'+probe+'_mec_r_gsm_re',data=d
+  data = transpose( [[d.x],[d.y]] )
+  shells = calculate_lshell(data)
+  store_data, 'mms'+probe+'_L', data = {x:d.x ,y:shells}
+  
+  tplot_rename,'mms'+probe+'_mec_mlat','mms'+probe+'_MLAT'
+  tplot_rename,'mms'+probe+'_mec_mlt','mms'+probe+'_MLT'
+  tplot_rename,'mms'+probe+'_mec_r_gsm_re','mms'+probe+'_pos_gsm'
+  
+  stop
+  if keyword_set(facmat) then begin
+    mms_load_fgm, probes=probe,trange = trange
+    get_mms_b0,probe=probe,trange=trange
+    stop
+    get_data,'mms'+probe+'_fgm_b_gsm_srvy_l2',data=tmp,dlim=dlim
+    store_data,'mms'+probe+'_fgm_b_gsm_srvy_l2',data={x:tmp.x,y:tmp.y[*,0:2]},dlim=dlim
+
+    ts=tmp.x[0] & te=tmp.x[n_elements(tmp.x)-1]
+    num=(te-ts)*8.
+    timesrs=tmp.x[0]+findgen(num)*1/8.
+    store_data,'time_reference',data={x:timesrs,y:timesrs}
+    tinterpol_mxn,'mms'+probe+'_fgm_b_gsm_srvy_l2','time_reference',/overwrite
+
+    ;compute the DC magnetic field using 15 minute smoothing window
+    tsmooth2, 'mms'+probe+'_fgm_b_gsm_srvy_l2', 8.*60.*15, newname='mms'+probe+'_fgm_b_gsm_srvy_l2_DC'
+    fac_matrix_make, 'mms'+probe+'_fgm_b_gsm_srvy_l2_DC', other_dim='Rgeo', pos_var_name='mms'+probe+'_mec_r_gei',newname ='mms'+probe+'_rotmat'
+  endif
+  
+  return
+END   

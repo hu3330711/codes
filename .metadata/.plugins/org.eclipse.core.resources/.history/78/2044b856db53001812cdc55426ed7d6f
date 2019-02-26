@@ -1,0 +1,431 @@
+pro get_mageis_electronflux_stevens_energy,time,sc,mode_name,ek,g0de
+ek=dblarr(8)
+if time_double(time) ge time_double('2013-07-12') and (sc eq 'A' or sc eq 'a') and mode_name eq 'LOW' then ek=[34,54,78,108,143,182,223]
+  if (time_double(time) lt time_double('2013-07-12') and time_double(time) ge time_double('2013-04-04')) and (sc eq 'A' or sc eq 'a') and mode_name eq 'LOW' then ek=[34,62,129]
+if (time_double(time) lt time_double('2013-04-04') and time_double(time) ge time_double('2012-12-23')) and (sc eq 'A' or sc eq 'a') and mode_name eq 'LOW' then ek=[34,62,129]
+
+if time_double(time) ge time_double('2013-07-12') and (sc eq 'B' or sc eq 'b') and mode_name eq 'LOW' then ek=[32,51,74,101,132,168,208]
+if (time_double(time) lt time_double('2013-07-12') and time_double(time) ge time_double('2013-04-03')) and (sc eq 'B' or sc eq 'b') and mode_name eq 'LOW' then ek=[32,58,121]
+if (time_double(time) lt time_double('2013-04-03') and time_double(time) ge time_double('2012-12-23')) and (sc eq 'B' or sc eq 'b') and mode_name eq 'LOW' then ek=[35,60,117]
+
+if time_double(time) ge time_double('2015-09-16') and (sc eq 'A' or sc eq 'a') and mode_name eq 'M35' then ek=[230,334,454,584,724,879,1031]
+if (time_double(time) lt time_double('2015-09-16') and time_double(time) ge time_double('2013-04-04')) and (sc eq 'A' or sc eq 'a') and mode_name eq 'M35' then ek=[260,492,802]
+if (time_double(time) lt time_double('2013-04-04') and time_double(time) ge time_double('2012-12-23')) and (sc eq 'A' or sc eq 'a') and mode_name eq 'M35' then ek=[146,288,684]
+
+if time_double(time) ge time_double('2015-09-16') and (sc eq 'B' or sc eq 'b') and mode_name eq 'M35' then ek=[246,354,475,604,749,909,1066]
+if (time_double(time) lt time_double('2015-09-16') and time_double(time) ge time_double('2013-04-04')) and (sc eq 'B' or sc eq 'b') and mode_name eq 'M35' then ek=[279,515,830]
+
+if time_double(time) ge time_double('2013-07-14') and (sc eq 'A' or sc eq 'a') and mode_name eq 'M75' then ek=[238,346,465,646,952]
+if (time_double(time) lt time_double('2013-07-14') and time_double(time) ge time_double('2013-04-04')) and (sc eq 'A' or sc eq 'a') and mode_name eq 'M75' then ek=[269,509,821]
+if (time_double(time) lt time_double('2013-04-04') and time_double(time) ge time_double('2012-10-09')) and (sc eq 'A' or sc eq 'a') and mode_name eq 'M75' then ek=[272,509,821]
+
+if time_double(time) ge time_double('2013-07-13') and (sc eq 'B' or sc eq 'b') and mode_name eq 'M75' then ek=[243,350,470,654,941]
+if (time_double(time) lt time_double('2013-07-13') and time_double(time) ge time_double('2013-04-04')) and (sc eq 'B' or sc eq 'b') and mode_name eq 'M75' then ek=[275,515,821]
+if (time_double(time) lt time_double('2013-04-04') and time_double(time) ge time_double('2012-12-23')) and (sc eq 'B' or sc eq 'b') and mode_name eq 'M75' then ek=[275,515,821]
+
+ek=double(ek)
+
+g0de=dblarr(8)
+if time_double(time) ge time_double('2013-07-12') and (sc eq 'A' or sc eq 'a') and mode_name eq 'LOW' then g0de=[4.13E-2,5.73E-2,6.056E-2,6.88E-2,7.35E-2,6.90E-2,5.98E-2]
+if (time_double(time) lt time_double('2013-07-12') and time_double(time) ge time_double('2013-04-04')) and (sc eq 'A' or sc eq 'a') and mode_name eq 'LOW' then g0de=[3.77E-2,0.112,0.208]
+if (time_double(time) lt time_double('2013-04-04') and time_double(time) ge time_double('2012-12-23')) and (sc eq 'A' or sc eq 'a') and mode_name eq 'LOW' then g0de=[5.93E-2,0.120,0.190]
+
+if time_double(time) ge time_double('2013-07-12') and (sc eq 'B' or sc eq 'b') and mode_name eq 'LOW' then g0de=[4.33E-2,5.41E-2,5.926E-2,6.605E-2,6.460E-2,6.23E-2,5.96E-2]
+if (time_double(time) lt time_double('2013-07-12') and time_double(time) ge time_double('2013-04-03')) and (sc eq 'B' or sc eq 'b') and mode_name eq 'LOW' then g0de=[4.56E-2,0.107,0.202]
+if (time_double(time) lt time_double('2013-04-03') and time_double(time) ge time_double('2012-12-23')) and (sc eq 'B' or sc eq 'b') and mode_name eq 'LOW' then g0de=[4.72E-2,0.104,0.16]
+
+if time_double(time) ge time_double('2015-09-16') and (sc eq 'A' or sc eq 'a') and mode_name eq 'M35' then g0de=[0.308,0.322,0.324,0.307,0.2835,0.252,0.202]
+if (time_double(time) lt time_double('2015-09-16') and time_double(time) ge time_double('2013-04-04')) and (sc eq 'A' or sc eq 'a') and mode_name eq 'M35' then g0de=[0.606,0.607,0.683]
+if (time_double(time) lt time_double('2013-04-04') and time_double(time) ge time_double('2012-12-23')) and (sc eq 'A' or sc eq 'a') and mode_name eq 'M35' then g0de=[0.319,0.967,0.944]
+
+if time_double(time) ge time_double('2015-09-16') and (sc eq 'B' or sc eq 'b') and mode_name eq 'M35' then g0de=[0.333,0.339,0.325,0.309,0.2684,0.240,0.195]
+if (time_double(time) lt time_double('2015-09-16') and time_double(time) ge time_double('2013-04-04')) and (sc eq 'B' or sc eq 'b') and mode_name eq 'M35' then g0de=[0.650,0.612,0.649]
+
+if time_double(time) ge time_double('2013-07-14') and (sc eq 'A' or sc eq 'a') and mode_name eq 'M75' then g0de=[0.323,0.327,0.328,0.571,0.449]
+if (time_double(time) lt time_double('2013-07-14') and time_double(time) ge time_double('2013-04-04')) and (sc eq 'A' or sc eq 'a') and mode_name eq 'M75' then g0de=[0.633,0.616,0.679]
+if (time_double(time) lt time_double('2013-04-04') and time_double(time) ge time_double('2012-10-09')) and (sc eq 'A' or sc eq 'a') and mode_name eq 'M75' then g0de=[0.687,0.647,0.712]
+
+if time_double(time) ge time_double('2013-07-13') and (sc eq 'B' or sc eq 'b') and mode_name eq 'M75' then g0de=[0.330,0.333,0.321,0.561,0.387]
+if (time_double(time) lt time_double('2013-07-13') and time_double(time) ge time_double('2013-04-04')) and (sc eq 'B' or sc eq 'b') and mode_name eq 'M75' then g0de=[0.627,0.617,0.619]
+if (time_double(time) lt time_double('2013-04-04') and time_double(time) ge time_double('2012-12-23')) and (sc eq 'B' or sc eq 'b') and mode_name eq 'M75' then g0de=[0.679,0.638,0.628]
+
+end
+
+pro insert_nan_for_get_mageis_electronflux_stevens,pa,cr,max_pa,pa_out,cr_out
+n_t=n_elements(pa[*,0])
+n_pa=n_elements(pa[0,*])
+pa_out=pa
+cr_out=cr
+  for ttt=0,n_t-1 do begin
+    pa_0=reverse(reform(pa[ttt,*]))
+    cr_0=reverse(reform(cr[ttt,*]))
+
+    pa_1=pa_0
+    cr_1=cr_0
+    index0=0
+    index1=0
+    while ~(pa_0[index0] ge 0 and pa_0[index0] le max_pa) and (index0 le n_pa-2) do begin
+      index0=index0+1
+      index1=index1+1
+      continue
+    endwhile
+    if index0 ge n_pa-2 then begin
+      cr_1[*]=-1.
+      continue
+    endif
+    if fix(pa_0[index0]) lt max_pa-2 then begin
+      pa_1[index1]=max_pa
+      pa_1[index1+1]=fix(pa_0[index0])+1
+      pa_1[index1+2]=pa_0[index0]
+      cr_1[index1]=-1.
+      cr_1[index1+1]=-1.
+      cr_1[index1+2]=cr_0[index0]
+      index0=1+index0
+      index1=3+index1
+    endif
+    while pa_0[index0] ge 0 and pa_0[index0+1] ge 0 do begin
+      if pa_0[index0]-pa_0[index0+1] gt 2 then begin
+        pa_1[index1]=pa_0[index0]
+        pa_1[index1+1]=fix(pa_0[index0])
+        pa_1[index1+2]=fix(pa_0[index0+1])+1
+        cr_1[index1]=cr_0[index0]
+        cr_1[index1+1]=-1.
+        cr_1[index1+2]=-1.
+        index0=index0+1
+        index1=index1+3
+      endif else begin
+        pa_1[index1]=pa_0[index0]
+        cr_1[index1]=cr_0[index0]
+        index1=index1+1
+        index0=index0+1
+      endelse
+    endwhile
+    if pa_0[index0] gt 1 then begin
+      pa_1[index1]=pa_0[index0]
+      pa_1[index1+1]=fix(pa_0[index0])
+      pa_1[index1+2]=0.
+      cr_1[index1]=cr_0[index0]
+      cr_1[index1+1]=-1.
+      cr_1[index1+2]=-1.
+    endif
+    
+    pa_out[ttt,*]=reverse(pa_1)
+    cr_out[ttt,*]=reverse(cr_1)
+  endfor
+end
+
+pro get_mageis_electronflux_stevens
+  del_data,'*'
+  rbsp_init
+  set_plot,'ps'
+
+dir_fig='/projectnb/burbsp/home/xcshen/'
+sc='A' & yy='14' & mm='05' & dd='09' & time1='20:25' & time2='22:35'
+
+    tr1='20'+yy+'/'+mm+'/'+dd+'/'+time1
+    tr2='20'+yy+'/'+mm+'/'+dd+'/'+time2
+    tsec1=time_double(tr1)
+    tsec2=time_double(tr2)
+    tr1=time_string(tsec1)
+    tr2=time_string(tsec2)
+    timespan,tsec1,tsec2-tsec1,/sec
+
+    mode_name_all=['HIGH','LOW','M35','M75']
+    for index_mode=0,3 do begin
+      del_data,'*'
+      exist=0
+      filename=file_search('/projectnb/burbsp/big/SATELLITE/rbsp/rbsp-ect.newmexicoconsortium.org/data_prot/rbsp'+sc+'/mageis/level3/int/20'+yy+'/', $
+        'rbsp'+sc+'_int_ect-mageis'+mode_name_all[index_mode]+'-hr-L3_20'+yy+mm+dd+'_v*.*.*.cdf',/fold_case,count=count)
+      if count gt 0 then print,mode_name_all[index_mode],count else continue
+      cdf2tplot,file=filename[count-1],/get_support_data
+
+
+      ;;;0 to 360
+      del_data,'HighRate_E*'
+      get_data,'HighRate',data=d
+      n_ek=n_elements(d.v2)
+      n_t=n_elements(d.x)
+      n_pa=n_elements(d.v1[0,*])
+      ymax=360
+      
+      pa=d.v1
+      index_sort=lonarr(n_t,n_pa)
+      for ttt=0,n_t-1 do begin
+        index_tmp=sort(pa[ttt,*])
+        pa_tmp=pa[ttt,index_tmp]
+        pa[ttt,*]=pa_tmp
+        index_sort[ttt,*]=index_tmp
+      endfor
+
+      get_mageis_electronflux_stevens_energy,tr1,sc,mode_name_all[index_mode],ek,g0de
+      index_ek_name=0
+      for eee=0,n_ek-1 do begin
+        cr=dblarr(n_t,n_pa)
+        for ppp=0,n_pa-1 do cr[*,ppp]=d.y[*,eee,ppp]
+        index1=where(d.x ge tsec1 and d.x le tsec2,count1)
+        if count1 le 0 then continue
+        tmp_cr=reform(cr[index1,*])
+        index=where(tmp_cr gt 0,count)
+        if count le 0 then continue
+        max_cr=max(tmp_cr[index])
+        min_cr=max_cr/10.
+
+        for ttt=0,n_t-1 do begin
+          cr_tmp=cr[ttt,index_sort[ttt,*]]
+          cr[ttt,*]=cr_tmp
+        endfor
+        
+        insert_nan_for_get_mageis_electronflux_stevens,pa,cr,360.,pa_out,cr_out
+        pa=pa_out
+        cr=cr_out
+
+        flux=cr/g0de[index_ek_name]
+        max_cr=max_cr/g0de[index_ek_name]
+        min_cr=max_cr*0.1
+        store_data,'HighRate_E'+string(eee,format='(I1)'),data={x:d.x,v:pa,y:flux}
+        options,'HighRate_E'+string(eee,format='(I1)'),yrange=[0,ymax],ystyle=1,zrange=[min_cr,max_cr],/zlog,ztitle='Flux!C!C[s!U-1!Nsr!U-1!Ncm!U-2!NkeV!U-1!N]',$
+          ytitle=string(round(ek[index_ek_name]),format='(I4)')+' keV!C!CPitch Angle',spec=1,ztickformat='exponent',zminor=9,zticklen=-0.3,yticks=6,yminor=3,zstyle=1
+        index_ek_name=index_ek_name+1
+      endfor
+
+      get_position_gsm_sm,yy,mm,dd,sc
+      get_magnetometer_tdpwrspc,yy,mm,dd,sc
+      tplot,['HighRate_E*','Bw_mag_combo'],var_label=['MLT','L','MLAT'],title='Van Allen Probe '+sc+' MagEIS HR '+mode_name_all[index_mode]
+
+      set_plot,'ps'
+      device,filename=dir_fig+'0_360/MagEIS_HR_'+mode_name_all[index_mode]+'_20'+yy+mm+dd+sc+strmid(time1,0,2)+'.ps',$
+        /color,bits_per_pixel=8,/times,xsize=21,ysize=21,xoffset=0.5,yoffset=1
+      !p.FONT=0
+      !p.BACKGROUND='ffffff'xl
+      !p.color=0
+      !p.charsize=1
+      !p.charthick=1
+      loadct,43,file='~/colortable/colors1.tbl'
+      tplot
+      device,/close
+      spawn,'convert -density 90 -background "#FFFFFF" -flatten '+dir_fig+'0_360/MagEIS_HR_'+mode_name_all[index_mode]+$
+        '_20'+yy+mm+dd+sc+strmid(time1,0,2)+'.ps '+dir_fig+'0_360/MagEIS_HR_'+mode_name_all[index_mode]+$
+        '_20'+yy+mm+dd+sc+strmid(time1,0,2)+'.png'
+
+;;;0 to 180
+      del_data,'HighRate_E*'
+      get_data,'HighRate',data=d
+      n_ek=n_elements(d.v2)
+      n_t=n_elements(d.x)
+      n_pa=n_elements(d.v1[0,*])
+      pa180=d.v1
+      index=where(d.v1 gt 180 and d.v1 le 360,count)
+      if count ge 1 then pa180[index]=360-pa180[index]
+      ymax=180
+      
+      pa=pa180
+      index_sort=lonarr(n_t,n_pa)
+      for ttt=0,n_t-1 do begin
+        index_tmp=sort(pa[ttt,*])
+        pa_tmp=pa[ttt,index_tmp]
+        pa[ttt,*]=pa_tmp
+        index_sort[ttt,*]=index_tmp
+      endfor
+      
+      get_mageis_electronflux_stevens_energy,tr1,sc,mode_name_all[index_mode],ek,g0de
+      index_ek_name=0
+      for eee=0,n_ek-1 do begin
+        cr=dblarr(n_t,n_pa)
+        for ppp=0,n_pa-1 do cr[*,ppp]=d.y[*,eee,ppp]
+        index1=where(d.x ge tsec1 and d.x le tsec2,count1)
+        if count1 le 0 then continue
+        tmp_cr=reform(cr[index1,*])
+        index=where(tmp_cr gt 0,count)
+        if count le 0 then continue
+        max_cr=max(tmp_cr[index])
+        min_cr=max_cr/10.
+        
+        for ttt=0,n_t-1 do begin
+          cr_tmp=cr[ttt,index_sort[ttt,*]]
+          cr[ttt,*]=cr_tmp
+        endfor
+
+          insert_nan_for_get_mageis_electronflux_stevens,pa,cr,180.,pa_out,cr_out
+          pa=pa_out
+          cr=cr_out
+        
+        flux=cr/g0de[index_ek_name]
+        max_cr=max_cr/g0de[index_ek_name]
+        min_cr=max_cr*0.1
+        store_data,'HighRate_E'+string(eee,format='(I1)'),data={x:d.x,v:pa,y:flux}
+        options,'HighRate_E'+string(eee,format='(I1)'),yrange=[0,ymax],ystyle=1,zrange=[min_cr,max_cr],/zlog,ztitle='Flux!C!C[s!U-1!Nsr!U-1!Ncm!U-2!NkeV!U-1!N]',$
+          ytitle=string(round(ek[index_ek_name]),format='(I4)')+' keV!C!CPitch Angle',spec=1,ztickformat='exponent',zminor=9,zticklen=-0.3,yticks=6,yminor=3,zstyle=1
+        index_ek_name=index_ek_name+1
+      endfor
+
+      get_position_gsm_sm,yy,mm,dd,sc
+      tplot,['HighRate_E*','Bw_mag_combo'],var_label=['MLT','L','MLAT'],title='Van Allen Probe '+sc+' MagEIS HR '+mode_name_all[index_mode]
+
+      set_plot,'ps'
+      device,filename=dir_fig+'0_180/MagEIS_HR_'+mode_name_all[index_mode]+'_20'+yy+mm+dd+sc+strmid(time1,0,2)+'.ps',$
+        /color,bits_per_pixel=8,/times,xsize=21,ysize=21,xoffset=0.5,yoffset=1
+      !p.FONT=0
+      !p.BACKGROUND='ffffff'xl
+      !p.color=0
+      !p.charsize=1
+      !p.charthick=1
+      loadct,43,file='~/colortable/colors1.tbl'
+      tplot
+      device,/close
+      spawn,'convert -density 90 -background "#FFFFFF" -flatten '+dir_fig+'0_180/MagEIS_HR_'+mode_name_all[index_mode]+$
+        '_20'+yy+mm+dd+sc+strmid(time1,0,2)+'.ps '+dir_fig+'0_180/MagEIS_HR_'+mode_name_all[index_mode]+$
+        '_20'+yy+mm+dd+sc+strmid(time1,0,2)+'.png'
+
+;;; 0 to 90
+      del_data,'HighRate_E*'
+      get_data,'HighRate',data=d
+      n_ek=n_elements(d.v2)
+      n_t=n_elements(d.x)
+      n_pa=n_elements(d.v1[0,*])
+      pa180=d.v1
+      index=where(d.v1 gt 180 and d.v1 le 360,count)
+      if count ge 1 then pa180[index]=360-pa180[index]
+      ymax=180
+      pa90=pa180
+      index=where(pa180 gt 90 and pa180 le 180,count)
+      if count ge 1 then pa90[index]=180-pa180[index]
+      ymax=90
+
+      pa=pa90
+      index_sort=lonarr(n_t,n_pa)
+      for ttt=0,n_t-1 do begin
+        index_tmp=sort(pa[ttt,*])
+        pa_tmp=pa[ttt,index_tmp]
+        pa[ttt,*]=pa_tmp
+        index_sort[ttt,*]=index_tmp
+      endfor
+
+      get_mageis_electronflux_stevens_energy,tr1,sc,mode_name_all[index_mode],ek,g0de
+      index_ek_name=0
+      for eee=0,n_ek-1 do begin
+        cr=dblarr(n_t,n_pa)
+        for ppp=0,n_pa-1 do cr[*,ppp]=d.y[*,eee,ppp]
+        index1=where(d.x ge tsec1 and d.x le tsec2,count1)
+        if count1 le 0 then continue
+        tmp_cr=reform(cr[index1,*])
+        index=where(tmp_cr gt 0,count)
+        if count le 0 then continue
+        max_cr=max(tmp_cr[index])
+        min_cr=max_cr/10.
+        
+        for ttt=0,n_t-1 do begin
+          cr_tmp=cr[ttt,index_sort[ttt,*]]
+          cr[ttt,*]=cr_tmp
+        endfor
+
+          insert_nan_for_get_mageis_electronflux_stevens,pa,cr,90.,pa_out,cr_out
+          pa=pa_out
+          cr=cr_out
+        
+        flux=cr/g0de[index_ek_name]
+        max_cr=max_cr/g0de[index_ek_name]
+        min_cr=max_cr*0.1
+        store_data,'HighRate_E'+string(eee,format='(I1)'),data={x:d.x,v:pa,y:flux}
+        options,'HighRate_E'+string(eee,format='(I1)'),yrange=[0,ymax],ystyle=1,zrange=[min_cr,max_cr],/zlog,ztitle='Flux!C!C[s!U-1!Nsr!U-1!Ncm!U-2!NkeV!U-1!N]',$
+          ytitle=string(round(ek[index_ek_name]),format='(I4)')+' keV!C!CPitch Angle',spec=1,ztickformat='exponent',zminor=9,zticklen=-0.3,yticks=6,yminor=3,zstyle=1
+        index_ek_name=index_ek_name+1
+      endfor
+
+      get_position_gsm_sm,yy,mm,dd,sc
+      tplot,['HighRate_E*','Bw_mag_combo'],var_label=['MLT','L','MLAT'],title='Van Allen Probe '+sc+' MagEIS HR '+mode_name_all[index_mode]
+
+      set_plot,'ps'
+      device,filename=dir_fig+'0_90/MagEIS_HR_'+mode_name_all[index_mode]+'_20'+yy+mm+dd+sc+strmid(time1,0,2)+'.ps',$
+        /color,bits_per_pixel=8,/times,xsize=21,ysize=21,xoffset=0.5,yoffset=1
+      !p.FONT=0
+      !p.BACKGROUND='ffffff'xl
+      !p.color=0
+      !p.charsize=1
+      !p.charthick=1
+      loadct,43,file='~/colortable/colors1.tbl'
+      tplot
+      device,/close
+      spawn,'convert -density 90 -background "#FFFFFF" -flatten '+dir_fig+'0_90/MagEIS_HR_'+mode_name_all[index_mode]+$
+        '_20'+yy+mm+dd+sc+strmid(time1,0,2)+'.ps '+dir_fig+'0_90/MagEIS_HR_'+mode_name_all[index_mode]+$
+        '_20'+yy+mm+dd+sc+strmid(time1,0,2)+'.png'
+
+
+;;; 0 to 15
+del_data,'HighRate_E*'
+      get_data,'HighRate',data=d
+      n_ek=n_elements(d.v2)
+      n_t=n_elements(d.x)
+      n_pa=n_elements(d.v1[0,*])
+      pa180=d.v1
+      index=where(d.v1 gt 180 and d.v1 le 360,count)
+      if count ge 1 then pa180[index]=360-pa180[index]
+      ymax=180
+      pa90=pa180
+      index=where(pa180 gt 90 and pa180 le 180,count)
+      if count ge 1 then pa90[index]=180-pa180[index]
+      ymax=15
+
+      pa=pa90
+      index_sort=lonarr(n_t,n_pa)
+      for ttt=0,n_t-1 do begin
+        index_tmp=sort(pa[ttt,*])
+        pa_tmp=pa[ttt,index_tmp]
+        pa[ttt,*]=pa_tmp
+        index_sort[ttt,*]=index_tmp
+      endfor
+
+      get_mageis_electronflux_stevens_energy,tr1,sc,mode_name_all[index_mode],ek,g0de
+      index_ek_name=0
+      for eee=0,n_ek-1 do begin
+        cr=dblarr(n_t,n_pa)
+        for ppp=0,n_pa-1 do cr[*,ppp]=d.y[*,eee,ppp]
+        index1=where(d.x ge tsec1 and d.x le tsec2,count1)
+        if count1 le 0 then continue
+        tmp_cr=reform(cr[index1,*])
+        index=where(tmp_cr gt 0,count)
+        if count le 0 then continue
+
+        for ttt=0,n_t-1 do begin
+          cr_tmp=cr[ttt,index_sort[ttt,*]]
+          cr[ttt,*]=cr_tmp
+        endfor
+
+          insert_nan_for_get_mageis_electronflux_stevens,pa,cr,90.,pa_out,cr_out
+          pa=pa_out
+          cr=cr_out
+
+        flux=cr/g0de[index_ek_name]
+        max_cr=0.
+        for ttt=0,n_t-1 do begin
+          if ~(d.x[ttt] ge tsec1 and d.x[ttt] le tsec2) then continue
+          for ppp=0,n_pa-1 do begin
+            if ~(pa[ttt,ppp] ge 0 and pa[ttt,ppp] le 15) then continue
+            if flux[ttt,ppp] gt max_cr then max_cr=flux[ttt,ppp]
+          endfor
+        endfor
+        min_cr=max_cr/10.
+        store_data,'HighRate_E'+string(eee,format='(I1)'),data={x:d.x,v:pa,y:flux}
+        options,'HighRate_E'+string(eee,format='(I1)'),yrange=[0,ymax],ystyle=1,zrange=[min_cr,max_cr],/zlog,ztitle='Flux!C!C[s!U-1!Nsr!U-1!Ncm!U-2!NkeV!U-1!N]',$
+          ytitle=string(round(ek[index_ek_name]),format='(I4)')+' keV!C!CPitch Angle',spec=1,ztickformat='exponent',zminor=9,zticklen=-0.3,yticks=5,yminor=3,zstyle=1
+        index_ek_name=index_ek_name+1
+      endfor
+
+      get_position_gsm_sm,yy,mm,dd,sc
+      tplot,['HighRate_E*','Bw_mag_combo'],var_label=['MLT','L','MLAT'],title='Van Allen Probe '+sc+' MagEIS HR '+mode_name_all[index_mode]
+
+      set_plot,'ps'
+      device,filename=dir_fig+'0_15/MagEIS_HR_'+mode_name_all[index_mode]+'_20'+yy+mm+dd+sc+strmid(time1,0,2)+'.ps',$
+        /color,bits_per_pixel=8,/times,xsize=21,ysize=21,xoffset=0.5,yoffset=1
+      !p.FONT=0
+      !p.BACKGROUND='ffffff'xl
+      !p.color=0
+      !p.charsize=1
+      !p.charthick=1
+      loadct,43,file='~/colortable/colors1.tbl'
+      tplot
+      device,/close
+      spawn,'convert -density 90 -background "#FFFFFF" -flatten '+dir_fig+'0_15/MagEIS_HR_'+mode_name_all[index_mode]+$
+        '_20'+yy+mm+dd+sc+strmid(time1,0,2)+'.ps '+dir_fig+'0_15/MagEIS_HR_'+mode_name_all[index_mode]+$
+        '_20'+yy+mm+dd+sc+strmid(time1,0,2)+'.png'
+    endfor
+end

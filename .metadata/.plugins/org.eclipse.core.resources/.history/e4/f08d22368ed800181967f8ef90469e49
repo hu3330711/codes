@@ -1,0 +1,45 @@
+;Purpose: 
+;         a wrap for loading necessery burst mode parameters of themis magnetic field
+;          
+
+PRO get_themis_bfield_burst,probe=probe,trange=trange,spec=spec,raw=raw,dataflag=dataflag
+  
+  t_load=[time_double(trange[0])-5.*60,time_double(trange[1])+5.*60]
+  thm_load_scm,probe=probe,trange=trange,datatype='scw',coord='gsm'
+  if ~tvar_exist('th'+probe+'_scw') then begin
+    dataflag=0
+    return
+  endif else dataflag=1
+  get_data,'th'+probe+'_scw',data=tmp
+  tmp_x=tmp.y[*,0] & tmp_y=tmp.y[*,1] & tmp_z=tmp.y[*,2]
+  d_tmp=tmp.y[1:-1,*]-tmp.y[0:-2,*]
+  d_tmp_x=reform(d_tmp[*,0]) & d_tmp_y=reform(d_tmp[*,1]) & d_tmp_z=reform(d_tmp[*,2])
+  d_tmp_x_pre=[1,d_tmp_x[0:-2]] & d_tmp_y_pre=[1,d_tmp_y[0:-2]] & d_tmp_z_pre=[1,d_tmp_z[0:-2]]
+  good_data=where((d_tmp_x ne 0 or d_tmp_y ne 0 or d_tmp_z ne 0) and (d_tmp_x_pre ne 0 or d_tmp_y_pre ne 0 or d_tmp_z_pre ne 0) and (finite(tmp_x) or finite(tmp_y) or finite(tmp_z)),count_tmp)
+  if count_tmp gt 1 then store_data,'th'+probe+'_scw',data={x:tmp.x[good_data],y:tmp.y[good_data,*]} else return
+  
+  if keyword_set(raw) then return
+  
+  if tvar_exist('th'+probe+'_scw') then begin
+    time_clip,'th'+probe+'_scw',trange[0],trange[1]
+    ;TRANS TO FAC
+    thm_load_state,probe=probe, coord='gei',/get_support_data,trange=t_load
+    thm_load_fgm, probe=probe, trange=t_load, coord=['gsm'], datatype=['fgs','fgs_btotal'], level=2,  /cal_spin_harmonics, /cal_dac_offset, /cal_tone_removal
+    get_themis_b0,probe=probe,trange=t_load
+    ;COMPUTE THE DC MAGNETIC FIELD USING ? MINUTE SMOOTHING WINDOW
+    tsmooth2, 'th'+probe+'_fgs_gsm', 30, newname='th'+probe+'_fgs_gsm_dc'
+    fac_matrix_make, 'th'+probe+'_fgs_gsm_dc', other_dim='Rgeo', pos_var_name='th'+probe+'_state_pos',newname = 'th'+probe+'_rotmat'
+    tvector_rotate, 'th'+probe+'_rotmat','th'+probe+'_scw_tclip', newname = 'th'+probe+'_scw_fac'
+    
+    if keyword_set(spec) then begin
+      ;WAVE POLORIZATION
+      twavpol,'th'+probe+'_scw_fac',nopfft=1024.,steplength=256,bin_freq=1
+      get_data,'th'+probe+'_scw_fac_waveangle',data=tmp,dlim=dlim
+      store_data,'th'+probe+'_scw_fac_waveangle_deg',data={x:tmp.x,y:tmp.y*180./!pi,v:tmp.v},dlim=dlim
+      ;stop
+      ;store_data,'th'+probe+'_scw',data=['th'+probe+'_scw','th'+probe+'_fce_eq','th'+probe+'_fce_eq_half','th'+probe+'_fce_eq_tenth']
+    end    
+    
+  endif
+
+END

@@ -1,0 +1,232 @@
+;Purpose:
+;         To analyze the conjunction
+;
+;Keyword:
+;         probes
+;         trange
+;         lrange: L shell range
+;         mltrange: MLT range
+;         ...
+;         level: 0, max(Bw_low) less than 5 pT during one conjunction time period; 1, 5pT<max(Bw_low)<10pT; 2, 10pT<max(Bw_low)<20pT
+;         showdata: print event time and distance btw two satellites in three dimensions.
+;
+;Created by X.C. Shen on 2018-11-28
+;
+PRO conj_location_analysis_burst_a_point_each_conjunction_3d,$
+  lrange=lrange,$
+  mltrange=mltrange,$
+  mlatrange=mlatrange,$
+  dr=dr,$
+  dphi=dphi,$
+  dz=dz,$
+  showdata=showdata,$
+  cctype=cctype,$
+  eps=eps,$
+  xlog=xlog,$
+  ylog=ylog,$
+  xrange=xrange,$
+  yrange=yrange,$
+  xbins=xbins,$
+  ybins=ybins,$
+  b_shreshold=b_shreshold,$
+  d_shreshold=d_shreshold
+
+  ;Initial settings
+  plot_init
+  dir_init
+  path=!files.doc_dir+'doc/final_data/csv/flag1/strong/'
+
+  files=file_search(path+'*cc_v4.4.csv',count=count)
+
+  ;header=['Index','L','MLT','MLAT','dr','dphi','dz','fce','bw1','bw2','wna1','wna2',
+  ;'cc_NW_50','cc_NW_75','cc_NW_85','cc_NW_95','cc_NW_pm_50','cc_NW_pm_75','cc_NW_pm_85','cc_NW_pm_95']
+
+  index=[]
+  la=[] & mlta=[] & mlata=[]
+  mlat_dr=[] & mlat_dphi=[] & mlat_dz=[]
+  fce=[] & bw1=[] & bw2=[] & wna1=[] & wna2=[]
+
+  cc_nw_50=[] & cc_nw_75=[]  & cc_nw_85=[] & cc_nw_95=[]
+  cc_nw_pm_50=[] & cc_nw_pm_75=[] & cc_nw_pm_85=[] & cc_nw_pm_95=[]
+  cc_bw=[]
+
+  for i=0, n_elements(files)-1 do begin
+    res=read_csv(files[i])
+    if n_elements(tag_names(res)) eq 1 then continue
+    index=[index,res.field01]
+    la=[la,res.field02] & mlta=[mlta,res.field03] & mlata=[mlata,res.field04]
+    mlat_dr=[mlat_dr,abs(res.field05)] & mlat_dphi=[mlat_dphi,abs(res.field06)] & mlat_dz=[mlat_dz,abs(res.field07)]
+    fce=[fce,res.field08] & bw1=[bw1,res.field09] & bw2=[bw2,res.field10] & wna1=[wna1,res.field11] & wna2=[wna2,res.field12]
+    cc_nw_50=[cc_nw_50,res.field13] & cc_nw_75=[cc_nw_75,res.field14]  & cc_nw_85=[cc_nw_85,res.field15] & cc_nw_95=[cc_nw_95,res.field16]
+    cc_nw_pm_50=[cc_nw_pm_50,res.field17] & cc_nw_pm_75=[cc_nw_pm_75,res.field18] & cc_nw_pm_85=[cc_nw_pm_85,res.field19] & cc_nw_pm_95=[cc_nw_pm_95,res.field20]
+    cc_bw=[cc_bw,res.field21]
+  endfor
+
+  if not defined(lrange)    then lrange    = [0,15]
+  if not defined(mltrange)  then mltrange  = [0,24]
+  if not defined(mlatrange) then mlatrange = [-50,50]
+  if not defined(dr)   then dr   = [0,10000]
+  if not defined(dphi) then dphi = [0,10000]
+  if not defined(dz)   then dz   = [0,10000]
+
+  ;index
+  good_l=where(la ge lrange[0] and la le lrange[1],count_l)
+  if mltrange[1] gt mltrange[0] then good_mlt=where(mlta ge mltrange[0] and mlta le mltrange[1],count_mlt) else good_mlt=where(mlta ge mltrange[0] or mlta le mltrange[1],count_mlt)
+  good_mlat=where(mlata ge mlatrange[0] and mlata le mlatrange[1],count_mlat)
+  good_dr=where(mlat_dr ge dr[0] and mlat_dr le dr[1],count_dr)
+  good_dphi=where(mlat_dphi ge dphi[0] and mlat_dphi le dphi[1],count_dphi)
+  good_dz=where(mlat_dz ge dz[0] and mlat_dz le dz[1],count_dz)
+
+  if min([count_l,count_mlt,count_mlat,count_dr,count_dphi,count_dz]) eq 0 then goto,jump
+  tmp1=intersect(good_l,good_mlt,count=count)
+  if count eq 0 then goto,jump
+  tmp2=intersect(tmp1,good_mlat,count=count)
+  if count eq 0 then goto,jump
+  tmp3=intersect(tmp2,good_dr,count=count)
+  if count eq 0 then goto,jump
+  tmp4=intersect(tmp3,good_dphi,count=count)
+  if count eq 0 then goto,jump
+  good=intersect(tmp4,good_dz,count=count)
+  if count eq 0 then goto,jump
+
+  index=index[good]
+  la=la[good] & mlta=mlta[good] & mlata=mlata[good]
+  mlat_dr=mlat_dr[good] & mlat_dphi=mlat_dphi[good] & mlat_dz=mlat_dz[good]
+  fce=fce[good] & bw1=bw1[good] & bw2=bw2[good] & wna1=wna1[good] & wna2=wna2[good]
+  cc_nw_50=cc_nw_50[good] & cc_nw_75=cc_nw_75[good]  & cc_nw_85=cc_nw_85[good] & cc_nw_95=cc_nw_95[good]
+  cc_nw_pm_50=cc_nw_pm_50[good] & cc_nw_pm_75=cc_nw_pm_75[good] & cc_nw_pm_85=cc_nw_pm_85[good] & cc_nw_pm_95=cc_nw_pm_95[good]
+
+  if not keyword_set(xrange) then xrange=[1,10000]
+  if not keyword_set(yrange) then yrange=[0.1,1]
+  
+
+  if not keyword_set(cctype) then cc_low=cc_nw_75 else begin
+    case cctype of
+      '50nw':cc_low=cc_nw_50
+      '75nw':cc_low=cc_nw_75
+      '85nw':cc_low=cc_nw_85
+      '95nw':cc_low=cc_nw_95
+      '50nwpm':cc_low=cc_nw_pm_50
+      '75nwpm':cc_low=cc_nw_pm_75
+      '85nwpm':cc_low=cc_nw_pm_85
+      '95nwpm':cc_low=cc_nw_pm_95
+      'bw':cc_low=cc_bw
+    endcase
+  endelse
+
+  if not defined(b_shreshold) then b_shreshold=5 ; great than b_shreshold
+  if not defined(d_shreshold) then d_shreshold=10000   ; less than d_shreshold
+  
+  nums=10
+
+  od=mlat_dz
+  good=where(od le d_shreshold and (bw1 ge b_shreshold or bw2 ge b_shreshold))
+  help,good
+  
+  index=index[good]
+  la=la[good] & mlta=mlta[good] & mlata=mlata[good]
+  mlat_dr=mlat_dr[good] & mlat_dphi=mlat_dphi[good] & mlat_dz=mlat_dz[good]
+  fce=fce[good] & bw1=bw1[good] & bw2=bw2[good] & wna1=wna1[good] & wna2=wna2[good]
+  cc_low=cc_low[good]
+
+  mlat_dperp=sqrt(mlat_dr^2+mlat_dphi^2)
+
+
+  
+  ;bin data  (seperation,cc,occurrence rate)
+  if not defined(xbins) then xbins=45
+  if not defined(ybins) then ybins=40
+
+  x_dvd=dlinear(xrange[0],xrange[1],xbins+1)
+  y_dvd=dlinear(yrange[0],yrange[1],ybins+1)
+  
+  dx=mean(x_dvd[1:-1]-x_dvd[0:-2])
+  dy=mean(y_dvd[1:-1]-y_dvd[0:-2])
+
+  x_res=x_dvd[0:-2]+0.5*dx
+  y_res=y_dvd[0:-2]+0.5*dy
+  z_res=fltarr(xbins,ybins)
+  count_num=intarr(xbins)
+  avg_each_bin=fltarr(xbins)
+  err_each_bin=fltarr(xbins)
+
+  ;cgplot,[1],[1],/nodata,xrange=xrange,yrange=yrange,xlog=xlog,ylog=ylog,xtitle='Perpendicular Separation [km]',ytitle='Correlation Coefficient'
+  
+  for x_ind=0,xbins-1 do begin
+    good_x=where(mlat_dperp gt x_res[x_ind]-0.5*dx and mlat_dperp le x_res[x_ind]+0.5*dx,count_x)
+    count_num[x_ind]=count_x
+ 
+    if count_x lt nums then begin
+      z_res[x_ind,*]=0 
+      avg_each_bin[x_ind]=!values.f_nan
+      err_each_bin[x_ind]=!values.f_nan
+    endif else begin
+    
+      avg_each_bin[x_ind]=mean(cc_low[good_x])
+      tmp=stand_err(cc_low[good_x],sigma=tmpsigma)
+      err_each_bin[x_ind]=2*tmp;tmpsigma
+      
+      for y_ind=0,ybins-1 do begin
+        good_y=where(mlat_dperp gt x_res[x_ind]-0.5*dx and mlat_dperp le x_res[x_ind]+0.5*dx and cc_low gt y_res[y_ind]-0.5*dy and cc_low le y_res[y_ind]+0.5*dy,count_y)
+        z_res[x_ind,y_ind]=float(count_y)/count_num[x_ind]
+      endfor
+    endelse
+  endfor
+  
+  cgloadct,8,clip=[50,255],/reverse
+  
+  if keyword_set(eps) then popen,$
+    !files.doc_dir+'figs/binsplot_2_'+'L_'+strjoin(strtrim(lrange,1),'_')+'_MLT_'+strjoin(strtrim(mltrange,1),'_')+'_MLAT_'+strjoin(strtrim(mlatrange,1),'_')+$
+    '_bw_shrshld_'+strtrim(b_shreshold,1)+'_sep_shrshld_'+strtrim(d_shreshold,1)+'_cctype_'+strtrim(cctype,1),$
+    xsize=8,ysize=8,unit=cm,/encapsulated
+  
+  figtitle='L=['+strjoin(strtrim(lrange,1),',')+'] MLT=['+strjoin(strtrim(mltrange,1),',')+'] MLAT=['+strjoin(strtrim(mlatrange,1),',')+']'+$
+    ' Bw > '+strtrim(b_shreshold,1)+'pT '+cgGreek('delta',/capital)+'perp < '+strtrim(d_shreshold,1)+'km'
+  
+  x_res_plot=lonarr(2*xbins)
+  y_res_plot=fltarr(2*xbins)
+  
+  for ind_tmp=0,xbins-1 do begin
+    
+    x_res_plot[2*ind_tmp]=x_res[ind_tmp]-0.5*dx
+    y_res_plot[2*ind_tmp]=count_num[ind_tmp]
+    x_res_plot[2*ind_tmp+1]=x_res[ind_tmp]+0.5*dx
+    y_res_plot[2*ind_tmp+1]=count_num[ind_tmp]
+
+  endfor
+  
+  cgplot,x_res_plot,y_res_plot,position=[0.1,0.765,0.86,0.92],xtickformat='(A1)',psym=0,xrange=xrange,ylog=1,title=figtitle,ytitle='# of Events',yrange=[0.8,1000],xstyle=1,ystyle=1
+  cgplots,xrange,[nums,nums],linestyle=2,color='red'
+  
+  ;cgplot,x_res,avg_each_bin,position=[0.1,0.495,0.86,0.76],/noerase,color='gray',xtickformat='(A1)',psym=16,ytitle='Correlation Coefficient',xrange=xrange,xstyle=1,yrange=[0,1]
+  
+  bin_plot,x_res,y_res,z_res*100,zrange=[0,30],position=[0.1,0.1,0.9,0.75],/noerase,xticklen=-0.01,yticklen=-0.01,$
+    xtitle='Perpendicular Separation [km]',ytitle='Correlation Coefficient',ztitle='Percentage (%)'
+  
+  cgplot,mlat_dperp,cc_low,position=[0.1,0.1,0.86,0.75],/noerase,psym=16,color='gray',symsize=0.5,xtickformat='(A1)',ytickformat='(A1)',xrange=xrange,xstyle=1,yrange=[0,1]
+  cgplot,x_res,avg_each_bin,ERR_YHIGH=err_each_bin,ERR_YLOW=err_each_bin,ERR_THICK=3,position=[0.1,0.1,0.86,0.75],/noerase,psym=16,color='magenta',xtickformat='(A1)',ytickformat='(A1)',xrange=xrange,xstyle=1,yrange=[0,1]
+   
+  good=where(x_res le 700)
+  x_res=x_res[good]
+  avg_each_bin=avg_each_bin[good]
+   
+  fit_res=GAUSSFIT([-1*x_res[where(finite(avg_each_bin))],x_res[where(finite(avg_each_bin))]],[avg_each_bin[where(finite(avg_each_bin))],avg_each_bin[where(finite(avg_each_bin))]], coeff, NTERMS=3)
+  y_add=coeff[0] * exp(-0.5*((x_res-coeff[1])/coeff[2])^2)
+  x_mark=sqrt(alog(0.4/coeff[0])/(-0.5))*coeff[2]+coeff[1]
+  
+  cgplots,x_res,y_add,color='blue',thick=5
+  xyouts,xrange[1]-400,0.93,'A!I0!N='+strmid(strtrim(coeff[0],1),0,4),ALIGNMENT=0,color='ffffff'xl,charsize=1.3
+  xyouts,xrange[1]-400,0.88,'A!I1!N='+strtrim(round(coeff[2]),1),ALIGNMENT=0,color='ffffff'xl,charsize=1.3
+  cgtext,xrange[1]-400,0.83,cgGreek('delta',/capital)+'prp|!IC.C.=0.4!N='+strtrim(round(x_mark),1),ALIGNMENT=0,color='ffffff'xl,charsize=1.3
+
+  if keyword_set(eps) then pclose
+
+
+  
+  
+  return
+
+  jump:
+  dprint,'NO Data in this range'
+
+END

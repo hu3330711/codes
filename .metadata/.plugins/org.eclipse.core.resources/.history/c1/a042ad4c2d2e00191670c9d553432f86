@@ -1,0 +1,147 @@
+;Purpose
+;  re-save VLF data
+
+pro command_history_vlf_survey,tind=tind,pind=pind
+
+yymm_all=['1006','1007','1008','1009','1010','1011','1012',$
+  '1101','1102','1103','1104','1105','1106','1107','1108','1109','1110','1111','1112',$
+  '1201','1202','1203','1204','1205','1206','1207','1208','1209','1210','1211','1212',$
+  '1301','1302','1303','1304','1305','1306','1307','1308','1309','1310','1311','1312',$
+  '1401','1402','1403','1404','1405','1406','1407','1408','1409','1410','1411','1412',$
+  '1501','1502','1503','1504','1505','1506','1507','1508','1509','1510','1511','1512',$
+  '1601','1602','1603','1604','1605','1606','1607','1608','1609','1610','1611','1612',$
+  '1701','1702','1703','1704','1705','1706','1707','1708','1709','1710','1711','1712',$
+  '1801','1802']
+
+help,tind
+help,yymm_all  
+  
+sc_all=['tha','thd','the']  
+if keyword_set(tind) then yymm_all=yymm_all[tind]
+if keyword_set(pind) then sc_all=sc_all[pind]
+
+print,'Now processing:'
+print,yymm_all[tind]
+print,sc_all[pind]
+stop
+for ind_yymm=0,n_elements(yymm_all)-1 do begin
+for ind_sc=0,n_elements(sc_all)-1 do begin
+
+file_name=file_search('/projectnb/burbsp/home/common/vlf_themis/data/data1/fff_bw_'+yymm_all[ind_yymm]+'*_'+sc_all[ind_sc]+'.dat')
+
+lines=0
+for ind_file=0,n_elements(file_name)-1 do lines=lines+file_lines(file_name[ind_file])
+
+list=strarr(69,lines)
+line_start=0
+
+for ind_file=0,n_elements(file_name)-1 do begin
+lines_tmp=file_lines(file_name[ind_file])
+line_end=line_start+lines_tmp-1
+
+if lines_tmp ge 1 then begin
+  list_tmp=strarr(69,lines_tmp)
+  OPENR,lun,file_name[ind_file],/get_lun
+  READF,lun,list_tmp,format='(1i4,5i3,3f7.2,24e10.2,25e10.2,f8.1,f7.2,1i2,6i6,2i2)'
+  CLOSE,lun
+  free_lun,lun
+  list[*,line_start:line_end]=list_tmp
+endif
+
+line_start=line_start+lines_tmp
+endfor
+
+year= reform(list[0,*])
+mm  = reform(list[1,*])
+dd  = reform(list[2,*])
+hh  = reform(list[3,*])
+mi  = reform(list[4,*])
+ss  = reform(list[5,*])
+
+time=strtrim(year,1)+'-'+strtrim(mm,1)+'-'+strtrim(dd,1)+'/'+strtrim(hh,1)+'-'+strtrim(mi,1)+'-'+strtrim(ss,1)
+l   = float(reform(list[6,*]))
+mlt = float(reform(list[7,*]))
+mlat= float(reform(list[8,*]))
+bw  = float(reform(list[9:32,*]))
+ew  = float(reform(list[33:57,*]))
+fce = float(reform(list[58,*]))
+fce2fpe=float(reform(list[59,*]))
+flag= long(reform(list[60,*]))
+al  = float(reform(list[61:63,*]))
+ae  = float(reform(list[64:66,*]))
+kp  = float(reform(list[67,*]))
+sc  = long(reform(list[68,*]))
+
+time_min=time_double(strtrim(year,1)+'-'+strtrim(mm,1)+'-'+strtrim(dd,1)+'/'+strtrim(hh,1)+'-'+strtrim(mi,1))
+t_tmp_array = time_min[UNIQ(time_min, SORT(time_min))]
+
+num = n_elements(t_tmp_array)
+l_out   = fltarr(num)
+mlt_out = fltarr(num)
+mlat_out= fltarr(num)
+bw_out  = fltarr(24,num)
+ew_out  = fltarr(25,num)
+fce_out = fltarr(num)
+fce2fpe_out= fltarr(num)
+flag_out= fltarr(num)
+al_out  = fltarr(3,num)
+ae_out  = fltarr(3,num)
+kp_out  = fltarr(num)
+sc_out  = fltarr(num)
+
+
+for ind_min=0,n_elements(t_tmp_array)-1 do begin
+  
+  good_index=where(time_double(time) ge time_double(t_tmp_array[ind_min]) and time_double(time) lt time_double(t_tmp_array[ind_min])+60)
+  l_out[ind_min]    = mean(l[good_index],/nan)
+  mlt_out[ind_min]  = mean(mlt[good_index],/nan)
+  mlat_out[ind_min] = mean(mlat[good_index],/nan)
+  for ind_tmp=0,23 do bw_out[ind_tmp,ind_min]   = mean(bw[ind_tmp,good_index],/nan)
+  for ind_tmp=0,24 do ew_out[ind_tmp,ind_min]   = mean(ew[ind_tmp,good_index],/nan)
+  fce_out[ind_min]  = mean(fce[good_index],/nan)
+  fce2fpe_out[ind_min] = mean(fce2fpe[good_index],/nan)
+  flag_out[ind_min] = median(flag[good_index])
+  for ind_tmp=0,2 do al_out[ind_tmp,ind_min]  = mean(al[ind_tmp,good_index],/nan)
+  for ind_tmp=0,2 do ae_out[ind_tmp,ind_min]  = mean(ae[ind_tmp,good_index],/nan)
+  kp_out[ind_min]   = median(kp[good_index])
+  sc_out[ind_min]   = sc[0]
+  
+  if ind_min+1 eq round(n_elements(t_tmp_array)*0.1) then print,'10% Completion'
+  if ind_min+1 eq round(n_elements(t_tmp_array)*0.2) then print,'20% Completion'
+  if ind_min+1 eq round(n_elements(t_tmp_array)*0.3) then print,'30% Completion'
+  if ind_min+1 eq round(n_elements(t_tmp_array)*0.4) then print,'40% Completion'
+  if ind_min+1 eq round(n_elements(t_tmp_array)*0.5) then print,'50% Completion'
+  if ind_min+1 eq round(n_elements(t_tmp_array)*0.6) then print,'60% Completion'
+  if ind_min+1 eq round(n_elements(t_tmp_array)*0.7) then print,'70% Completion'
+  if ind_min+1 eq round(n_elements(t_tmp_array)*0.8) then print,'80% Completion'
+  if ind_min+1 eq round(n_elements(t_tmp_array)*0.9) then print,'90% Completion'
+  if ind_min+1 eq round(n_elements(t_tmp_array)*1.0) then print,'100% Completion'
+  
+endfor
+
+year_out=strmid(time_string(t_tmp_array,format=6,prec=-1),0,4)
+mm_out  =strmid(time_string(t_tmp_array,format=6,prec=-1),4,2)
+dd_out  =strmid(time_string(t_tmp_array,format=6,prec=-1),6,2)
+hh_out  =strmid(time_string(t_tmp_array,format=6,prec=-1),8,2)
+mi_out  =strmid(time_string(t_tmp_array,format=6,prec=-1),10,2)
+
+if ~file_test('/projectnb/burbsp/home/common/vlf_themis/data/data3') then file_mkdir,'/projectnb/burbsp/home/common/vlf_themis/data/data3'
+openw,/get_lun,lun,'/projectnb/burbsp/home/common/vlf_themis/data/data3/fff_bw_'+yymm_all[ind_yymm]+'_'+sc_all[ind_sc]+'_1min.dat',width=400
+i1=long(0)
+
+repeat begin
+  printf,lun,format='(A4,1X,A2,1X,A2,1X,A2,1X,A2,3f6.2,24e10.2,25e10.2,f7.2,i2,6i6,2i2)',$
+    year_out[i1],mm_out[i1],dd_out[i1],hh_out[i1],mi_out[i1],l_out[i1],mlt_out[i1],mlat_out[i1],bw_out[*,i1],ew_out[*,i1],fce2fpe_out[i1],flag_out[i1], al_out[*,i1],ae_out[*,i1],kp_out[i1],sc_out[i1]
+  i1=i1+1
+endrep until (i1 eq n_elements(year_out))
+
+close,/all
+free_lun,lun
+
+;store_data,'bw',data={x:time_double(time),y:float(reform(bw[0:*]))}
+;bin_data,float(l),float(mlt),float(fce2fpe),xrange=[1,10],yrange=[0,24],xbins=10,ybins=24,xout=xout,yout=yout,zout=zout
+
+endfor
+endfor
+
+end

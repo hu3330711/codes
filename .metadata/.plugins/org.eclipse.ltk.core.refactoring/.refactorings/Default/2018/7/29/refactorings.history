@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Default/MultiSateEMIC/calculate_loss_cone_V2.pro&apos; to &apos;calculate_loss_cone_v2.pro&apos;" description="Rename resource &apos;calculate_loss_cone_V2.pro&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="MultiSateEMIC/calculate_loss_cone_V2.pro" name="calculate_loss_cone_v2.pro" stamp="1532011523182" updateReferences="true"/>
+</session>

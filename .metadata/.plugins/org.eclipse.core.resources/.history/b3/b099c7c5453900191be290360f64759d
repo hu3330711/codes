@@ -1,0 +1,177 @@
+;Purpose
+;    Load juno JEDI proton counts rate
+;
+;    multi-day is not completed yet
+;
+;
+
+
+
+PRO get_jedi_proton_tof_hr,trange=trange
+
+  remote_path=file_dailynames(file_format='https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/JNO-J-JED-3-CDR-V1.0/DATA/YYYY/DOY/',trange=trange,/unique)
+  local_path=file_dailynames(file_format='/projectnb/burbsp/big/SATELLITE/Juno/JEDI_proton_from_PDS/YYYY/DOY/',trange=trange,/unique)
+
+  files=[]
+  for ind=0,n_elements(remote_path)-1 do begin
+
+    detectors=['180','270','090']
+    for ind_det=0,2 do begin
+      detector=detectors[ind_det]
+      file_name_part = file_dailynames(file_format='JED_'+detector+'_HIERSTOFXER_CDR_YYYYDOY_',trange=trange,/unique)
+      versions=['V01','V02','V03','V04']
+      for ind_version=0,n_elements(versions)-1 do begin
+        version=versions[ind_version]
+        file_name=file_name_part+version+'.TAB'
+        print,file_name
+        if file_test(local_path[ind]+file_name_part[ind]+'*') then goto,jump
+        if ~file_test(local_path[ind]) then begin
+          file_mkdir,local_path[ind]
+          spawn,'chmod 777 '+local_path[ind]
+        endif
+        file_tmp=wget(remote_path[ind]+file_name[ind],filename=local_path[ind]+file_name[ind])
+        file_info_tmp=FILE_INFO(file_tmp)
+        if file_info_tmp.size ge 1024 then begin
+          goto, jump
+        endif else spawn,'rm -f '+file_tmp
+      endfor
+
+    endfor
+
+    jump:
+    file_tmp=file_search(local_path+file_name_part+'*')
+    files=[files,file_tmp]
+  endfor
+
+  if strmatch(files[-1],'') then return
+  res=read_csv(files[-1])
+  time=res.(0)[4:*]
+  lines=n_elements(time)
+
+  intensity=strarr(6,24,lines)
+  center_energy=strarr(24)
+  for ind_pa=0,5 do begin
+    for ind_e=0,23 do begin
+      intensity[ind_pa,ind_e,*]=res.((24*ind_pa+ind_e)*3+16)[4:*]
+      center_energy[ind_e]=mean(long(res.((24*ind_pa+ind_e)*3+16)[0:1]),/nan)
+
+    endfor
+  endfor
+
+  intensity=double(intensity)
+
+  n_pa=6
+  step_pa=180./n_pa
+  pa=(dindgen(n_pa)+0.5)*step_pa
+  ;;calculate spin-averaged flux
+  flux_spin_average=dblarr(lines,n_elements(center_energy))
+
+  for ind_t=0,lines-1 do begin
+    for ind_eb=0,n_elements(center_energy)-1 do begin
+      index=where(intensity[*,ind_eb,ind_t] gt 0 and finite(intensity[*,ind_eb,ind_t]),count)
+      if count le 0 then continue
+      flux_spin_average[ind_t,ind_eb]=total(intensity[index,ind_eb,ind_t]*sin(pa[index]/180.*!pi)*!pi/2)/count
+    endfor
+  endfor
+
+  store_data,'JEDI_ion_tofxe_hr',data={x:time_double(time),y:double(transpose(reform(intensity))),v1:float(center_energy),v2:pa},$
+    dlim={spec:1,ylog:1,zlog:1,yrange:[4e1,1e3],ystyle:1,ytitle:'JEDI Ion!C', ysubtitle:'E [keV]',ytickunits:'scientific',ztitle:'Ion Flux!C[sec!E-1!Ncm!E-2!Nster!E-1!NkeV!E-1!N]',ztickunits:'scientific'}
+
+  store_data,'JEDI_ion_tofxe_hr_SA',data={x:time_double(time),y:flux_spin_average,v:float(center_energy)},$
+    dlim={spec:1,ylog:1,zlog:1,yrange:[4e1,1e3],ystyle:1,ytitle:'JEDI Ion!C', ysubtitle:'E [keV]',ytickunits:'scientific',ztitle:'Ion Flux!C[cm!E-2!Ns!E-1!Nsr!E-1!NkeV!E-1!N]',ztickunits:'scientific'}
+
+
+  ;-------------
+  ;Load tofxph
+
+  remote_path=file_dailynames(file_format='https://pds-ppi.igpp.ucla.edu/ditdos/download?id=pds://PPI/JNO-J-JED-3-CDR-V1.0/DATA/YYYY/DOY/',trange=trange,/unique)
+  local_path=file_dailynames(file_format='/projectnb/burbsp/big/SATELLITE/Juno/JEDI_proton_from_PDS/YYYY/DOY/',trange=trange,/unique)
+
+  files=[]
+  for ind=0,n_elements(remote_path)-1 do begin
+
+    detectors=['180','270','090']
+    for ind_det=0,2 do begin
+      detector=detectors[ind_det]
+      file_name_part = file_dailynames(file_format='JED_'+detector+'_HIERSTOFXPHR_CDR_YYYYDOY_',trange=trange,/unique)
+      versions=['V01','V02','V03','V04']
+      for ind_version=0,n_elements(versions)-1 do begin
+        version=versions[ind_version]
+        file_name=file_name_part+version+'.TAB'
+        if file_test(local_path[ind]+file_name_part[ind]+'*') then goto,jump2
+        if ~file_test(local_path[ind]) then begin
+          file_mkdir,local_path[ind]
+          spawn,'chmod 777 '+local_path[ind]
+        endif
+        file_tmp=wget(remote_path[ind]+file_name[ind],filename=local_path[ind]+file_name[ind])
+        file_info_tmp=FILE_INFO(file_tmp)
+        if file_info_tmp.size ge 1024 then begin
+          goto, jump2
+        endif else spawn,'rm -f '+file_tmp
+      endfor
+
+    endfor
+
+    jump2:
+    file_tmp=file_search(local_path+file_name_part+'*')
+    files=[files,file_tmp]
+  endfor
+
+  if strmatch(files[-1],'') then return
+  res=read_csv(files[-1])
+  time=res.(0)[4:*]
+  lines=n_elements(time)
+
+  intensity=strarr(6,16,lines)
+  center_energy=strarr(16)
+  for ind_pa=0,5 do begin
+    for ind_e=0,n_elements(center_energy)-1 do begin
+      intensity[ind_pa,ind_e,*]=res.((n_elements(center_energy)*ind_pa+ind_e)*3+16)[4:*]
+      center_energy[ind_e]=mean(long(res.((n_elements(center_energy)*ind_pa+ind_e)*3+16)[0:1]),/nan)
+
+    endfor
+  endfor
+
+  intensity=double(intensity)
+
+  n_pa=6
+  step_pa=180./n_pa
+  pa=(dindgen(n_pa)+0.5)*step_pa
+  ;;calculate spin-averaged flux
+  flux_spin_average=dblarr(lines,n_elements(center_energy))
+
+  for ind_t=0,lines-1 do begin
+    for ind_eb=0,n_elements(center_energy)-1 do begin
+      index=where(intensity[*,ind_eb,ind_t] gt 0 and finite(intensity[*,ind_eb,ind_t]),count)
+      if count le 0 then continue
+      flux_spin_average[ind_t,ind_eb]=total(intensity[index,ind_eb,ind_t]*sin(pa[index]/180.*!pi)*!pi/2)/count
+    endfor
+  endfor
+
+  store_data,'JEDI_ion_tofxph_hr',data={x:time_double(time),y:double(transpose(reform(intensity))),v1:float(center_energy),v2:pa},$
+    dlim={spec:1,ylog:1,zlog:1,yrange:[4e1,1e3],ystyle:1,ytitle:'JEDI Ion!C', ysubtitle:'E [keV]',ytickunits:'scientific',ztitle:'Ion Flux!C[sec!E-1!Ncm!E-2!Nster!E-1!NkeV!E-1!N]',ztickunits:'scientific'}
+
+  store_data,'JEDI_ion_tofxph_hr_SA',data={x:time_double(time),y:flux_spin_average,v:float(center_energy)},$
+    dlim={spec:1,ylog:1,zlog:1,yrange:[4e1,1e3],ystyle:1,ytitle:'JEDI Ion!C', ysubtitle:'E [keV]',ytickunits:'scientific',ztitle:'Ion Flux!C[cm!E-2!Ns!E-1!Nsr!E-1!NkeV!E-1!N]',ztickunits:'scientific'}
+
+  if tvar_exist('JEDI_ion_tofxe_hr_SA') and tvar_exist('JEDI_ion_tofxph_hr_SA') then begin
+
+    get_data,'JEDI_ion_tofxe_hr_SA',data=d1
+    get_data,'JEDI_ion_tofxph_hr_SA',data=d2
+    v_out=[d1.v,d2.v]
+    tmp_sort=sort(v_out)
+    v_out_f=v_out[tmp_sort]
+
+    if n_elements(d1.x) ne n_elements(d2.x) then return
+    tmp_res=fltarr(n_elements(d1.x),40)
+    for tmp_i=0,n_elements(d1.x)-1 do begin
+      data_tmp=[reform(d1.y[tmp_i,*]),reform(d2.y[tmp_i,*])]
+      tmp_res[tmp_i,*]=data_tmp[tmp_sort]
+    endfor
+
+  endif
+
+  store_data,'JEDI_ion_tof_hr_SA',data={x:d1.x,y:tmp_res,v:v_out_f},$
+    dlim={spec:1,ylog:1,zrange:[1e0,1e4],zlog:1,yrange:[1e0,1e3],ystyle:1,ytitle:'JEDI Ion!C', ysubtitle:'E [keV]',ytickunits:'scientific',ztitle:'Ion Flux!C[cm!E-2!Ns!E-1!Nsr!E-1!NkeV!E-1!N]',ztickunits:'scientific'}
+
+END

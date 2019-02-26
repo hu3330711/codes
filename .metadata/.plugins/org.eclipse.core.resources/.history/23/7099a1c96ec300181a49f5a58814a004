@@ -1,0 +1,81 @@
+pro get_B0State,probe=probe,trange=trange,coord=coord
+
+  if not keyword_set(probe) then begin
+    dprint,'probe should be set: a or b'
+    return
+  endif
+
+  if not keyword_set(trange) then begin
+    dprint,'trange should be set'
+    return
+  endif
+
+  if not keyword_set(no_update) then no_update=1
+  if not keyword_set(coord) then coord='sm'
+  year=strmid(trange[0],0,4)
+  yy=strmid(trange[0],2,2)
+  mm=strmid(trange[0],5,2)
+  dd=strmid(trange[0],8,2)
+
+  dir_init
+
+  remote_data_dir=!rbsp_emfisis.REMOTE_DATA_DIR
+  local_data_dir=!rbsp_emfisis.local_data_dir
+
+  pathformat = 'RBSP-'+strupcase(probe)+'/L3/YYYY/MM/DD/rbsp-'+probe+'_magnetometer_1sec-'+coord+'_emfisis-L3_YYYYMMDD_v*.cdf'
+
+  relpathnames = file_dailynames(file_format=pathformat,trange=trange,/unique)
+
+  files = spd_download(remote_file=relpathnames, remote_path=remote_data_dir, no_update=no_update,local_path = local_data_dir, ssl_verify_peer=0, ssl_verify_host=0, /last_version )
+
+  prefix = 'rbsp'+strlowcase(probe)+'_'
+
+  cdf2tplot,file=files,varformat=varformat,verbose=verbose,prefix=prefix ,tplotnames=tn    ; load data into tplot variables
+  
+  if tvar_exist('rbsp'+probe+'_ect_mageis_L3_L') then begin
+    tplot_rename,'rbsp'+probe+'_ect_mageis_L3_L','rbsp'+probe+'_L'
+    tplot_rename,'rbsp'+probe+'_ect_mageis_L3_MLAT','rbsp'+probe+'_MLAT'
+    tplot_rename,'rbsp'+probe+'_ect_mageis_L3_MLT','rbsp'+probe+'_MLT'
+  endif else $
+    get_rbsp_location,probe=probe,trange=trange,model_name='TS04D'
+    
+  tinterpol_mxn,'rbsp'+probe+'_L','rbsp'+strlowcase(probe)+'_'+'Magnitude',newname=prefix+'L_sm'
+  tinterpol_mxn,'rbsp'+probe+'_MLAT','rbsp'+strlowcase(probe)+'_'+'Magnitude',newname=prefix+'MLAT_sm'
+  tinterpol_mxn,'rbsp'+probe+'_MLT','rbsp'+strlowcase(probe)+'_'+'Magnitude',newname=prefix+'MLT_sm'
+  get_data,prefix+'L_sm',data=dl
+  get_data,prefix+'MLAT_sm',data=dlat
+  
+  get_data,'rbsp'+strlowcase(probe)+'_'+'Magnitude',data=dB0
+  ylim,'rbsp'+strlowcase(probe)+'_'+'Magnitude',1e2,3e4,1
+  options,'rbsp'+strlowcase(probe)+'_'+'Magnitude',ytitle='B!C'
+  
+  lat_rad=dlat.y*!pi/180.
+  B0=3.1e-5
+  me=9.109*1e-31
+  q=1.602*1e-19
+  feq_d=B0*q/me/(2*!pi)/dl.y^3
+  flocal_d=feq_d*sqrt(1+3*(sin(lat_rad))^2)/(cos(lat_rad))^6
+  fce_local=dB0.y*1e-9*q/2/!pi/me
+  fce_eq=fce_local*(cos(lat_rad))^6/sqrt(1+3*(sin(lat_rad))^2)
+  for i=0, n_elements(dB0.x)-1 do begin
+    ratio=fce_eq[i]/feq_d[i]
+    if ratio gt 10 or ratio lt 0.1 then begin
+      fce_eq[i]=feq_d[i]
+      fce_local[i]=feq_d[i]*sqrt(1+3*(sin(lat_rad[i]))^2)/(cos(lat_rad[i]))^6
+    endif
+  endfor
+  
+  store_data,prefix+'fce_eq',data={x:dB0.x,y:fce_eq},dlim={colors:'w',thick:'1',linestyle:'0'}
+  store_data,prefix+'fce_eq_double',data={x:dB0.x,y:2*fce_eq},dlim={colors:'w',thick:'1',linestyle:'1'}
+  store_data,prefix+'fce_eq_half',data={x:dB0.x,y:fce_eq/2},dlim={colors:'w',thick:'1',linestyle:'2'}
+  store_data,prefix+'fce_eq_tenth',data={x:dB0.x,y:fce_eq/10},dlim={colors:'w',thick:'1',linestyle:'4'}
+  store_data,prefix+'fLHR',data={x:dB0.x,y:fce_eq/1837*43},dlim={colors:'w',thick:'1',linestyle:'3'}
+  store_data,prefix+'fLHR_half',data={x:dB0.x,y:fce_eq/1837*43/2},dlim={colors:'w',thick:'1',linestyle:'4'}
+  store_data,prefix+'fcp_eq',data={x:dB0.x,y:fce_eq/1837},dlim={colors:'w',thick:'1',linestyle:'0'}
+  store_data,prefix+'fche_eq',data={x:dB0.x,y:fce_eq/7348},dlim={colors:'w',thick:'1',linestyle:'1'}
+  store_data,prefix+'fco_eq',data={x:dB0.x,y:fce_eq/29392},dlim={colors:'w',thick:'1',linestyle:'2'}
+
+  
+  fce_eq=fce_local
+  store_data,prefix+'fce_local',data={x:dB0.x,y:fce_eq},dlim={colors:'w',thick:'1',linestyle:'0'}
+end

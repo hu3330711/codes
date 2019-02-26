@@ -1,0 +1,37 @@
+;calculate running cross coherence between two tars, containing x and y only.
+PRO running_cross_correlation,tvar1,tvar2,boxpoints=boxpoints,shiftpoints=shiftpoints
+
+  get_data,tvar1,data=d1
+  get_data,tvar2,data=d2
+  
+  timesrs=d1.x
+  
+  steps=round(1.0*(n_elements(timesrs)-boxpoints)/shiftpoints)-1
+  
+  time_out=dblarr(steps)
+  data_out=dblarr(steps)
+  data_out_no_sin=dblarr(steps)
+  data_3d=dblarr(steps,2*boxpoints-3)
+  
+  for t_ind=0,steps-1 do begin
+    t_win=[timesrs[1.0*t_ind*shiftpoints],timesrs[1.0*t_ind*shiftpoints+boxpoints-1]]
+    
+    good_t=where(timesrs ge t_win[0] and timesrs le t_win[1])
+    
+    tmp_1=d1.y[good_t] & tmp_2=d2.y[good_t]
+    num=n_elements(tmp_1)
+    lag=findgen(2*num-3)-num+2
+    
+    result=c_correlate(tmp_1,tmp_2,lag) 
+    result_no_lag=c_correlate(tmp_1,tmp_2,0) 
+    
+    time_out[t_ind]=mean(t_win)
+    data_out[t_ind]=0.5*(max(result)-min(result)) ;sin wave
+    data_out_no_sin[t_ind]=result_no_lag  ;time_lag=0
+    ;data_3d[t_ind,*]=result
+  endfor
+  store_data,'cross_correlation',data={x:time_out,y:data_out}
+  store_data,'cross_correlation_no_lag',data={x:time_out,y:data_out_no_sin}
+ ; store_data,'cross_correlation_3d',data={x:time_out,y:data_3d,v:lag*mean(d1.x[1:10]-d1.x[0:9])}
+  return
+END  

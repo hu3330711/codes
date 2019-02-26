@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;IDL_code/command_history/conj_location_analysis.pro&apos; to &apos;conj_location_analysis_old.pro&apos;" description="Rename resource &apos;conj_location_analysis.pro&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="command_history/conj_location_analysis.pro" name="conj_location_analysis_old.pro" stamp="1539871985336" updateReferences="true"/>
+</session>

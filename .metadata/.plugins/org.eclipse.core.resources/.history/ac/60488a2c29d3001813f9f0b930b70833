@@ -1,0 +1,11 @@
+Function timeres,varname_in
+
+  get_data,varname_in,data=tmp
+  dtime=tmp.x[1]-tmp.x[0]
+  print,dtime,' seconds, ',1./dtime,' Hz'
+  
+  dt=dtime
+  hz=1./dtime
+  
+  return,[dt,hz]
+END  
